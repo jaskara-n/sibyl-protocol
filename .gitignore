@@ -1,0 +1,12 @@
+node_modules
+.pnpm-store
+.env
+.env.*
+dist
+.next
+coverage
+out
+.DS_Store
+artifacts
+cache
+broadcast

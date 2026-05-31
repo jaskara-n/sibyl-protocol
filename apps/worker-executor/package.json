@@ -1,0 +1,12 @@
+{
+  "name": "@sibyl/worker-executor",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "node src/main.js",
+    "build": "echo \"build pending\"",
+    "test": "echo \"test pending\"",
+    "lint": "echo \"lint pending\""
+  }
+}
