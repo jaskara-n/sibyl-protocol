@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "node app.js",
     "build": "echo \"build pending\"",
+    "typecheck": "echo \"typecheck pending\"",
     "test": "echo \"test pending\"",
     "lint": "echo \"lint pending\""
   }

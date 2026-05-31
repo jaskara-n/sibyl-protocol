@@ -4,9 +4,20 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "node src/main.js",
-    "build": "echo \"build pending\"",
+    "dev": "tsx watch src/main.ts",
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
     "test": "echo \"test pending\"",
     "lint": "echo \"lint pending\""
+  },
+  "dependencies": {
+    "@nestjs/common": "^11.1.6",
+    "@nestjs/core": "^11.1.6",
+    "reflect-metadata": "^0.2.2",
+    "rxjs": "^7.8.1"
+  },
+  "devDependencies": {
+    "tsx": "^4.19.2",
+    "typescript": "^5.6.3"
   }
 }
