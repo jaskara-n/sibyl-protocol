@@ -1,0 +1,7 @@
+timestamp,symbol,agent_id,probability,outcome
+1717000000,MNT-USD,news_v1,0.62,1
+1717003600,MNT-USD,news_v1,0.55,0
+1717007200,MNT-USD,funding_v1,0.48,0
+1717010800,MNT-USD,funding_v1,0.66,1
+1717014400,MNT-USD,momentum_v1,0.71,1
+1717018000,MNT-USD,momentum_v1,0.53,0

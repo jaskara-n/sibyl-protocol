@@ -1,8 +1,4 @@
-import { brierScore } from '@sibyl/shared';
+import { runReplay } from './replay.js';
 
-function demoReplayRun() {
-  const score = brierScore(0.7, 1);
-  console.log('Replay worker booted. Demo Brier score:', score);
-}
-
-demoReplayRun();
+const result = runReplay();
+console.log('Replay complete:', result);
