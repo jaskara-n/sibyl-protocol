@@ -9,5 +9,8 @@
     "typecheck": "echo \"typecheck pending\"",
     "test": "echo \"test pending\"",
     "lint": "echo \"lint pending\""
+  },
+  "devDependencies": {
+    "@types/node": "^25.9.1"
   }
 }
