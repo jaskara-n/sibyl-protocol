@@ -1,0 +1,11 @@
+{
+  "name": "@sibyl/contracts",
+  "private": true,
+  "version": "0.1.0",
+  "scripts": {
+    "build": "echo \"use forge build\"",
+    "test": "echo \"use forge test\"",
+    "lint": "echo \"lint pending\"",
+    "typecheck": "echo \"n/a\""
+  }
+}
