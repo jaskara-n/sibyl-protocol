@@ -1,28 +1,17 @@
-import { mkdirSync, readFileSync, writeFileSync, existsSync } from 'node:fs';
+import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { computeConsensus, type ReplayScore, type Signal } from '@sibyl/shared';
 import { DEFAULT_AGENTS, type AgentInput } from '@sibyl/agents';
+import { selectVenue, type ExecutionOrder } from './venue.js';
 
 type ReplayArtifact = {
   datasetHash: string;
   scores: ReplayScore[];
 };
 
-type TradeEvent = {
-  id: string;
-  timestamp: number;
-  symbol: string;
-  direction: 'LONG' | 'SHORT' | 'FLAT';
-  sizeBps: number;
-  confidence: number;
-  contributors: string[];
-  mode: 'paper';
-};
-
 function readReplayArtifact(): ReplayArtifact {
   const path = resolve(process.cwd(), '../../data/artifacts/replay-scores.json');
-  const raw = readFileSync(path, 'utf8');
-  return JSON.parse(raw) as ReplayArtifact;
+  return JSON.parse(readFileSync(path, 'utf8')) as ReplayArtifact;
 }
 
 function buildSnapshot(symbol = 'MNT-USD'): AgentInput {
@@ -43,38 +32,25 @@ async function collectSignals(snapshot: AgentInput): Promise<Signal[]> {
   return Promise.all(DEFAULT_AGENTS.map((agent) => agent.run(snapshot)));
 }
 
-function persistTrade(event: TradeEvent): void {
-  const artifactDir = resolve(process.cwd(), '../../data/artifacts');
-  const tradesPath = resolve(artifactDir, 'trade-events.json');
-  mkdirSync(artifactDir, { recursive: true });
-
-  const existing: TradeEvent[] = existsSync(tradesPath)
-    ? (JSON.parse(readFileSync(tradesPath, 'utf8')) as TradeEvent[])
-    : [];
-
-  existing.unshift(event);
-  writeFileSync(tradesPath, JSON.stringify(existing.slice(0, 100), null, 2));
-}
-
 async function main() {
   const replay = readReplayArtifact();
   const snapshot = buildSnapshot();
   const signals = await collectSignals(snapshot);
   const consensus = computeConsensus(signals, replay.scores);
 
-  const trade: TradeEvent = {
-    id: `paper-${snapshot.timestamp}`,
+  const order: ExecutionOrder = {
+    id: `order-${snapshot.timestamp}`,
     timestamp: snapshot.timestamp,
     symbol: snapshot.symbol,
     direction: consensus.direction,
     sizeBps: consensus.sizeBps,
     confidence: Number(consensus.confidence.toFixed(6)),
-    contributors: consensus.contributors,
-    mode: 'paper'
+    contributors: consensus.contributors
   };
 
-  persistTrade(trade);
-  console.log('Executor emitted trade event:', trade);
+  const venue = selectVenue();
+  const receipt = await venue.execute(order);
+  console.log('Executor decision:', { order, receipt });
 }
 
 main().catch((error) => {
