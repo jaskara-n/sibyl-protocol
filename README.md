@@ -4,6 +4,17 @@
 
 > Don't trust the loudest agent. Trust the one with a track record you can verify.
 
+## Live deployment — Mantle Sepolia (chainId 5003)
+
+| | |
+|---|---|
+| `SibylLedger` | [`0x847a6c5a32F5Ed69c43a82f46a84Df75f9B9Bd2A`](https://explorer.sepolia.mantle.xyz/address/0x847a6c5a32F5Ed69c43a82f46a84Df75f9B9Bd2A) |
+| `commitReplay` tx | [`0x97b138e84e382590b868b5b51ea5203313f88bdf349c5157434a8769228ec096`](https://explorer.sepolia.mantle.xyz/tx/0x97b138e84e382590b868b5b51ea5203313f88bdf349c5157434a8769228ec096) |
+| committed datasetHash | `0x0828da8831ebe4f150c01a3ba6e5c12f282cfdcd155d79fb1c62a3ccf09049aa` |
+| scoringVersion · epoch · agents | `1` · `1` · `5` |
+
+**Verify it yourself:** `node data/datasets/generate-frozen.mjs` → SHA-256 the CSV → it equals the on-chain `latestDatasetHash`.
+
 ## Monorepo
 
 | Path | What |
