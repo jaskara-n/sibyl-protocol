@@ -1,3 +1,5 @@
+import deployment from '../../../deployments/mantle-sepolia.json';
+
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL ?? 'http://localhost:4000';
 
 type Consensus = {
@@ -11,6 +13,7 @@ type Consensus = {
 
 type AgentRow = {
   agentId: string;
+  erc8004AgentId?: string | null;
   brier: number;
   reputationWeight: number;
   weightShare: number;
@@ -31,6 +34,8 @@ type Verification = { status: string; datasetHash?: string; generatedAt?: string
 type ChainStatus = {
   status: string;
   ledgerAddress?: string;
+  network?: string;
+  explorer?: string;
   owner?: string;
   onchainLatestDatasetHash?: string;
   localLatestDatasetHash?: string | null;
@@ -62,6 +67,13 @@ async function safeFetch<T>(path: string, fallback: T): Promise<T> {
 function short(v?: string | null): string {
   if (!v) return '—';
   return v.length < 18 ? v : `${v.slice(0, 10)}…${v.slice(-8)}`;
+}
+
+/// Derive the explorer base (e.g. https://explorer.sepolia.mantle.xyz) from chain.status's
+/// address URL, falling back to the committed deployment record.
+function explorerBase(chain: ChainStatus): string {
+  if (chain.explorer) return chain.explorer.replace(/\/(address|tx)\/.*/i, '');
+  return deployment.explorer;
 }
 
 function dirColor(d: string): string {
@@ -99,6 +111,12 @@ export default async function Page() {
   const confidencePct = Math.round(consensus.confidence * 1000) / 10;
   const topAgent = agents[0];
   const rogue = agents.find((a) => a.isRogue);
+
+  const base = explorerBase(chain);
+  const ledgerAddress = chain.ledgerAddress ?? deployment.contracts.SibylLedger.address;
+  const ledgerUrl = `${base}/address/${ledgerAddress}`;
+  const consensusTx = deployment.latestConsensus?.tx;
+  const consensusUrl = consensusTx ? `${base}/tx/${consensusTx}` : undefined;
 
   return (
     <main style={{ maxWidth: 1040, margin: '0 auto', padding: '32px 24px 64px' }}>
@@ -183,8 +201,9 @@ export default async function Page() {
             <tr style={{ color: COLORS.muted, textAlign: 'left', fontSize: 12 }}>
               <th style={{ padding: '6px 8px' }}>#</th>
               <th style={{ padding: '6px 8px' }}>Agent</th>
+              <th style={{ padding: '6px 8px' }}>ERC-8004 ID</th>
               <th style={{ padding: '6px 8px' }}>Brier</th>
-              <th style={{ padding: '6px 8px', width: '45%' }}>Consensus weight (capped)</th>
+              <th style={{ padding: '6px 8px', width: '40%' }}>Consensus weight (capped)</th>
             </tr>
           </thead>
           <tbody>
@@ -208,6 +227,9 @@ export default async function Page() {
                     </span>
                   )}
                 </td>
+                <td style={{ padding: '10px 8px', color: COLORS.muted, fontFamily: 'ui-monospace, monospace' }}>
+                  {a.erc8004AgentId ? `#${a.erc8004AgentId}` : '—'}
+                </td>
                 <td style={{ padding: '10px 8px', color: a.isRogue ? COLORS.red : COLORS.green }}>{a.brier.toFixed(3)}</td>
                 <td style={{ padding: '10px 8px' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
@@ -229,13 +251,62 @@ export default async function Page() {
             ))}
             {agents.length === 0 && (
               <tr>
-                <td colSpan={4} style={{ padding: 16, color: COLORS.muted }}>
+                <td colSpan={5} style={{ padding: 16, color: COLORS.muted }}>
                   No replay scores yet — run <code>pnpm demo:seed</code>.
                 </td>
               </tr>
             )}
           </tbody>
         </table>
+      </Card>
+
+      {/* On-chain */}
+      <Card title="On-chain">
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12 }}>
+          <a
+            href={ledgerUrl}
+            target="_blank"
+            rel="noreferrer"
+            style={{
+              flex: 1,
+              minWidth: 240,
+              textDecoration: 'none',
+              color: 'inherit',
+              background: '#0b0e14',
+              border: `1px solid ${COLORS.border}`,
+              borderRadius: 10,
+              padding: '12px 14px'
+            }}
+          >
+            <div style={{ fontSize: 12, color: COLORS.muted, marginBottom: 4 }}>SIBYL LEDGER</div>
+            <div style={{ fontFamily: 'ui-monospace, monospace', color: COLORS.blue, fontSize: 14 }}>
+              {short(ledgerAddress)} ↗
+            </div>
+          </a>
+          <a
+            href={consensusUrl ?? ledgerUrl}
+            target="_blank"
+            rel="noreferrer"
+            style={{
+              flex: 1,
+              minWidth: 240,
+              textDecoration: 'none',
+              color: 'inherit',
+              background: '#0b0e14',
+              border: `1px solid ${COLORS.border}`,
+              borderRadius: 10,
+              padding: '12px 14px'
+            }}
+          >
+            <div style={{ fontSize: 12, color: COLORS.muted, marginBottom: 4 }}>LATEST CONSENSUS TX</div>
+            <div style={{ fontFamily: 'ui-monospace, monospace', color: COLORS.blue, fontSize: 14 }}>
+              {consensusTx ? `${short(consensusTx)} ↗` : '—'}
+            </div>
+          </a>
+        </div>
+        <div style={{ fontSize: 12, color: COLORS.muted, marginTop: 10 }}>
+          {chain.network ?? deployment.network} · chain {deployment.chainId} · decisions recorded on Mantle
+        </div>
       </Card>
 
       {/* Verification + Chain side by side */}

@@ -76,6 +76,7 @@ export async function registerAgentIdentity(
   // return can be stale across rapid sequential calls, so prefer the receipt.
   const transferTopic = keccak256(toBytes('Transfer(address,address,uint256)'));
   let mintedId = agentId;
+  let found = false;
   for (const log of receipt.logs) {
     if (
       log.address.toLowerCase() === identityRegistry.toLowerCase() &&
@@ -84,9 +85,11 @@ export async function registerAgentIdentity(
       BigInt(log.topics[1] as Hex) === 0n
     ) {
       mintedId = BigInt(log.topics[3] as Hex);
+      found = true;
       break;
     }
   }
+  if (!found) throw new Error(`No ERC-721 mint Transfer event found in receipt ${txHash}`);
   return { agentId: mintedId, txHash };
 }
 

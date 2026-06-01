@@ -133,6 +133,7 @@ export async function emitConsensusOnchain(
   });
   const receipt = await mantleClient.waitForTransactionReceipt({ hash: txHash });
   const events = parseEventLogs({ abi: SIBYL_LEDGER_ABI, logs: receipt.logs, eventName: 'ConsensusReached' });
+  if (events.length === 0) throw new Error(`ConsensusReached event not found in receipt ${txHash}`);
   const a = (events[0]?.args ?? {}) as Partial<ConsensusReachedEvent>;
   return {
     txHash,

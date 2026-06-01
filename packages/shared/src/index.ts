@@ -124,7 +124,11 @@ const DIRECTION_BY_CODE: Record<DirectionCode, Direction> = { 0: 'FLAT', 1: 'LON
 
 /// Display-friendly wrapper over {@link computeConsensusPpm}. Recognized signals are mapped into
 /// the ppm domain (SHORT side inverts), then the canonical integer algorithm decides everything.
-export function computeConsensus(signals: Signal[], scores: ReplayScore[]): ConsensusResult {
+export function computeConsensus(
+  signals: Signal[],
+  scores: ReplayScore[],
+  maxAgentWeightPpm: number = DEFAULT_MAX_AGENT_WEIGHT_PPM
+): ConsensusResult {
   const brierByAgent = new Map(scores.map((s) => [s.agentId, s.brier]));
 
   const brierPpm: number[] = [];
@@ -141,7 +145,7 @@ export function computeConsensus(signals: Signal[], scores: ReplayScore[]): Cons
     contributors.push(signal.agentId);
   }
 
-  const result = computeConsensusPpm(brierPpm, isLong, probabilityPpm);
+  const result = computeConsensusPpm(brierPpm, isLong, probabilityPpm, maxAgentWeightPpm);
 
   return {
     direction: DIRECTION_BY_CODE[result.direction],
