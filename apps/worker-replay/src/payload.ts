@@ -7,6 +7,7 @@ type ReplayArtifact = {
   datasetHash: string;
   generatedAt: string;
   scoringVersion: string;
+  scoringVersionId: number;
   scores: ReplayScore[];
 };
 
@@ -19,6 +20,7 @@ function main() {
     datasetHash: replay.datasetHash,
     generatedAt: replay.generatedAt,
     scoringVersion: replay.scoringVersion,
+    scoringVersionId: replay.scoringVersionId ?? 1,
     scores: replay.scores.map((score) => ({
       agentId: score.agentId,
       agentIdHex: toAgentId(score.agentId),

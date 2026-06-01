@@ -10,6 +10,7 @@ import {
 
 type ReplayCommitFile = {
   datasetHash: `0x${string}`;
+  scoringVersionId: number;
   scores: Array<{
     agentId: string;
     agentIdHex: `0x${string}`;
@@ -24,6 +25,7 @@ function loadPayload(): CommitReplayPayload {
 
   return {
     datasetHash: payload.datasetHash,
+    scoringVersion: payload.scoringVersionId ?? 1,
     scores: payload.scores.map((score) => ({
       agentIdHex: score.agentIdHex,
       brierPpm: score.brierPpm
