@@ -1,0 +1,31 @@
+{
+  "_comment": "Canonical source of truth for Sibyl on-chain deployments. Update this file when (re)deploying or committing a new replay; README and tooling reference it.",
+  "protocol": "sibyl-protocol",
+  "network": "mantle-sepolia",
+  "chainId": 5003,
+  "rpcUrl": "https://rpc.sepolia.mantle.xyz",
+  "explorer": "https://explorer.sepolia.mantle.xyz",
+  "contracts": {
+    "SibylLedger": {
+      "address": "0x847a6c5a32F5Ed69c43a82f46a84Df75f9B9Bd2A",
+      "deployer": "0x12B2434a1022d5787bf06056F2885Fe35De62Bf8",
+      "deployTx": "0x3a36074d4ac90463a300cc295ab4263f6a9cdae5ba0a4d4936fe2a3960bdb9d4",
+      "deployBlock": 39389411,
+      "maxAgentWeightPpm": 900000
+    }
+  },
+  "latestReplay": {
+    "commitTx": "0x97b138e84e382590b868b5b51ea5203313f88bdf349c5157434a8769228ec096",
+    "datasetHash": "0x0828da8831ebe4f150c01a3ba6e5c12f282cfdcd155d79fb1c62a3ccf09049aa",
+    "scoringVersion": 1,
+    "epoch": 1,
+    "scoreCount": 5,
+    "agentsBrierPpm": {
+      "momentum_v1": 154970,
+      "onchain_oi_v1": 196001,
+      "news_v1": 215944,
+      "funding_v1": 236695,
+      "rogue_10x_v1": 479500
+    }
+  }
+}

@@ -55,3 +55,18 @@ export function readTradeArtifacts(): TradeArtifact[] {
   if (!existsSync(path)) return [];
   return JSON.parse(readFileSync(path, 'utf8')) as TradeArtifact[];
 }
+
+export type DeployedLedger = { address: `0x${string}`; network: string; chainId: number; explorer?: string };
+
+/// Canonical on-chain deployment record (single source of truth: deployments/mantle-sepolia.json).
+export function readDeployedLedger(): DeployedLedger | null {
+  const path = resolve(process.cwd(), '../../deployments/mantle-sepolia.json');
+  if (!existsSync(path)) return null;
+  const d = JSON.parse(readFileSync(path, 'utf8')) as {
+    network: string;
+    chainId: number;
+    explorer?: string;
+    contracts: { SibylLedger: { address: `0x${string}` } };
+  };
+  return { address: d.contracts.SibylLedger.address, network: d.network, chainId: d.chainId, explorer: d.explorer };
+}
