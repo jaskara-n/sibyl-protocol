@@ -1,0 +1,49 @@
+{
+  "_comment": "Canonical source of truth for Sibyl on-chain deployments. Update this file when (re)deploying or committing a new replay; README and tooling reference it.",
+  "protocol": "sibyl-protocol",
+  "network": "mantle-sepolia",
+  "chainId": 5003,
+  "rpcUrl": "https://rpc.sepolia.mantle.xyz",
+  "explorer": "https://explorer.sepolia.mantle.xyz",
+  "contracts": {
+    "SibylLedger": {
+      "address": "0x847a6c5a32F5Ed69c43a82f46a84Df75f9B9Bd2A",
+      "deployer": "0x12B2434a1022d5787bf06056F2885Fe35De62Bf8",
+      "deployTx": "0x3a36074d4ac90463a300cc295ab4263f6a9cdae5ba0a4d4936fe2a3960bdb9d4",
+      "deployBlock": 39389411,
+      "maxAgentWeightPpm": 900000
+    }
+  },
+  "latestReplay": {
+    "commitTx": "0x97b138e84e382590b868b5b51ea5203313f88bdf349c5157434a8769228ec096",
+    "datasetHash": "0x0828da8831ebe4f150c01a3ba6e5c12f282cfdcd155d79fb1c62a3ccf09049aa",
+    "scoringVersion": 1,
+    "epoch": 1,
+    "scoreCount": 5,
+    "agentsBrierPpm": {
+      "momentum_v1": 154970,
+      "onchain_oi_v1": 196001,
+      "news_v1": 215944,
+      "funding_v1": 236695,
+      "rogue_10x_v1": 479500
+    }
+  },
+  "latestConsensus": {
+    "tx": "0xb87a4b0462a5d72fa6fe3b359e47b34cf383e38edfa1e141f3f01ca32b463e25",
+    "direction": "LONG",
+    "sizeBps": 430,
+    "note": "Sample live ConsensusReached emitted on-chain from Bybit-sourced signals (defining feature: decisions recorded on Mantle)."
+  },
+  "erc8004": {
+    "identityRegistry": "0x8004A818BFB912233c491871b3d84c89A494BD9e",
+    "reputationRegistry": "0x8004B663056A597Dffe9eCcC1965A193B7388713",
+    "note": "Each Sibyl agent minted an ERC-8004 identity NFT (agentURI links the NFT to its SibylLedger agentId). Full records in deployments/agent-identities.json.",
+    "agentIds": {
+      "news_v1": 98,
+      "funding_v1": 99,
+      "onchain_oi_v1": 100,
+      "momentum_v1": 101,
+      "rogue_10x_v1": 102
+    }
+  }
+}

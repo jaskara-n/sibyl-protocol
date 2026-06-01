@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "tsx watch src/main.ts",
     "run": "tsx src/main.ts",
+    "emit-onchain": "tsx src/emit-onchain.ts",
     "build": "tsc -p tsconfig.json",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "test": "echo \"test pending\"",
@@ -13,7 +14,9 @@
   },
   "dependencies": {
     "@sibyl/agents": "workspace:*",
-    "@sibyl/shared": "workspace:*"
+    "@sibyl/sdk": "workspace:*",
+    "@sibyl/shared": "workspace:*",
+    "viem": "^2.23.5"
   },
   "devDependencies": {
     "@types/node": "^25.9.1",

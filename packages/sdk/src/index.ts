@@ -21,3 +21,4 @@ export function brierToPpm(brier: number): number {
 }
 
 export * from './sibylLedger.js';
+export * from './erc8004.js';

@@ -60,6 +60,9 @@ export function runReplay() {
   const output = {
     generatedAt: new Date().toISOString(),
     scoringVersion: 'brier_v1',
+    // Numeric scoring version committed on-chain (uint32). Bump when the scoring
+    // recipe changes so a new commit does not collide with a prior (hash, version).
+    scoringVersionId: 1,
     datasetHash,
     rows: rows.length,
     scores
