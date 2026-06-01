@@ -4,6 +4,7 @@ import {
   getAddress,
   http,
   parseAbi,
+  parseEventLogs,
   type Address,
   type Hex
 } from 'viem';
@@ -19,6 +20,7 @@ export const SIBYL_LEDGER_ABI = parseAbi([
   'function maxAgentWeightPpm() view returns (uint32)',
   'function paused() view returns (bool)',
   'function owner() view returns (address)',
+  'function emitConsensus((bytes32 agentId, bool isLong, uint32 probabilityPpm)[] signals) returns ((uint8 direction, uint16 sizeBps, uint32 confidencePpm, uint32 contributorCount))',
   'event ConsensusReached(uint8 direction, uint16 sizeBps, uint32 confidencePpm, uint32 contributorCount)'
 ]);
 
@@ -103,6 +105,42 @@ export async function commitReplayOnchain(ledgerAddress: Address, payload: Commi
   });
 
   return walletClient.writeContract(request);
+}
+
+export type OnchainSignal = { agentId: Hex; isLong: boolean; probabilityPpm: number };
+
+/// Broadcast emitConsensus to record a live ConsensusReached decision on-chain, then read the
+/// result back from the emitted event. Owner-gated on the contract.
+export async function emitConsensusOnchain(
+  ledgerAddress: Address,
+  signals: OnchainSignal[],
+  privateKey: Hex
+): Promise<{ txHash: Hex; direction: number; sizeBps: number; confidencePpm: number; contributorCount: number }> {
+  const account = privateKeyToAccount(privateKey);
+  const walletClient = createWalletClient({
+    account,
+    chain: mantleSepoliaTestnet,
+    transport: http(process.env.MANTLE_RPC_URL)
+  });
+
+  const txHash = await walletClient.writeContract({
+    address: ledgerAddress,
+    abi: SIBYL_LEDGER_ABI,
+    functionName: 'emitConsensus',
+    args: [signals],
+    account,
+    chain: mantleSepoliaTestnet
+  });
+  const receipt = await mantleClient.waitForTransactionReceipt({ hash: txHash });
+  const events = parseEventLogs({ abi: SIBYL_LEDGER_ABI, logs: receipt.logs, eventName: 'ConsensusReached' });
+  const a = (events[0]?.args ?? {}) as Partial<ConsensusReachedEvent>;
+  return {
+    txHash,
+    direction: Number(a.direction ?? 0),
+    sizeBps: Number(a.sizeBps ?? 0),
+    confidencePpm: Number(a.confidencePpm ?? 0),
+    contributorCount: Number(a.contributorCount ?? 0)
+  };
 }
 
 export type ConsensusReachedEvent = {

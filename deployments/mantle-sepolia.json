@@ -28,6 +28,12 @@
       "rogue_10x_v1": 479500
     }
   },
+  "latestConsensus": {
+    "tx": "0xb87a4b0462a5d72fa6fe3b359e47b34cf383e38edfa1e141f3f01ca32b463e25",
+    "direction": "LONG",
+    "sizeBps": 430,
+    "note": "Sample live ConsensusReached emitted on-chain from Bybit-sourced signals (defining feature: decisions recorded on Mantle)."
+  },
   "erc8004": {
     "identityRegistry": "0x8004A818BFB912233c491871b3d84c89A494BD9e",
     "reputationRegistry": "0x8004B663056A597Dffe9eCcC1965A193B7388713",

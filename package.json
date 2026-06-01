@@ -12,6 +12,7 @@
     "replay:commit": "pnpm --filter @sibyl/worker-replay run commit",
     "register:agents": "pnpm --filter @sibyl/worker-replay run register",
     "executor:run": "pnpm --filter @sibyl/worker-executor run run",
+    "emit:onchain": "pnpm --filter @sibyl/worker-executor run emit-onchain",
     "demo:seed": "pnpm replay:run && pnpm replay:payload && pnpm executor:run",
     "test": "pnpm -r test",
     "lint": "pnpm -r lint",
