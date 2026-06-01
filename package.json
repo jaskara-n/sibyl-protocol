@@ -10,6 +10,7 @@
     "replay:run": "pnpm --filter @sibyl/worker-replay run run",
     "replay:payload": "pnpm --filter @sibyl/worker-replay run payload",
     "executor:run": "pnpm --filter @sibyl/worker-executor run run",
+    "demo:seed": "pnpm replay:run && pnpm replay:payload && pnpm executor:run",
     "test": "pnpm -r test",
     "lint": "pnpm -r lint",
     "typecheck": "pnpm -r typecheck"

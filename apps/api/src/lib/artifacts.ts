@@ -10,6 +10,18 @@ export type ReplayArtifact = {
   scores: ReplayScore[];
 };
 
+export type ReplayCommitPayload = {
+  datasetHash: string;
+  generatedAt: string;
+  scoringVersion: string;
+  scores: Array<{
+    agentId: string;
+    agentIdHex: `0x${string}`;
+    brier: number;
+    brierPpm: number;
+  }>;
+};
+
 export type TradeArtifact = {
   id: string;
   timestamp: number;
@@ -29,6 +41,12 @@ export function readReplayArtifact(): ReplayArtifact | null {
   const path = artifactsPath('replay-scores.json');
   if (!existsSync(path)) return null;
   return JSON.parse(readFileSync(path, 'utf8')) as ReplayArtifact;
+}
+
+export function readReplayCommitPayload(): ReplayCommitPayload | null {
+  const path = artifactsPath('replay-commit-payload.json');
+  if (!existsSync(path)) return null;
+  return JSON.parse(readFileSync(path, 'utf8')) as ReplayCommitPayload;
 }
 
 export function readTradeArtifacts(): TradeArtifact[] {

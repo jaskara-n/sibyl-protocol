@@ -1,5 +1,5 @@
 import { Controller, Get } from '@nestjs/common';
-import { readReplayArtifact } from '../lib/artifacts.js';
+import { readReplayArtifact, readReplayCommitPayload } from '../lib/artifacts.js';
 
 @Controller('verification')
 export class VerificationController {
@@ -20,6 +20,22 @@ export class VerificationController {
       rows: replay.rows,
       scoringVersion: replay.scoringVersion,
       scores: replay.scores
+    };
+  }
+
+  @Get('commit-payload')
+  commitPayload() {
+    const payload = readReplayCommitPayload();
+    if (!payload) {
+      return {
+        status: 'pending',
+        message: 'Replay commit payload not generated yet'
+      };
+    }
+
+    return {
+      status: 'ready',
+      payload
     };
   }
 }

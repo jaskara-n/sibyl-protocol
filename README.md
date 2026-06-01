@@ -22,20 +22,13 @@ Sibyl is an on-chain reputation-weighted AI trading signal protocol on Mantle.
 pnpm install
 ```
 
-2. Generate replay artifacts
+2. Seed demo artifacts in one shot
 
 ```bash
-pnpm replay:run
-pnpm replay:payload
+pnpm demo:seed
 ```
 
-3. Generate a paper trade event
-
-```bash
-pnpm executor:run
-```
-
-4. Start API + web
+3. Start API + web
 
 ```bash
 pnpm dev
@@ -51,6 +44,7 @@ pnpm dev
 - `GET /consensus/latest`
 - `GET /trades`
 - `GET /verification`
+- `GET /verification/commit-payload`
 
 ## Contract
 
