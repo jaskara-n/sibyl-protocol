@@ -18,8 +18,12 @@ export const SIBYL_LEDGER_ABI = parseAbi([
   'function epoch() view returns (uint64)',
   'function maxAgentWeightPpm() view returns (uint32)',
   'function paused() view returns (bool)',
-  'function owner() view returns (address)'
+  'function owner() view returns (address)',
+  'event ConsensusReached(uint8 direction, uint16 sizeBps, uint32 confidencePpm, uint32 contributorCount)'
 ]);
+
+/// Direction enum codes as emitted on-chain (FLAT=0, LONG=1, SHORT=2).
+export const DIRECTION_LABELS = ['FLAT', 'LONG', 'SHORT'] as const;
 
 export type CommitReplayScore = {
   agentIdHex: `0x${string}`;
@@ -99,4 +103,35 @@ export async function commitReplayOnchain(ledgerAddress: Address, payload: Commi
   });
 
   return walletClient.writeContract(request);
+}
+
+export type ConsensusReachedEvent = {
+  direction: number;
+  sizeBps: number;
+  confidencePpm: number;
+  contributorCount: number;
+};
+
+/// Subscribe to on-chain ConsensusReached events. The executor uses this to drive execution
+/// from the ledger (the consensus-listener loop). Returns an unwatch function.
+export function watchConsensusReached(
+  ledgerAddress: Address,
+  onConsensus: (event: ConsensusReachedEvent) => void
+) {
+  return mantleClient.watchContractEvent({
+    address: ledgerAddress,
+    abi: SIBYL_LEDGER_ABI,
+    eventName: 'ConsensusReached',
+    onLogs: (logs) => {
+      for (const log of logs) {
+        const a = log.args as Partial<ConsensusReachedEvent>;
+        onConsensus({
+          direction: Number(a.direction ?? 0),
+          sizeBps: Number(a.sizeBps ?? 0),
+          confidencePpm: Number(a.confidencePpm ?? 0),
+          contributorCount: Number(a.contributorCount ?? 0)
+        });
+      }
+    }
+  });
 }
