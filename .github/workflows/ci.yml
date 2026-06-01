@@ -19,4 +19,5 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm typecheck
       - run: pnpm replay:run
+      - run: pnpm replay:payload
       - run: pnpm executor:run

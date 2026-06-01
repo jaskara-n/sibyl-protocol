@@ -82,13 +82,16 @@ importers:
 
   apps/worker-replay:
     dependencies:
+      '@sibyl/sdk':
+        specifier: workspace:*
+        version: link:../../packages/sdk
       '@sibyl/shared':
         specifier: workspace:*
         version: link:../../packages/shared
     devDependencies:
       '@types/node':
-        specifier: ^25.9.1
-        version: 25.9.1
+        specifier: ^24.0.0
+        version: 24.12.4
       tsx:
         specifier: ^4.19.2
         version: 4.22.4

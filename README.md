@@ -26,6 +26,7 @@ pnpm install
 
 ```bash
 pnpm replay:run
+pnpm replay:payload
 ```
 
 3. Generate a paper trade event
@@ -53,4 +54,22 @@ pnpm dev
 
 ## Contract
 
-Contract source: `packages/contracts/src/SibylLedger.sol`
+Core contract: `packages/contracts/src/SibylLedger.sol`
+
+Foundry scripts:
+- `script/Deploy.s.sol`
+- `script/CommitReplay.s.sol`
+
+Example replay commit run:
+
+```bash
+cd packages/contracts
+forge script script/CommitReplay.s.sol:CommitReplayScript \
+  --rpc-url "$MANTLE_RPC_URL" \
+  --private-key "$PRIVATE_KEY" \
+  --broadcast
+```
+
+Required env:
+- `SIBYL_LEDGER_ADDRESS`
+- `REPLAY_DATASET_HASH`
