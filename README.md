@@ -72,6 +72,7 @@ Required env:
 - `GET /verification`
 - `GET /verification/commit-payload`
 - `GET /verification/commit-calldata`
+- `GET /chain/status`
 
 ## Contract
 

@@ -4,6 +4,7 @@ import { ConsensusController } from '../consensus/consensus.controller.js';
 import { VerificationController } from '../verification/verification.controller.js';
 import { AgentsController } from '../agents/agents.controller.js';
 import { TradesController } from '../trades/trades.controller.js';
+import { ChainController } from '../chain/chain.controller.js';
 
 @Module({
   controllers: [
@@ -11,7 +12,8 @@ import { TradesController } from '../trades/trades.controller.js';
     ConsensusController,
     VerificationController,
     AgentsController,
-    TradesController
+    TradesController,
+    ChainController
   ]
 })
 export class AppModule {}

@@ -12,7 +12,9 @@ import { mantleSepoliaTestnet } from 'viem/chains';
 import { mantleClient } from './index.js';
 
 export const SIBYL_LEDGER_ABI = parseAbi([
-  'function commitReplay(bytes32 datasetHash, (bytes32 agentId,uint32 brierPpm,bool exists)[] agentScores)'
+  'function commitReplay(bytes32 datasetHash, (bytes32 agentId,uint32 brierPpm,bool exists)[] agentScores)',
+  'function latestDatasetHash() view returns (bytes32)',
+  'function owner() view returns (address)'
 ]);
 
 export type CommitReplayScore = {
@@ -38,6 +40,23 @@ export function encodeCommitReplayCalldata(payload: CommitReplayPayload): Hex {
       }))
     ]
   });
+}
+
+export async function readLedgerState(ledgerAddress: Address) {
+  const [latestDatasetHash, owner] = await Promise.all([
+    mantleClient.readContract({
+      address: ledgerAddress,
+      abi: SIBYL_LEDGER_ABI,
+      functionName: 'latestDatasetHash'
+    }),
+    mantleClient.readContract({
+      address: ledgerAddress,
+      abi: SIBYL_LEDGER_ABI,
+      functionName: 'owner'
+    })
+  ]);
+
+  return { latestDatasetHash, owner };
 }
 
 export async function simulateCommitReplay(
