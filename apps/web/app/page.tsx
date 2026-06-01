@@ -1,375 +1,172 @@
-import deployment from '../../../deployments/mantle-sepolia.json';
+import type { ReactNode } from 'react';
+import { api, type AgentRow, type ChainStatus, type Consensus, type Verification } from '../lib/api';
+import { short } from '../lib/utils';
+import { ConsensusGauge } from '../components/ConsensusGauge';
+import { RoundClock } from '../components/RoundClock';
+import { Leaderboard } from '../components/Leaderboard';
 
-const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL ?? 'http://localhost:4000';
-
-type Consensus = {
-  direction: string;
-  sizeBps: number;
-  confidence: number;
-  contributors: string[];
-  source?: string;
-  timestamp?: number;
-};
-
-type AgentRow = {
-  agentId: string;
-  erc8004AgentId?: string | null;
-  brier: number;
-  reputationWeight: number;
-  weightShare: number;
-  isRogue: boolean;
-};
-
-type Trade = {
-  id: string;
-  timestamp: number;
-  symbol: string;
-  direction: string;
-  sizeBps: number;
-  confidence: number;
-  contributors: string[];
-};
-
-type Verification = { status: string; datasetHash?: string; generatedAt?: string; rows?: number; scoringVersion?: string };
-type ChainStatus = {
-  status: string;
-  ledgerAddress?: string;
-  network?: string;
-  explorer?: string;
-  owner?: string;
-  onchainLatestDatasetHash?: string;
-  localLatestDatasetHash?: string | null;
-  isSynced?: boolean;
-  message?: string;
-};
-
-const COLORS = {
-  card: '#141925',
-  border: '#222a3a',
-  muted: '#8b93a7',
-  green: '#2fd47b',
-  red: '#ff5d6c',
-  gray: '#6b7280',
-  blue: '#4c8dff',
-  yellow: '#f5c451'
-};
-
-async function safeFetch<T>(path: string, fallback: T): Promise<T> {
-  try {
-    const res = await fetch(`${API_BASE}${path}`, { cache: 'no-store' });
-    if (!res.ok) return fallback;
-    return (await res.json()) as T;
-  } catch {
-    return fallback;
-  }
-}
-
-function short(v?: string | null): string {
-  if (!v) return '—';
-  return v.length < 18 ? v : `${v.slice(0, 10)}…${v.slice(-8)}`;
-}
-
-/// Derive the explorer base (e.g. https://explorer.sepolia.mantle.xyz) from chain.status's
-/// address URL, falling back to the committed deployment record.
 function explorerBase(chain: ChainStatus): string {
   if (chain.explorer) return chain.explorer.replace(/\/(address|tx)\/.*/i, '');
-  return deployment.explorer;
-}
-
-function dirColor(d: string): string {
-  return d === 'LONG' ? COLORS.green : d === 'SHORT' ? COLORS.red : COLORS.gray;
-}
-
-function Card({ title, children }: { title: string; children: React.ReactNode }) {
-  return (
-    <section
-      style={{
-        background: COLORS.card,
-        border: `1px solid ${COLORS.border}`,
-        borderRadius: 14,
-        padding: 20,
-        marginBottom: 16
-      }}
-    >
-      <h2 style={{ margin: '0 0 14px', fontSize: 14, letterSpacing: 0.6, textTransform: 'uppercase', color: COLORS.muted }}>
-        {title}
-      </h2>
-      {children}
-    </section>
-  );
+  return 'https://explorer.sepolia.mantle.xyz';
 }
 
 export default async function Page() {
-  const [consensus, agents, trades, verification, chain] = await Promise.all([
-    safeFetch<Consensus>('/consensus/latest', { direction: 'FLAT', sizeBps: 0, confidence: 0.5, contributors: [] }),
-    safeFetch<AgentRow[]>('/agents', []),
-    safeFetch<Trade[]>('/trades', []),
-    safeFetch<Verification>('/verification', { status: 'pending' }),
-    safeFetch<ChainStatus>('/chain/status', { status: 'pending' })
+  const [consensus, agents, verification, chain] = await Promise.all([
+    api<Consensus>('/consensus/latest', { direction: 'FLAT', sizeBps: 0, confidence: 0.5, contributors: [] }),
+    api<AgentRow[]>('/agents', []),
+    api<Verification>('/verification', { status: 'pending' }),
+    api<ChainStatus>('/chain/status', { status: 'pending' })
   ]);
 
-  const confidencePct = Math.round(consensus.confidence * 1000) / 10;
-  const topAgent = agents[0];
+  const top = agents[0];
   const rogue = agents.find((a) => a.isRogue);
-
   const base = explorerBase(chain);
-  const ledgerAddress = chain.ledgerAddress ?? deployment.contracts.SibylLedger.address;
-  const ledgerUrl = `${base}/address/${ledgerAddress}`;
-  const consensusTx = deployment.latestConsensus?.tx;
-  const consensusUrl = consensusTx ? `${base}/tx/${consensusTx}` : undefined;
+  const ledger = chain.ledgerAddress;
 
   return (
-    <main style={{ maxWidth: 1040, margin: '0 auto', padding: '32px 24px 64px' }}>
+    <div className="mx-auto max-w-6xl px-5 pb-24">
+      {/* Nav */}
+      <nav className="flex items-center justify-between py-6">
+        <div className="flex items-center gap-2.5">
+          <div className="grid h-8 w-8 place-items-center rounded-lg bg-brand font-display text-lg font-bold text-ink glow-brand">◈</div>
+          <span className="font-display text-lg font-bold tracking-tight">Sibyl</span>
+          <span className="ml-1 hidden rounded-full border border-line px-2.5 py-1 text-[11px] text-muted sm:inline">
+            credit bureau for AI agents
+          </span>
+        </div>
+        <div className="hidden items-center gap-6 text-sm text-muted md:flex">
+          <span className="text-fg">Arena</span>
+          <span className="cursor-not-allowed opacity-60">Agents</span>
+          <span className="cursor-not-allowed opacity-60">Decisions</span>
+          <span className="cursor-not-allowed opacity-60">Verify</span>
+        </div>
+        <button className="rounded-lg bg-linear-to-r from-brand to-cyan px-4 py-2 text-sm font-semibold text-ink transition-transform hover:scale-[1.03]">
+          Register agent →
+        </button>
+      </nav>
+
       {/* Hero */}
-      <header style={{ marginBottom: 24 }}>
-        <div style={{ fontSize: 13, color: COLORS.blue, fontWeight: 600, letterSpacing: 1 }}>SIBYL · PROOF-OF-EDGE</div>
-        <h1 style={{ margin: '6px 0 8px', fontSize: 30 }}>On-Chain Proof-of-Edge for AI Trading Agents</h1>
-        <p style={{ margin: 0, color: COLORS.muted, fontSize: 16 }}>
-          Don&apos;t trust the loudest agent. Trust the one with a track record you can verify.
+      <header className="relative pt-8 pb-10">
+        <div className="mb-4"><RoundClock /></div>
+        <h1 className="font-display text-5xl font-bold leading-[1.05] tracking-tight sm:text-6xl">
+          The <span className="text-gradient">credit bureau</span><br />for AI trading agents.
+        </h1>
+        <p className="mt-5 max-w-2xl text-lg text-muted">
+          Agents earn an on-chain reputation from a verifiable, re-runnable track record — and that score becomes
+          their voting power. Don&apos;t trust the loudest agent. Trust the one that&apos;s been right.
         </p>
+        <div className="mt-6 flex flex-wrap items-center gap-2 font-mono text-xs">
+          <Pill>● {chain.network ?? 'mantle-sepolia'}</Pill>
+          <Pill>{agents.length} agents live</Pill>
+          {chain.epoch !== undefined && <Pill>epoch {chain.epoch}</Pill>}
+          <Pill>{verification.rows ?? '—'} windows scored</Pill>
+        </div>
       </header>
 
-      {/* Consensus */}
-      <Card title="Live Consensus">
-        <div style={{ display: 'flex', alignItems: 'center', gap: 24, flexWrap: 'wrap' }}>
-          <div
-            style={{
-              background: dirColor(consensus.direction),
-              color: '#0b0e14',
-              fontWeight: 800,
-              fontSize: 22,
-              padding: '10px 20px',
-              borderRadius: 10,
-              minWidth: 90,
-              textAlign: 'center'
-            }}
-          >
-            {consensus.direction}
-          </div>
-          <div>
-            <div style={{ fontSize: 12, color: COLORS.muted }}>POSITION SIZE</div>
-            <div style={{ fontSize: 22, fontWeight: 700 }}>{consensus.sizeBps} bps</div>
-          </div>
-          <div style={{ flex: 1, minWidth: 240 }}>
-            <div style={{ fontSize: 12, color: COLORS.muted, marginBottom: 6 }}>
-              LONG CONFIDENCE · {confidencePct}%
-            </div>
-            <div style={{ position: 'relative', height: 10, background: '#0b0e14', borderRadius: 6, overflow: 'hidden' }}>
-              <div
-                style={{
-                  position: 'absolute',
-                  left: 0,
-                  top: 0,
-                  bottom: 0,
-                  width: `${confidencePct}%`,
-                  background: dirColor(consensus.direction)
-                }}
-              />
-              <div style={{ position: 'absolute', left: '50%', top: 0, bottom: 0, width: 2, background: COLORS.muted }} />
-            </div>
-            <div style={{ fontSize: 12, color: COLORS.muted, marginTop: 6 }}>
-              {consensus.contributors.length} contributing agents · 50% line = no edge
-            </div>
+      {/* Consensus + narrative */}
+      <section className="grid items-stretch gap-5 md:grid-cols-[300px_1fr]">
+        <ConsensusGauge
+          direction={consensus.direction}
+          confidence={consensus.confidence}
+          sizeBps={consensus.sizeBps}
+          contributors={consensus.contributors.length}
+        />
+        <div className="glass flex flex-col justify-center rounded-2xl p-6">
+          <div className="text-xs uppercase tracking-widest text-brand">the mechanism</div>
+          <h2 className="mt-2 font-display text-2xl font-semibold">Reputation is the steering wheel.</h2>
+          {top && rogue ? (
+            <p className="mt-3 text-muted">
+              The best-calibrated agent <b className="text-long">{top.agentId}</b> earns{' '}
+              <b className="text-fg">{Math.round(top.weightShare * 100)}%</b> of the vote. The loud, overconfident{' '}
+              <b className="text-short">{rogue.agentId}</b> — worst Brier {rogue.brier.toFixed(3)} — is math-silenced to{' '}
+              <b className="text-fg">{Math.round(rogue.weightShare * 100)}%</b>. No human override; calibration enforced
+              in Solidity.
+            </p>
+          ) : (
+            <p className="mt-3 text-muted">Seed the protocol (`pnpm demo:seed`) to populate live agents.</p>
+          )}
+          <div className="mt-5 flex flex-wrap gap-2 font-mono text-xs">
+            <Pill>inverse-Brier weighting</Pill>
+            <Pill>per-agent cap (anti-domination)</Pill>
+            <Pill>FLAT dead-band · no leverage</Pill>
           </div>
         </div>
-      </Card>
-
-      {/* The beat */}
-      {topAgent && rogue && (
-        <div
-          style={{
-            background: 'rgba(76,141,255,0.08)',
-            border: `1px solid ${COLORS.blue}`,
-            borderRadius: 14,
-            padding: '14px 18px',
-            marginBottom: 16,
-            fontSize: 15
-          }}
-        >
-          <b>Reputation is the steering wheel.</b> The best-calibrated agent{' '}
-          <b style={{ color: COLORS.green }}>{topAgent.agentId}</b> carries{' '}
-          <b>{Math.round(topAgent.weightShare * 100)}%</b> of the vote, while the loud, overconfident{' '}
-          <b style={{ color: COLORS.red }}>{rogue.agentId}</b> (worst Brier {rogue.brier.toFixed(3)}) is
-          down-weighted to just <b>{Math.round(rogue.weightShare * 100)}%</b> — the chain silences it.
-        </div>
-      )}
+      </section>
 
       {/* Leaderboard */}
-      <Card title="Agent Reputation Leaderboard">
-        <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 14 }}>
-          <thead>
-            <tr style={{ color: COLORS.muted, textAlign: 'left', fontSize: 12 }}>
-              <th style={{ padding: '6px 8px' }}>#</th>
-              <th style={{ padding: '6px 8px' }}>Agent</th>
-              <th style={{ padding: '6px 8px' }}>ERC-8004 ID</th>
-              <th style={{ padding: '6px 8px' }}>Brier</th>
-              <th style={{ padding: '6px 8px', width: '40%' }}>Consensus weight (capped)</th>
-            </tr>
-          </thead>
-          <tbody>
-            {agents.map((a, i) => (
-              <tr key={a.agentId} style={{ borderTop: `1px solid ${COLORS.border}` }}>
-                <td style={{ padding: '10px 8px', color: COLORS.muted }}>{i + 1}</td>
-                <td style={{ padding: '10px 8px', fontWeight: 600 }}>
-                  {a.agentId}
-                  {a.isRogue && (
-                    <span
-                      style={{
-                        marginLeft: 8,
-                        fontSize: 11,
-                        color: COLORS.red,
-                        border: `1px solid ${COLORS.red}`,
-                        borderRadius: 6,
-                        padding: '1px 6px'
-                      }}
-                    >
-                      ROGUE
-                    </span>
-                  )}
-                </td>
-                <td style={{ padding: '10px 8px', color: COLORS.muted, fontFamily: 'ui-monospace, monospace' }}>
-                  {a.erc8004AgentId ? `#${a.erc8004AgentId}` : '—'}
-                </td>
-                <td style={{ padding: '10px 8px', color: a.isRogue ? COLORS.red : COLORS.green }}>{a.brier.toFixed(3)}</td>
-                <td style={{ padding: '10px 8px' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                    <div style={{ flex: 1, height: 8, background: '#0b0e14', borderRadius: 5, overflow: 'hidden' }}>
-                      <div
-                        style={{
-                          width: `${Math.max(2, a.weightShare * 100)}%`,
-                          height: '100%',
-                          background: a.isRogue ? COLORS.red : COLORS.blue
-                        }}
-                      />
-                    </div>
-                    <span style={{ minWidth: 42, textAlign: 'right', color: COLORS.muted }}>
-                      {Math.round(a.weightShare * 100)}%
-                    </span>
-                  </div>
-                </td>
-              </tr>
-            ))}
-            {agents.length === 0 && (
-              <tr>
-                <td colSpan={5} style={{ padding: 16, color: COLORS.muted }}>
-                  No replay scores yet — run <code>pnpm demo:seed</code>.
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
-      </Card>
-
-      {/* On-chain */}
-      <Card title="On-chain">
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12 }}>
-          <a
-            href={ledgerUrl}
-            target="_blank"
-            rel="noreferrer"
-            style={{
-              flex: 1,
-              minWidth: 240,
-              textDecoration: 'none',
-              color: 'inherit',
-              background: '#0b0e14',
-              border: `1px solid ${COLORS.border}`,
-              borderRadius: 10,
-              padding: '12px 14px'
-            }}
-          >
-            <div style={{ fontSize: 12, color: COLORS.muted, marginBottom: 4 }}>SIBYL LEDGER</div>
-            <div style={{ fontFamily: 'ui-monospace, monospace', color: COLORS.blue, fontSize: 14 }}>
-              {short(ledgerAddress)} ↗
-            </div>
-          </a>
-          <a
-            href={consensusUrl ?? ledgerUrl}
-            target="_blank"
-            rel="noreferrer"
-            style={{
-              flex: 1,
-              minWidth: 240,
-              textDecoration: 'none',
-              color: 'inherit',
-              background: '#0b0e14',
-              border: `1px solid ${COLORS.border}`,
-              borderRadius: 10,
-              padding: '12px 14px'
-            }}
-          >
-            <div style={{ fontSize: 12, color: COLORS.muted, marginBottom: 4 }}>LATEST CONSENSUS TX</div>
-            <div style={{ fontFamily: 'ui-monospace, monospace', color: COLORS.blue, fontSize: 14 }}>
-              {consensusTx ? `${short(consensusTx)} ↗` : '—'}
-            </div>
-          </a>
+      <section className="mt-10">
+        <div className="mb-4 flex items-end justify-between">
+          <h2 className="font-display text-xl font-semibold">Agent reputation leaderboard</h2>
+          <span className="font-mono text-xs text-muted">ranked by consensus weight</span>
         </div>
-        <div style={{ fontSize: 12, color: COLORS.muted, marginTop: 10 }}>
-          {chain.network ?? deployment.network} · chain {deployment.chainId} · decisions recorded on Mantle
-        </div>
-      </Card>
-
-      {/* Verification + Chain side by side */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
-        <Card title="Verification">
-          <Row label="Status" value={verification.status} />
-          {verification.datasetHash && <Row label="Dataset hash" value={short(verification.datasetHash)} mono />}
-          {verification.rows !== undefined && <Row label="Windows scored" value={String(verification.rows)} />}
-          {verification.scoringVersion && <Row label="Scoring version" value={verification.scoringVersion} />}
-          {verification.generatedAt && <Row label="Generated" value={verification.generatedAt} />}
-        </Card>
-        <Card title="Chain Sync">
-          <Row label="Status" value={chain.status} />
-          {chain.message && <Row label="Note" value={chain.message} />}
-          {chain.ledgerAddress && <Row label="Ledger" value={short(chain.ledgerAddress)} mono />}
-          {chain.owner && <Row label="Owner" value={short(chain.owner)} mono />}
-          {chain.onchainLatestDatasetHash && <Row label="On-chain hash" value={short(chain.onchainLatestDatasetHash)} mono />}
-          {chain.isSynced !== undefined && <Row label="Synced" value={chain.isSynced ? 'Yes' : 'No'} />}
-        </Card>
-      </div>
-
-      {/* Trades */}
-      <Card title="Recent Trades (paper)">
-        {trades.length === 0 ? (
-          <div style={{ color: COLORS.muted }}>No trades yet.</div>
+        {agents.length > 0 ? (
+          <Leaderboard agents={agents} />
         ) : (
-          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 14 }}>
-            <thead>
-              <tr style={{ color: COLORS.muted, textAlign: 'left', fontSize: 12 }}>
-                <th style={{ padding: '6px 8px' }}>Symbol</th>
-                <th style={{ padding: '6px 8px' }}>Direction</th>
-                <th style={{ padding: '6px 8px' }}>Size</th>
-                <th style={{ padding: '6px 8px' }}>Confidence</th>
-                <th style={{ padding: '6px 8px' }}>Contributors</th>
-              </tr>
-            </thead>
-            <tbody>
-              {trades.slice(0, 6).map((t) => (
-                <tr key={t.id} style={{ borderTop: `1px solid ${COLORS.border}` }}>
-                  <td style={{ padding: '8px' }}>{t.symbol}</td>
-                  <td style={{ padding: '8px', color: dirColor(t.direction), fontWeight: 600 }}>{t.direction}</td>
-                  <td style={{ padding: '8px' }}>{t.sizeBps} bps</td>
-                  <td style={{ padding: '8px' }}>{Math.round(t.confidence * 1000) / 10}%</td>
-                  <td style={{ padding: '8px', color: COLORS.muted }}>{t.contributors.length}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+          <div className="glass rounded-xl p-6 text-muted">No agents yet — run <code className="font-mono">pnpm demo:seed</code>.</div>
         )}
-      </Card>
+      </section>
 
-      <footer style={{ color: COLORS.muted, fontSize: 12, textAlign: 'center', marginTop: 24 }}>
-        Reputation-weighted consensus · re-runnable replay · on-chain verifiable · Mantle
+      {/* On-chain + verification */}
+      <section className="mt-10 grid gap-5 md:grid-cols-2">
+        <div className="glass rounded-2xl p-6">
+          <div className="text-xs uppercase tracking-widest text-cyan">on-chain · Mantle</div>
+          <div className="mt-4 space-y-3">
+            {ledger ? (
+              <LinkRow label="SibylLedger" value={short(ledger)} href={`${base}/address/${ledger}`} />
+            ) : (
+              <Row label="SibylLedger" value="not configured" />
+            )}
+            <Row label="Dataset hash" value={short(verification.datasetHash, 10, 6)} />
+            <Row label="Scoring version" value={verification.scoringVersion ?? '—'} />
+            <Row
+              label="Chain sync"
+              value={chain.isSynced ? 'synced ✓' : chain.status === 'ready' ? 'ready' : chain.status}
+              accent={chain.isSynced ? 'text-long' : undefined}
+            />
+          </div>
+        </div>
+        <div className="glass rounded-2xl p-6">
+          <div className="text-xs uppercase tracking-widest text-amber">verify it yourself</div>
+          <p className="mt-3 text-sm text-muted">
+            The replay is deterministic. Recompute the dataset hash and confirm it equals what&apos;s committed on Mantle.
+          </p>
+          <pre className="mt-4 overflow-x-auto rounded-lg border border-line bg-ink p-3 font-mono text-[12px] text-fg/90">
+{`node data/datasets/generate-frozen.mjs
+# SHA-256 the CSV == on-chain latestDatasetHash`}
+          </pre>
+          <div className="mt-3 font-mono text-xs text-muted">
+            {verification.rows ?? '—'} windows · status {verification.status} · 79 Foundry + 2 TS parity tests green
+          </div>
+        </div>
+      </section>
+
+      <footer className="mt-14 border-t border-line pt-6 text-center font-mono text-xs text-muted">
+        reputation-weighted consensus · re-runnable replay · on-chain verifiable · proven on trading, reusable everywhere
       </footer>
-    </main>
+    </div>
   );
 }
 
-function Row({ label, value, mono }: { label: string; value: string; mono?: boolean }) {
+function Pill({ children }: { children: ReactNode }) {
+  return <span className="rounded-full border border-line bg-card/60 px-3 py-1 text-muted">{children}</span>;
+}
+
+function Row({ label, value, accent }: { label: string; value: string | number; accent?: string }) {
   return (
-    <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12, padding: '4px 0', fontSize: 14 }}>
-      <span style={{ color: COLORS.muted }}>{label}</span>
-      <span style={{ fontFamily: mono ? 'ui-monospace, monospace' : 'inherit', textAlign: 'right' }}>{value}</span>
+    <div className="flex items-center justify-between text-sm">
+      <span className="text-muted">{label}</span>
+      <span className={`font-mono ${accent ?? 'text-fg'}`}>{value}</span>
+    </div>
+  );
+}
+
+function LinkRow({ label, value, href }: { label: string; value: string; href: string }) {
+  return (
+    <div className="flex items-center justify-between text-sm">
+      <span className="text-muted">{label}</span>
+      <a href={href} target="_blank" rel="noreferrer" className="font-mono text-cyan hover:underline">
+        {value} ↗
+      </a>
     </div>
   );
 }
