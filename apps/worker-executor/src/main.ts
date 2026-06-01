@@ -3,6 +3,7 @@ import { resolve } from 'node:path';
 import { computeConsensus, type ReplayScore, type Signal } from '@sibyl/shared';
 import { DEFAULT_AGENTS, type AgentInput } from '@sibyl/agents';
 import { selectVenue, type ExecutionOrder } from './venue.js';
+import { fetchMarketSnapshot } from './marketData.js';
 
 type ReplayArtifact = {
   datasetHash: string;
@@ -14,27 +15,13 @@ function readReplayArtifact(): ReplayArtifact {
   return JSON.parse(readFileSync(path, 'utf8')) as ReplayArtifact;
 }
 
-function buildSnapshot(symbol = 'MNT-USD'): AgentInput {
-  const now = Math.floor(Date.now() / 1000);
-  const phase = Math.sin(now / 3600);
-  return {
-    symbol,
-    timestamp: now,
-    price: 0.85 + phase * 0.03,
-    fundingRate: 0.002 * Math.cos(now / 1800),
-    oiDelta: Math.sin(now / 2400),
-    momentum: Math.sin(now / 1200),
-    newsSentiment: Math.cos(now / 2700)
-  };
-}
-
 async function collectSignals(snapshot: AgentInput): Promise<Signal[]> {
   return Promise.all(DEFAULT_AGENTS.map((agent) => agent.run(snapshot)));
 }
 
 async function main() {
   const replay = readReplayArtifact();
-  const snapshot = buildSnapshot();
+  const snapshot = await fetchMarketSnapshot();
   const signals = await collectSignals(snapshot);
   const consensus = computeConsensus(signals, replay.scores);
 
