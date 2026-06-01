@@ -14,6 +14,7 @@ export type ReplayCommitPayload = {
   datasetHash: `0x${string}`;
   generatedAt: string;
   scoringVersion: string;
+  scoringVersionId: number;
   scores: Array<{
     agentId: string;
     agentIdHex: `0x${string}`;

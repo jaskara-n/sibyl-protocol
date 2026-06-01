@@ -52,6 +52,7 @@ export class VerificationController {
 
     const commitPayload: CommitReplayPayload = {
       datasetHash: payload.datasetHash,
+      scoringVersion: payload.scoringVersionId ?? 1,
       scores: payload.scores.map((score) => ({
         agentIdHex: score.agentIdHex,
         brierPpm: score.brierPpm
@@ -62,12 +63,15 @@ export class VerificationController {
 
     return {
       status: 'ready',
-      function: 'commitReplay(bytes32,(bytes32,uint32,bool)[])',
+      function: 'commitReplay(bytes32,uint32,(bytes32,uint32,uint64,bool,bool)[])',
       args: {
         datasetHash: payload.datasetHash,
+        scoringVersion: commitPayload.scoringVersion,
         scores: payload.scores.map((score) => ({
           agentId: score.agentIdHex,
           brierPpm: score.brierPpm,
+          updatedEpoch: 0,
+          active: true,
           exists: true
         }))
       },
