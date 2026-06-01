@@ -38,4 +38,28 @@ export class VerificationController {
       payload
     };
   }
+
+  @Get('commit-calldata')
+  commitCalldata() {
+    const payload = readReplayCommitPayload();
+    if (!payload) {
+      return {
+        status: 'pending',
+        message: 'Replay commit payload not generated yet'
+      };
+    }
+
+    return {
+      status: 'ready',
+      function: 'commitReplay(bytes32,(bytes32,uint32,bool)[])',
+      args: {
+        datasetHash: payload.datasetHash,
+        scores: payload.scores.map((score) => ({
+          agentId: score.agentIdHex,
+          brierPpm: score.brierPpm,
+          exists: true
+        }))
+      }
+    };
+  }
 }

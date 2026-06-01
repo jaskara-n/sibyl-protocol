@@ -13,6 +13,13 @@ type AgentRow = {
   reputationWeight: number;
 };
 
+type Verification = {
+  status: string;
+  datasetHash?: string;
+  generatedAt?: string;
+  rows?: number;
+};
+
 async function safeFetch<T>(path: string, fallback: T): Promise<T> {
   try {
     const res = await fetch(`${API_BASE}${path}`, { cache: 'no-store' });
@@ -24,10 +31,11 @@ async function safeFetch<T>(path: string, fallback: T): Promise<T> {
 }
 
 export default async function Page() {
-  const [consensus, agents, trades] = await Promise.all([
+  const [consensus, agents, trades, verification] = await Promise.all([
     safeFetch<Consensus>('/consensus/latest', { direction: 'FLAT', sizeBps: 0, confidence: 0.5, contributors: [] }),
     safeFetch<AgentRow[]>('/agents', []),
-    safeFetch<any[]>('/trades', [])
+    safeFetch<any[]>('/trades', []),
+    safeFetch<Verification>('/verification', { status: 'pending' })
   ]);
 
   return (
@@ -41,6 +49,14 @@ export default async function Page() {
           Direction: <b>{consensus.direction}</b> | Size: <b>{consensus.sizeBps} bps</b> | Confidence:{' '}
           <b>{Math.round(consensus.confidence * 100)}%</b>
         </p>
+      </section>
+
+      <section style={{ background: 'white', borderRadius: 12, padding: 16, marginBottom: 16 }}>
+        <h2>Verification</h2>
+        <p>Status: <b>{verification.status}</b></p>
+        {verification.datasetHash && <p>Dataset hash: <code>{verification.datasetHash}</code></p>}
+        {verification.generatedAt && <p>Generated: {verification.generatedAt}</p>}
+        {verification.rows !== undefined && <p>Rows: {verification.rows}</p>}
       </section>
 
       <section style={{ background: 'white', borderRadius: 12, padding: 16, marginBottom: 16 }}>

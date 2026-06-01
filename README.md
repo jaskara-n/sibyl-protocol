@@ -45,6 +45,7 @@ pnpm dev
 - `GET /trades`
 - `GET /verification`
 - `GET /verification/commit-payload`
+- `GET /verification/commit-calldata`
 
 ## Contract
 
