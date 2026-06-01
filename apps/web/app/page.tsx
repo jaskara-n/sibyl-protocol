@@ -20,6 +20,22 @@ type Verification = {
   rows?: number;
 };
 
+type ChainStatus = {
+  status: string;
+  ledgerAddress?: string;
+  owner?: string;
+  onchainLatestDatasetHash?: string;
+  localLatestDatasetHash?: string | null;
+  isSynced?: boolean;
+  message?: string;
+};
+
+type CommitCalldata = {
+  status: string;
+  calldata?: string;
+  message?: string;
+};
+
 async function safeFetch<T>(path: string, fallback: T): Promise<T> {
   try {
     const res = await fetch(`${API_BASE}${path}`, { cache: 'no-store' });
@@ -30,12 +46,20 @@ async function safeFetch<T>(path: string, fallback: T): Promise<T> {
   }
 }
 
+function short(value?: string | null): string {
+  if (!value) return '-';
+  if (value.length < 18) return value;
+  return `${value.slice(0, 10)}...${value.slice(-8)}`;
+}
+
 export default async function Page() {
-  const [consensus, agents, trades, verification] = await Promise.all([
+  const [consensus, agents, trades, verification, chainStatus, commitCalldata] = await Promise.all([
     safeFetch<Consensus>('/consensus/latest', { direction: 'FLAT', sizeBps: 0, confidence: 0.5, contributors: [] }),
     safeFetch<AgentRow[]>('/agents', []),
     safeFetch<any[]>('/trades', []),
-    safeFetch<Verification>('/verification', { status: 'pending' })
+    safeFetch<Verification>('/verification', { status: 'pending' }),
+    safeFetch<ChainStatus>('/chain/status', { status: 'pending' }),
+    safeFetch<CommitCalldata>('/verification/commit-calldata', { status: 'pending' })
   ]);
 
   return (
@@ -57,6 +81,32 @@ export default async function Page() {
         {verification.datasetHash && <p>Dataset hash: <code>{verification.datasetHash}</code></p>}
         {verification.generatedAt && <p>Generated: {verification.generatedAt}</p>}
         {verification.rows !== undefined && <p>Rows: {verification.rows}</p>}
+      </section>
+
+      <section style={{ background: 'white', borderRadius: 12, padding: 16, marginBottom: 16 }}>
+        <h2>Chain Sync</h2>
+        <p>Status: <b>{chainStatus.status}</b></p>
+        {chainStatus.message && <p>{chainStatus.message}</p>}
+        {chainStatus.ledgerAddress && <p>Ledger: <code>{chainStatus.ledgerAddress}</code></p>}
+        {chainStatus.owner && <p>Owner: <code>{short(chainStatus.owner)}</code></p>}
+        {chainStatus.onchainLatestDatasetHash && (
+          <p>On-chain hash: <code>{short(chainStatus.onchainLatestDatasetHash)}</code></p>
+        )}
+        {chainStatus.localLatestDatasetHash && (
+          <p>Local hash: <code>{short(chainStatus.localLatestDatasetHash)}</code></p>
+        )}
+        {chainStatus.isSynced !== undefined && (
+          <p>Synced: <b>{chainStatus.isSynced ? 'Yes' : 'No'}</b></p>
+        )}
+      </section>
+
+      <section style={{ background: 'white', borderRadius: 12, padding: 16, marginBottom: 16 }}>
+        <h2>Commit Calldata</h2>
+        <p>Status: <b>{commitCalldata.status}</b></p>
+        {commitCalldata.message && <p>{commitCalldata.message}</p>}
+        {commitCalldata.calldata && (
+          <pre style={{ whiteSpace: 'pre-wrap', margin: 0 }}>{commitCalldata.calldata}</pre>
+        )}
       </section>
 
       <section style={{ background: 'white', borderRadius: 12, padding: 16, marginBottom: 16 }}>
