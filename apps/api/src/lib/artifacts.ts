@@ -56,7 +56,42 @@ export function readTradeArtifacts(): TradeArtifact[] {
   return JSON.parse(readFileSync(path, 'utf8')) as TradeArtifact[];
 }
 
-export type DeployedLedger = { address: `0x${string}`; network: string; chainId: number; explorer?: string };
+export type FrozenSample = {
+  timestamp: number;
+  symbol: string;
+  agentId: string;
+  probability: number;
+  outcome: number;
+};
+
+/// Frozen replay dataset (cols: timestamp,symbol,agent_id,probability,outcome).
+/// Single source of truth: data/datasets/frozen/mnt_eth_sample.csv.
+export function readFrozenSamples(): FrozenSample[] {
+  const path = resolve(process.cwd(), '../../data/datasets/frozen/mnt_eth_sample.csv');
+  if (!existsSync(path)) return [];
+  const raw = readFileSync(path, 'utf8');
+  const lines = raw.split(/\r?\n/).filter((l) => l.trim().length > 0);
+  if (lines.length <= 1) return [];
+  // Skip header row; columns are positional per the frozen schema.
+  return lines.slice(1).map((line) => {
+    const [timestamp, symbol, agentId, probability, outcome] = line.split(',');
+    return {
+      timestamp: Number(timestamp),
+      symbol,
+      agentId,
+      probability: Number(probability),
+      outcome: Number(outcome)
+    };
+  });
+}
+
+export type DeployedLedger = {
+  address: `0x${string}`;
+  network: string;
+  chainId: number;
+  explorer?: string;
+  latestConsensusTx?: string;
+};
 
 /// Canonical on-chain deployment record (single source of truth: deployments/mantle-sepolia.json).
 export function readDeployedLedger(): DeployedLedger | null {
@@ -67,6 +102,13 @@ export function readDeployedLedger(): DeployedLedger | null {
     chainId: number;
     explorer?: string;
     contracts: { SibylLedger: { address: `0x${string}` } };
+    latestConsensus?: { tx?: string };
   };
-  return { address: d.contracts.SibylLedger.address, network: d.network, chainId: d.chainId, explorer: d.explorer };
+  return {
+    address: d.contracts.SibylLedger.address,
+    network: d.network,
+    chainId: d.chainId,
+    explorer: d.explorer,
+    latestConsensusTx: d.latestConsensus?.tx
+  };
 }

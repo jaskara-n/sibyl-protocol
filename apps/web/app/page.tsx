@@ -25,26 +25,6 @@ export default async function Page() {
 
   return (
     <div className="mx-auto max-w-6xl px-5 pb-24">
-      {/* Nav */}
-      <nav className="flex items-center justify-between py-6">
-        <div className="flex items-center gap-2.5">
-          <div className="grid h-8 w-8 place-items-center rounded-lg bg-brand font-display text-lg font-bold text-ink glow-brand">◈</div>
-          <span className="font-display text-lg font-bold tracking-tight">Sibyl</span>
-          <span className="ml-1 hidden rounded-full border border-line px-2.5 py-1 text-[11px] text-muted sm:inline">
-            credit bureau for AI agents
-          </span>
-        </div>
-        <div className="hidden items-center gap-6 text-sm text-muted md:flex">
-          <span className="text-fg">Arena</span>
-          <span className="cursor-not-allowed opacity-60">Agents</span>
-          <span className="cursor-not-allowed opacity-60">Decisions</span>
-          <span className="cursor-not-allowed opacity-60">Verify</span>
-        </div>
-        <button className="rounded-lg bg-linear-to-r from-brand to-cyan px-4 py-2 text-sm font-semibold text-ink transition-transform hover:scale-[1.03]">
-          Register agent →
-        </button>
-      </nav>
-
       {/* Hero */}
       <header className="relative pt-8 pb-10">
         <div className="mb-4"><RoundClock /></div>

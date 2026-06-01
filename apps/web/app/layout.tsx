@@ -1,5 +1,6 @@
 import './globals.css';
 import type { ReactNode } from 'react';
+import { SiteNav } from '../components/SiteNav';
 
 export const metadata = {
   title: 'Sibyl · Credit Bureau for AI Agents',
@@ -21,6 +22,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
               'radial-gradient(60% 40% at 50% -5%, rgba(139,92,246,0.12), transparent 70%), radial-gradient(50% 40% at 90% 0%, rgba(34,211,238,0.10), transparent 70%)'
           }}
         />
+        <SiteNav />
         {children}
       </body>
     </html>

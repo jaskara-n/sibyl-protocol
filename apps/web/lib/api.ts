@@ -48,7 +48,35 @@ export type ChainStatus = {
   onchainLatestDatasetHash?: string;
   localLatestDatasetHash?: string | null;
   isSynced?: boolean;
+  latestConsensusTx?: string;
   message?: string;
+};
+
+/** Per-agent analytics derived from the frozen replay dataset. */
+export type AgentProfile = {
+  agentId: string;
+  erc8004AgentId?: string | null;
+  brier: number;
+  count: number;
+  hitRate: number;
+  isRogue: boolean;
+  /** Cumulative Brier as windows accrue (the reputation trajectory). */
+  reputationCurve: { window: number; cumBrier: number }[];
+  /** Calibration reliability diagram: predicted-mean vs actual-frequency per probability bucket. */
+  reliability: { bucket: number; predicted: number; actual: number; n: number }[];
+  recentSignals: { ts: number; prob: number; outcome: number }[];
+};
+
+/** A consensus decision (round outcome). */
+export type Decision = {
+  id: string;
+  timestamp: number;
+  symbol: string;
+  direction: string;
+  sizeBps: number;
+  confidence: number;
+  contributors: number;
+  txHash?: string;
 };
 
 export async function api<T>(path: string, fallback: T): Promise<T> {
