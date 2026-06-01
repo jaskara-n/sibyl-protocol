@@ -5,12 +5,14 @@
   "type": "module",
   "scripts": {
     "dev": "tsx watch src/main.ts",
+    "run": "tsx src/main.ts",
     "build": "tsc -p tsconfig.json",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "test": "echo \"test pending\"",
     "lint": "echo \"lint pending\""
   },
   "dependencies": {
+    "@sibyl/agents": "workspace:*",
     "@sibyl/shared": "workspace:*"
   },
   "devDependencies": {

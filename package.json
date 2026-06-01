@@ -5,7 +5,10 @@
   "packageManager": "pnpm@10.0.0",
   "scripts": {
     "build": "pnpm -r build",
-    "dev": "pnpm --parallel --filter @sibyl/api --filter @sibyl/worker-replay --filter @sibyl/worker-executor --filter @sibyl/web dev",
+    "dev": "pnpm --parallel --filter @sibyl/api --filter @sibyl/web dev",
+    "dev:workers": "pnpm --parallel --filter @sibyl/worker-replay --filter @sibyl/worker-executor dev",
+    "replay:run": "pnpm --filter @sibyl/worker-replay run run",
+    "executor:run": "pnpm --filter @sibyl/worker-executor run run",
     "test": "pnpm -r test",
     "lint": "pnpm -r lint",
     "typecheck": "pnpm -r typecheck"

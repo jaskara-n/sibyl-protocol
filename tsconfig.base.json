@@ -15,7 +15,7 @@
     "paths": {
       "@sibyl/shared": ["packages/shared/src/index.ts"],
       "@sibyl/agents": ["packages/agents/src/index.ts"],
-      "@sibyl/sdk": ["packages/sdk/src/index.js"]
+      "@sibyl/sdk": ["packages/sdk/src/index.ts"]
     }
   }
 }

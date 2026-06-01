@@ -10,3 +10,5 @@ out
 artifacts
 cache
 broadcast
+
+*.tsbuildinfo
