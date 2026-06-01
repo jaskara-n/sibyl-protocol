@@ -1,4 +1,4 @@
-import { createWalletClient, getAddress, http, parseAbi, type Address, type Hex } from 'viem';
+import { createWalletClient, getAddress, http, keccak256, parseAbi, toBytes, type Address, type Hex } from 'viem';
 import { privateKeyToAccount } from 'viem/accounts';
 import { mantleSepoliaTestnet } from 'viem/chains';
 import { mantleClient } from './index.js';
@@ -68,7 +68,26 @@ export async function registerAgentIdentity(
   });
 
   const txHash = await walletClient.writeContract(request);
-  return { agentId, txHash };
+  // Wait for inclusion so sequential registrations don't collide on the nonce
+  // (Mantle sequencer rejects the next tx as "replacement underpriced" otherwise).
+  const receipt = await mantleClient.waitForTransactionReceipt({ hash: txHash });
+
+  // Authoritative minted id from the ERC-721 mint event (Transfer from 0x0); the simulate
+  // return can be stale across rapid sequential calls, so prefer the receipt.
+  const transferTopic = keccak256(toBytes('Transfer(address,address,uint256)'));
+  let mintedId = agentId;
+  for (const log of receipt.logs) {
+    if (
+      log.address.toLowerCase() === identityRegistry.toLowerCase() &&
+      log.topics.length === 4 &&
+      log.topics[0] === transferTopic &&
+      BigInt(log.topics[1] as Hex) === 0n
+    ) {
+      mintedId = BigInt(log.topics[3] as Hex);
+      break;
+    }
+  }
+  return { agentId: mintedId, txHash };
 }
 
 export const ERC8004_REPUTATION_ABI = parseAbi([

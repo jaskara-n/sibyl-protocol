@@ -27,5 +27,17 @@
       "funding_v1": 236695,
       "rogue_10x_v1": 479500
     }
+  },
+  "erc8004": {
+    "identityRegistry": "0x8004A818BFB912233c491871b3d84c89A494BD9e",
+    "reputationRegistry": "0x8004B663056A597Dffe9eCcC1965A193B7388713",
+    "note": "Each Sibyl agent minted an ERC-8004 identity NFT (agentURI links the NFT to its SibylLedger agentId). Full records in deployments/agent-identities.json.",
+    "agentIds": {
+      "news_v1": 98,
+      "funding_v1": 99,
+      "onchain_oi_v1": 100,
+      "momentum_v1": 101,
+      "rogue_10x_v1": 102
+    }
   }
 }

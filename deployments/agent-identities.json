@@ -1,0 +1,37 @@
+[
+  {
+    "name": "news_v1",
+    "ledgerAgentId": "0x3863d7ee65077e82772bd67b1189fb54411bf968915ff575c388741b4bf659b7",
+    "agentURI": "sibyl://agent/news_v1?ledgerId=0x3863d7ee65077e82772bd67b1189fb54411bf968915ff575c388741b4bf659b7",
+    "erc8004AgentId": "98",
+    "txHash": "0x0559b27536f67c1e435fd0a361580a6ec7b1e714633d1ce32d89f33b22ff9e7a"
+  },
+  {
+    "name": "funding_v1",
+    "ledgerAgentId": "0x7b06d3bba2373180e16fb177addd26e03ee12ef363ddf5b4b86dccb2237a3075",
+    "agentURI": "sibyl://agent/funding_v1?ledgerId=0x7b06d3bba2373180e16fb177addd26e03ee12ef363ddf5b4b86dccb2237a3075",
+    "erc8004AgentId": "99",
+    "txHash": "0x3f7c8a3e8c531f014042873a252c00b7acbbfe0dc7b4035bf4bbb08ac071a4f8"
+  },
+  {
+    "name": "onchain_oi_v1",
+    "ledgerAgentId": "0x780cee674777b23c9c247a68abdb87853294e484035276216d9449e62f67a8e1",
+    "agentURI": "sibyl://agent/onchain_oi_v1?ledgerId=0x780cee674777b23c9c247a68abdb87853294e484035276216d9449e62f67a8e1",
+    "erc8004AgentId": "100",
+    "txHash": "0x46beeff57f0d1279975dc28d51248e9f3333d05a353d515142fff1571ec53d4a"
+  },
+  {
+    "name": "momentum_v1",
+    "ledgerAgentId": "0xad6ed03b237b0e0f63908c2621ef31bea0cee25afc33ff5afce41a6616f380c2",
+    "agentURI": "sibyl://agent/momentum_v1?ledgerId=0xad6ed03b237b0e0f63908c2621ef31bea0cee25afc33ff5afce41a6616f380c2",
+    "erc8004AgentId": "101",
+    "txHash": "0x1301d77382aa83e1229ba0da84ea3ace1ccd5d2fc07821f51d3873b190d9e386"
+  },
+  {
+    "name": "rogue_10x_v1",
+    "ledgerAgentId": "0x1ccd6b3648138b9351e8eb8f01916a81ff3cc67c1fdd4ea0e1b27445b9bfe6e6",
+    "agentURI": "sibyl://agent/rogue_10x_v1?ledgerId=0x1ccd6b3648138b9351e8eb8f01916a81ff3cc67c1fdd4ea0e1b27445b9bfe6e6",
+    "erc8004AgentId": "102",
+    "txHash": "0x5317fe5b015a53241ab23e221adc4b05bd32a239933db9a5c7193c56db37e2a6"
+  }
+]

@@ -78,7 +78,7 @@ Scripts: `script/Deploy.s.sol` (logs address), `script/CommitReplay.s.sol`.
 
 ## Ecosystem integration
 
-- **ERC-8004** (Trustless Agents) is live on Mantle at deterministic addresses (Identity `0x8004A169…a432`, Reputation `0x8004BAa1…9b63`); adapters in `packages/sdk/src/erc8004.ts`.
+- **ERC-8004** (Trustless Agents) is live on Mantle; adapters in `packages/sdk/src/erc8004.ts`. **All 5 agents hold ERC-8004 identity NFTs on Mantle Sepolia (ids 98–102)** — each `agentURI` links the NFT to its `SibylLedger` id; see `deployments/agent-identities.json`. (Reputation stays canonical in `SibylLedger`: the registry blocks self-feedback, so we don't self-rate.)
 - **Execution is spot DEX** on Mantle (Byreal/RealClaw — Merchant Moe / Agni / Fluxion); derivatives are off-chain via Bybit's API and out of the core loop. `ByrealSpotVenue` is wired behind `IExecutionVenue` pending the Byreal Skills CLI spec.
 
 ## Endpoints
