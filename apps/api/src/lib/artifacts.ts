@@ -5,13 +5,13 @@ import type { ReplayScore } from '@sibyl/shared';
 export type ReplayArtifact = {
   generatedAt: string;
   scoringVersion: string;
-  datasetHash: string;
+  datasetHash: `0x${string}`;
   rows: number;
   scores: ReplayScore[];
 };
 
 export type ReplayCommitPayload = {
-  datasetHash: string;
+  datasetHash: `0x${string}`;
   generatedAt: string;
   scoringVersion: string;
   scores: Array<{

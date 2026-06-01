@@ -1,4 +1,5 @@
 import { Controller, Get } from '@nestjs/common';
+import { encodeCommitReplayCalldata, type CommitReplayPayload } from '@sibyl/sdk';
 import { readReplayArtifact, readReplayCommitPayload } from '../lib/artifacts.js';
 
 @Controller('verification')
@@ -49,6 +50,16 @@ export class VerificationController {
       };
     }
 
+    const commitPayload: CommitReplayPayload = {
+      datasetHash: payload.datasetHash,
+      scores: payload.scores.map((score) => ({
+        agentIdHex: score.agentIdHex,
+        brierPpm: score.brierPpm
+      }))
+    };
+
+    const calldata = encodeCommitReplayCalldata(commitPayload);
+
     return {
       status: 'ready',
       function: 'commitReplay(bytes32,(bytes32,uint32,bool)[])',
@@ -59,7 +70,8 @@ export class VerificationController {
           brierPpm: score.brierPpm,
           exists: true
         }))
-      }
+      },
+      calldata
     };
   }
 }

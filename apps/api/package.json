@@ -13,12 +13,13 @@
   "dependencies": {
     "@nestjs/common": "^11.1.6",
     "@nestjs/core": "^11.1.6",
+    "@sibyl/sdk": "workspace:*",
     "@sibyl/shared": "workspace:*",
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.1"
   },
   "devDependencies": {
-    "@types/node": "^25.9.1",
+    "@types/node": "^24.0.0",
     "tsx": "^4.19.2",
     "typescript": "^5.6.3"
   }

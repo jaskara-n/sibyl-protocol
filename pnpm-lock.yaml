@@ -16,6 +16,9 @@ importers:
       '@nestjs/core':
         specifier: ^11.1.6
         version: 11.1.24(@nestjs/common@11.1.24(reflect-metadata@0.2.2)(rxjs@7.8.2))(reflect-metadata@0.2.2)(rxjs@7.8.2)
+      '@sibyl/sdk':
+        specifier: workspace:*
+        version: link:../../packages/sdk
       '@sibyl/shared':
         specifier: workspace:*
         version: link:../../packages/shared
@@ -27,8 +30,8 @@ importers:
         version: 7.8.2
     devDependencies:
       '@types/node':
-        specifier: ^25.9.1
-        version: 25.9.1
+        specifier: ^24.0.0
+        version: 24.12.4
       tsx:
         specifier: ^4.19.2
         version: 4.22.4
@@ -88,6 +91,9 @@ importers:
       '@sibyl/shared':
         specifier: workspace:*
         version: link:../../packages/shared
+      viem:
+        specifier: ^2.23.5
+        version: 2.52.0(typescript@5.9.3)
     devDependencies:
       '@types/node':
         specifier: ^24.0.0
