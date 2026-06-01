@@ -1,4 +1,6 @@
-import { getAddress, parseAbi, type Address } from 'viem';
+import { createWalletClient, getAddress, http, parseAbi, type Address, type Hex } from 'viem';
+import { privateKeyToAccount } from 'viem/accounts';
+import { mantleSepoliaTestnet } from 'viem/chains';
 import { mantleClient } from './index.js';
 
 /**
@@ -35,10 +37,39 @@ export function erc8004Addresses(network: Erc8004Network = 'testnet') {
 }
 
 export const ERC8004_IDENTITY_ABI = parseAbi([
+  'function register(string agentURI) returns (uint256 agentId)',
   'function ownerOf(uint256 tokenId) view returns (address)',
   'function getAgentWallet(uint256 agentId) view returns (address)',
+  'function tokenURI(uint256 tokenId) view returns (string)',
   'function getMetadata(uint256 agentId, string metadataKey) view returns (bytes)'
 ]);
+
+/// Mint an ERC-8004 identity NFT for an agent (the hackathon's "every agent gets an identity
+/// NFT" requirement). Simulates to obtain the assigned agentId, then broadcasts. The NFT is
+/// minted to the caller (the operator wallet).
+export async function registerAgentIdentity(
+  identityRegistry: Address,
+  agentURI: string,
+  privateKey: Hex
+): Promise<{ agentId: bigint; txHash: Hex }> {
+  const account = privateKeyToAccount(privateKey);
+  const walletClient = createWalletClient({
+    account,
+    chain: mantleSepoliaTestnet,
+    transport: http(process.env.MANTLE_RPC_URL)
+  });
+
+  const { result: agentId, request } = await mantleClient.simulateContract({
+    address: identityRegistry,
+    abi: ERC8004_IDENTITY_ABI,
+    functionName: 'register',
+    args: [agentURI],
+    account
+  });
+
+  const txHash = await walletClient.writeContract(request);
+  return { agentId, txHash };
+}
 
 export const ERC8004_REPUTATION_ABI = parseAbi([
   'function getSummary(uint256 agentId, address[] clientAddresses, bytes32 tag1, bytes32 tag2) view returns (uint64 count, int128 value, uint8 decimals)'
