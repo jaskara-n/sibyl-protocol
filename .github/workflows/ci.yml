@@ -18,6 +18,22 @@ jobs:
           version: 10.0.0
       - run: pnpm install --frozen-lockfile
       - run: pnpm typecheck
+      - run: pnpm build
+      # On-chain/off-chain consensus parity (TS side): the 16 golden vectors.
+      - run: pnpm --filter @sibyl/shared test
       - run: pnpm replay:run
       - run: pnpm replay:payload
-      - run: pnpm executor:run
+      - run: EXECUTION_VENUE=paper pnpm executor:run
+
+  contracts:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - uses: foundry-rs/foundry-toolchain@v1
+      # Full Foundry suite, including ConsensusParity.t.sol — the on-chain side
+      # of the frozen-kernel parity gate (same 16 golden vectors as the TS test).
+      - name: forge test
+        working-directory: packages/contracts
+        run: forge test -vvv

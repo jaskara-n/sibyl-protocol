@@ -12,6 +12,12 @@
       "deployTx": "0x3a36074d4ac90463a300cc295ab4263f6a9cdae5ba0a4d4936fe2a3960bdb9d4",
       "deployBlock": 39389411,
       "maxAgentWeightPpm": 900000
+    },
+    "SibylVault": {
+      "_comment": "Optional ERC-4626 strategy vault (test/local only). Leave address null until a vault is deployed; the API /vault endpoints fall back to an artifact/snapshot-derived shape when absent.",
+      "address": null,
+      "asset": null,
+      "venue": null
     }
   },
   "latestReplay": {

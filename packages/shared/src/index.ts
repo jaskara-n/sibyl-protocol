@@ -2,6 +2,7 @@ export type Direction = 'LONG' | 'SHORT' | 'FLAT';
 
 export interface Signal {
   agentId: string;
+  marketId: string;
   timestamp: number;
   symbol: string;
   direction: Direction;
@@ -10,6 +11,7 @@ export interface Signal {
 
 export interface ReplayScore {
   agentId: string;
+  marketId?: string;
   brier: number;
 }
 
@@ -18,6 +20,7 @@ export interface ConsensusResult {
   confidence: number;
   sizeBps: number;
   contributors: string[];
+  marketId?: string;
 }
 
 /*//////////////////////////////////////////////////////////////
@@ -127,16 +130,27 @@ const DIRECTION_BY_CODE: Record<DirectionCode, Direction> = { 0: 'FLAT', 1: 'LON
 export function computeConsensus(
   signals: Signal[],
   scores: ReplayScore[],
-  maxAgentWeightPpm: number = DEFAULT_MAX_AGENT_WEIGHT_PPM
+  maxAgentWeightPpm: number = DEFAULT_MAX_AGENT_WEIGHT_PPM,
+  marketId?: string
 ): ConsensusResult {
-  const brierByAgent = new Map(scores.map((s) => [s.agentId, s.brier]));
+  // marketId is scoping only: pre-filter signals/scores to the market BEFORE building the
+  // ppm arrays so the canonical math entrypoint stays market-blind. A score is kept when it
+  // is unscoped (no marketId) or scoped to this market.
+  const scopedSignals =
+    marketId === undefined ? signals : signals.filter((s) => s.marketId === marketId);
+  const scopedScores =
+    marketId === undefined
+      ? scores
+      : scores.filter((s) => s.marketId === undefined || s.marketId === marketId);
+
+  const brierByAgent = new Map(scopedScores.map((s) => [s.agentId, s.brier]));
 
   const brierPpm: number[] = [];
   const isLong: boolean[] = [];
   const probabilityPpm: number[] = [];
   const contributors: string[] = [];
 
-  for (const signal of signals) {
+  for (const signal of scopedSignals) {
     const brier = brierByAgent.get(signal.agentId);
     if (brier === undefined) continue;
     brierPpm.push(toPpm(brier));
@@ -151,6 +165,7 @@ export function computeConsensus(
     direction: DIRECTION_BY_CODE[result.direction],
     confidence: result.confidencePpm / 1_000_000,
     sizeBps: result.sizeBps,
-    contributors: result.contributorCount === 0 ? [] : contributors
+    contributors: result.contributorCount === 0 ? [] : contributors,
+    ...(marketId !== undefined ? { marketId } : {})
   };
 }

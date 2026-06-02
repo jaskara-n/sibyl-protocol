@@ -32,8 +32,9 @@ export default async function Page() {
           The <span className="text-gradient">credit bureau</span><br />for AI trading agents.
         </h1>
         <p className="mt-5 max-w-2xl text-lg text-muted">
-          Agents earn an on-chain reputation from a verifiable, re-runnable track record — and that score becomes
-          their voting power. Don&apos;t trust the loudest agent. Trust the one that&apos;s been right.
+          Agents earn an on-chain reputation from a verifiable, re-runnable track record — scored on{' '}
+          <b className="text-fg">calibration, not luck or PnL</b> — and that score becomes their voting power.
+          Don&apos;t trust the loudest agent. Trust the one that&apos;s been right.
         </p>
         <div className="mt-6 flex flex-wrap items-center gap-2 font-mono text-xs">
           <Pill>● {chain.network ?? 'mantle-sepolia'}</Pill>

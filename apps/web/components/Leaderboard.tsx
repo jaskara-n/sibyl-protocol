@@ -1,12 +1,22 @@
 'use client';
 
+import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
-import type { AgentRow } from '../lib/api';
+import { api, type AgentRow, type Market } from '../lib/api';
 import { AgentAvatar } from './AgentAvatar';
 import { tier } from '../lib/utils';
 
-export function Leaderboard({ agents }: { agents: AgentRow[] }) {
+const ALL = '__all__';
+
+/** Recompute weightShare within a given set of agents (normalized reputation weight). */
+function withRecomputedShare(rows: AgentRow[]): AgentRow[] {
+  const total = rows.reduce((s, a) => s + (a.reputationWeight ?? 0), 0);
+  if (total <= 0) return rows;
+  return rows.map((a) => ({ ...a, weightShare: (a.reputationWeight ?? 0) / total }));
+}
+
+function LeaderboardRows({ agents }: { agents: AgentRow[] }) {
   const max = Math.max(...agents.map((a) => a.weightShare), 0.0001);
 
   return (
@@ -78,6 +88,84 @@ export function Leaderboard({ agents }: { agents: AgentRow[] }) {
           </motion.div>
         );
       })}
+    </div>
+  );
+}
+
+/**
+ * Leaderboard.
+ * - Without `markets`: renders the provided `agents` exactly as given (per-market pages pass pre-filtered rows).
+ * - With `markets`: renders a market selector that re-fetches `GET /agents?marketId=` and recomputes
+ *   per-market weightShare. The default "all markets" option uses the aggregate `agents` prop.
+ */
+export function Leaderboard({ agents, markets }: { agents: AgentRow[]; markets?: Market[] }) {
+  const [selected, setSelected] = useState<string>(ALL);
+  const [rows, setRows] = useState<AgentRow[]>(agents);
+  const [loading, setLoading] = useState(false);
+
+  // Keep aggregate in sync if the prop changes (e.g. parent re-renders with fresh data).
+  useEffect(() => {
+    if (selected === ALL) setRows(agents);
+  }, [agents, selected]);
+
+  useEffect(() => {
+    if (!markets || selected === ALL) return;
+    let cancelled = false;
+    setLoading(true);
+    api<AgentRow[]>(`/agents?marketId=${encodeURIComponent(selected)}`, [])
+      .then((fetched) => {
+        if (cancelled) return;
+        const ranked = [...withRecomputedShare(fetched)].sort((a, b) => b.weightShare - a.weightShare);
+        setRows(ranked);
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [markets, selected]);
+
+  const display = useMemo(() => rows, [rows]);
+
+  if (!markets) {
+    return <LeaderboardRows agents={agents} />;
+  }
+
+  return (
+    <div className="flex flex-col gap-4">
+      <div className="flex items-center gap-3">
+        <label htmlFor="lb-market" className="font-mono text-xs uppercase tracking-widest text-muted">
+          market
+        </label>
+        <div className="relative">
+          <select
+            id="lb-market"
+            value={selected}
+            onChange={(e) => setSelected(e.target.value)}
+            className="appearance-none rounded-lg border border-line bg-card/80 py-2 pl-3 pr-9 font-mono text-sm text-fg outline-none transition-colors hover:border-brand/50 focus:border-brand"
+          >
+            <option value={ALL}>all markets (aggregate)</option>
+            {markets.map((m) => (
+              <option key={m.marketId} value={m.marketId}>
+                {m.name ?? m.marketId}
+              </option>
+            ))}
+          </select>
+          <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 font-mono text-xs text-muted">
+            ▾
+          </span>
+        </div>
+        {loading && <span className="font-mono text-xs text-muted">loading…</span>}
+      </div>
+
+      {display.length > 0 ? (
+        <LeaderboardRows agents={display} />
+      ) : (
+        <div className="glass rounded-xl p-6 font-mono text-sm text-muted">
+          {loading ? 'loading agents…' : 'no agents voting in this market yet.'}
+        </div>
+      )}
     </div>
   );
 }

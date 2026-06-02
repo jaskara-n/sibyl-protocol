@@ -1,12 +1,13 @@
-import { Controller, Get, Param } from '@nestjs/common';
+import { Controller, Get, Param, Query } from '@nestjs/common';
 import { existsSync, readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { weightPpm, toPpm, DEFAULT_MAX_AGENT_WEIGHT_PPM } from '@sibyl/shared';
-import { readReplayArtifact, readFrozenSamples } from '../lib/artifacts.js';
+import { readReplayArtifact, readFrozenSamples, scoresForMarket } from '../lib/artifacts.js';
 
 /** Per-agent analytics derived from the frozen replay dataset. */
 type AgentProfile = {
   agentId: string;
+  marketId?: string | null;
   erc8004AgentId?: string | null;
   brier: number;
   count: number;
@@ -45,16 +46,20 @@ function readAgentIdentities(): Map<string, string> {
 @Controller('agents')
 export class AgentsController {
   @Get()
-  list() {
+  list(@Query('marketId') marketId?: string) {
     const replay = readReplayArtifact();
     if (!replay) return [];
 
     const cap = BigInt(DEFAULT_MAX_AGENT_WEIGHT_PPM);
     const identities = readAgentIdentities();
 
+    // Per-market scores when marketId is given; aggregated (mean Brier per agent across
+    // markets) when omitted. Each market gives an agent an independent reputation.
+    const scores = scoresForMarket(replay, marketId);
+
     // Canonical capped weight per agent (mirrors the on-chain weighting), then normalized
     // into a share so the leaderboard shows the actual influence each agent has on consensus.
-    const enriched = replay.scores.map((score) => {
+    const enriched = scores.map((score) => {
       const brierPpm = toPpm(score.brier);
       const raw = weightPpm(brierPpm);
       const capped = raw > cap ? cap : raw;
@@ -84,20 +89,23 @@ export class AgentsController {
   }
 
   @Get(':id/profile')
-  profile(@Param('id') id: string): AgentProfile {
+  profile(@Param('id') id: string, @Query('marketId') marketId?: string): AgentProfile {
     const identities = readAgentIdentities();
     const erc8004AgentId = identities.get(id) ?? null;
     const isRogue = id.includes('rogue');
 
-    // Chronological per-agent samples from the frozen replay dataset.
+    // Chronological per-agent samples from the frozen replay dataset, scoped to a market
+    // when marketId is given (the frozen `symbol` column is the market id). Omitting it
+    // aggregates the agent's samples across every market.
     const samples = readFrozenSamples()
-      .filter((s) => s.agentId === id)
+      .filter((s) => s.agentId === id && (marketId === undefined || s.symbol === marketId))
       .sort((a, b) => a.timestamp - b.timestamp);
 
     const count = samples.length;
     if (count === 0) {
       return {
         agentId: id,
+        marketId: marketId ?? null,
         erc8004AgentId,
         brier: 0,
         count: 0,
@@ -159,6 +167,7 @@ export class AgentsController {
 
     return {
       agentId: id,
+      marketId: marketId ?? null,
       erc8004AgentId,
       brier: Number(brier.toFixed(6)),
       count,

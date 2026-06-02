@@ -1,9 +1,10 @@
-import { Controller, Get } from '@nestjs/common';
+import { Controller, Get, Query } from '@nestjs/common';
 import { readTradeArtifacts } from '../lib/artifacts.js';
 
 /** A consensus decision (round outcome) surfaced to the dashboard. */
 type Decision = {
   id: string;
+  marketId: string;
   timestamp: number;
   symbol: string;
   direction: string;
@@ -15,12 +16,15 @@ type Decision = {
 
 @Controller('decisions')
 export class DecisionsController {
+  /// GET /decisions[?marketId=] — consensus decisions, newest first, optionally scoped to a
+  /// single market. Source of truth: data/artifacts/trade-events.json.
   @Get()
-  list(): Decision[] {
-    // Source of truth: data/artifacts/trade-events.json. Newest first.
+  list(@Query('marketId') marketId?: string): Decision[] {
     return readTradeArtifacts()
+      .filter((t) => marketId === undefined || t.marketId === marketId)
       .map((t) => ({
         id: t.id,
+        marketId: t.marketId,
         timestamp: t.timestamp,
         symbol: t.symbol,
         direction: t.direction,

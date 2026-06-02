@@ -6,6 +6,8 @@ import { AgentsController } from '../agents/agents.controller.js';
 import { TradesController } from '../trades/trades.controller.js';
 import { ChainController } from '../chain/chain.controller.js';
 import { DecisionsController } from '../decisions/decisions.controller.js';
+import { MarketsController } from '../markets/markets.controller.js';
+import { VaultController } from '../vault/vault.controller.js';
 
 @Module({
   controllers: [
@@ -15,7 +17,9 @@ import { DecisionsController } from '../decisions/decisions.controller.js';
     AgentsController,
     TradesController,
     ChainController,
-    DecisionsController
+    DecisionsController,
+    MarketsController,
+    VaultController
   ]
 })
 export class AppModule {}

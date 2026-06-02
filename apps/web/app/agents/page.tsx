@@ -1,9 +1,12 @@
 import type { ReactNode } from 'react';
-import { api, type AgentRow } from '../../lib/api';
+import { api, type AgentRow, type Market } from '../../lib/api';
 import { Leaderboard } from '../../components/Leaderboard';
 
 export default async function AgentsPage() {
-  const agents = await api<AgentRow[]>('/agents', []);
+  const [agents, markets] = await Promise.all([
+    api<AgentRow[]>('/agents', []),
+    api<Market[]>('/markets', [])
+  ]);
 
   const count = agents.length;
   const avgBrier = count > 0 ? agents.reduce((s, a) => s + a.brier, 0) / count : 0;
@@ -55,7 +58,7 @@ export default async function AgentsPage() {
           <span className="font-mono text-xs text-muted">ranked by consensus weight</span>
         </div>
         {count > 0 ? (
-          <Leaderboard agents={agents} />
+          <Leaderboard agents={agents} markets={markets} />
         ) : (
           <div className="glass rounded-xl p-6 text-muted">
             No agents yet — run <code className="font-mono">pnpm demo:seed</code>.

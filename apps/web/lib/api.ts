@@ -7,6 +7,7 @@ export type Consensus = {
   contributors: string[];
   source?: string;
   timestamp?: number;
+  marketId?: string;
 };
 
 export type AgentRow = {
@@ -17,6 +18,25 @@ export type AgentRow = {
   reputationWeight: number;
   weightShare: number;
   isRogue: boolean;
+  marketId?: string;
+};
+
+export type Market = {
+  marketId: string;
+  name?: string;
+  active: boolean;
+  conviction: { totalWeight: string; activeAgentCount: number };
+};
+
+export type VaultNav = {
+  totalAssets: string;
+  cash: string;
+  sharePrice: string;
+};
+
+export type VaultPosition = {
+  marketId: string;
+  value: string;
 };
 
 export type Trade = {
@@ -77,6 +97,7 @@ export type Decision = {
   confidence: number;
   contributors: number;
   txHash?: string;
+  marketId?: string;
 };
 
 export async function api<T>(path: string, fallback: T): Promise<T> {
