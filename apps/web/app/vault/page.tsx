@@ -3,86 +3,114 @@ import { api, type VaultNav, type VaultPosition } from '../../lib/api';
 import { NavCard } from '../../components/NavCard';
 import { PositionTable } from '../../components/PositionTable';
 import { VaultForm } from '../../components/VaultForm';
+import { Reveal } from '../../components/landing/Reveal';
 
 function num(v: unknown): number {
   const n = typeof v === 'number' ? v : Number(v);
   return Number.isFinite(n) ? n : 0;
 }
 
-export default async function VaultPage() {
-  const [nav, positions] = await Promise.all([
-    api<VaultNav>('/vault/nav', { totalAssets: '0', cash: '0', sharePrice: '1' }),
-    api<VaultPosition[]>('/vault/positions', [])
-  ]);
+/** Live API values arrive as 18-decimal wei strings; older builds sent plain units. */
+function toUnits(v: unknown): number {
+  const n = num(v);
+  return n > 1e15 ? n / 1e18 : n;
+}
 
-  const totalAssets = num(nav.totalAssets);
-  const cash = num(nav.cash);
-  const sharePrice = num(nav.sharePrice) || 1;
+export default async function VaultPage() {
+  const [nav, positionsRes] = await Promise.all([
+    api<VaultNav>('/vault/nav', { totalAssets: '0', cash: '0', sharePrice: '1' }),
+    api<VaultPosition[] | { positions?: VaultPosition[] }>('/vault/positions', [])
+  ]);
+  // The live API answers with an envelope ({ source, vaultAddress, positions });
+  // older builds returned a bare array. Accept both.
+  const rawPositions = Array.isArray(positionsRes) ? positionsRes : (positionsRes?.positions ?? []);
+  const positions = rawPositions.map((p) => ({ ...p, value: String(toUnits(p.value)) }));
+
+  const totalAssets = toUnits(nav.totalAssets);
+  const cash = toUnits(nav.cash);
+  const sharePrice = toUnits(nav.sharePrice) || 1;
 
   return (
-    <div className="mx-auto max-w-6xl px-5 pb-24">
-      {/* Hero */}
-      <header className="relative pt-8 pb-8">
-        <div className="text-xs uppercase tracking-widest text-brand">the strategy vault</div>
-        <h1 className="mt-2 font-display text-4xl font-bold leading-[1.05] tracking-tight sm:text-5xl">
-          An <span className="text-gradient">ERC-4626 vault</span> steered by reputation.
-        </h1>
-        <p className="mt-4 max-w-2xl text-lg text-muted">
-          The vault routes idle cash into spot positions sized by each market&apos;s reputation-weighted
-          consensus. NAV is idle cash plus the value of open venue positions — no leverage, no borrow path.
-        </p>
-        <div className="mt-6 flex flex-wrap items-center gap-2 font-mono text-xs">
-          <Pill>{totalAssets.toLocaleString(undefined, { maximumFractionDigits: 0 })} assets</Pill>
-          <Pill className="text-cyan">{positions.length} positions</Pill>
-          <Pill className="text-long">live deposit / withdraw on Mantle Sepolia</Pill>
-        </div>
-      </header>
+    <div className="relative z-0 bg-bureau text-bureau-fg">
+      <div className="mx-auto max-w-6xl px-5 pb-24">
+        {/* Header */}
+        <header className="relative pt-12 pb-8">
+          <p className="font-monod text-[11px] uppercase tracking-[0.42em] text-brass">The vault</p>
+          <h1 className="mt-4 max-w-3xl font-serifd text-[clamp(2.2rem,4.6vw,3.6rem)] leading-[1.02]">
+            An ERC-4626 vault steered by <span className="italic text-brass">reputation.</span>
+          </h1>
+          <p className="mt-5 max-w-2xl font-sansd text-base leading-relaxed text-bureau-muted">
+            The vault routes idle cash into spot positions sized by each market&apos;s reputation-weighted
+            consensus. NAV is idle cash plus the value of open venue positions — no leverage, no borrow path.
+          </p>
+          <div className="mt-6 flex flex-wrap items-center gap-2">
+            <Stamp>{totalAssets.toLocaleString(undefined, { maximumFractionDigits: 0 })} assets</Stamp>
+            <Stamp className="text-brass">{positions.length} positions</Stamp>
+            <Stamp className="text-rise">live deposit / withdraw · Mantle Sepolia</Stamp>
+          </div>
+        </header>
 
-      {/* NAV + simulate form */}
-      <section className="grid items-start gap-5 lg:grid-cols-[1fr_380px]">
-        <div className="flex flex-col gap-5">
-          <NavCard totalAssets={totalAssets} cash={cash} sharePrice={sharePrice} />
-          <div>
-            <div className="mb-3 flex items-end justify-between">
-              <h2 className="font-display text-xl font-semibold">Open positions</h2>
-              <span className="font-mono text-xs text-muted">per-market venue notional</span>
+        <div className="tick-scale" aria-hidden />
+
+        {/* NAV + deposit/withdraw form */}
+        <section className="mt-10 grid items-start gap-5 lg:grid-cols-[1fr_380px]">
+          <div className="flex flex-col gap-5">
+            <Reveal>
+              <NavCard totalAssets={totalAssets} cash={cash} sharePrice={sharePrice} />
+            </Reveal>
+            <Reveal delay={0.1}>
+              <div className="mb-3 flex items-baseline justify-between">
+                <h2 className="font-serifd text-2xl">Open positions</h2>
+                <span className="font-monod text-[10px] uppercase tracking-[0.24em] text-bureau-muted">
+                  per-market venue notional
+                </span>
+              </div>
+              <PositionTable positions={positions} />
+            </Reveal>
+          </div>
+          <Reveal delay={0.15}>
+            <VaultForm sharePrice={sharePrice} />
+          </Reveal>
+        </section>
+
+        {/* Self-custody note */}
+        <Reveal delay={0.1} className="mt-10">
+          <div className="bureau-frame p-6">
+            <div className="bureau-grain" aria-hidden />
+            <div className="flex items-start gap-4">
+              <span className="mt-0.5 grid h-9 w-9 shrink-0 place-items-center border border-rise/50 font-serifd text-rise">
+                ◈
+              </span>
+              <div>
+                <div className="font-monod text-[11px] uppercase tracking-[0.28em] text-rise">
+                  Self-custody · on-chain
+                </div>
+                <p className="mt-2 font-sansd text-sm leading-relaxed text-bureau-muted">
+                  The vault is a non-custodial ERC-4626 contract on Mantle Sepolia (chain 5003). Deposits and
+                  withdrawals are real transactions signed by your own wallet: a deposit calls
+                  {' '}<code className="font-monod text-brass">approve</code> (when allowance is insufficient) then{' '}
+                  <code className="font-monod text-brass">deposit(assets, you)</code>, and a withdrawal calls{' '}
+                  <code className="font-monod text-brass">redeem(shares, you, you)</code>. Shares are minted to your
+                  address — only you can redeem them. Testnet assets only.
+                </p>
+              </div>
             </div>
-            <PositionTable positions={positions} />
           </div>
-        </div>
-        <VaultForm sharePrice={sharePrice} />
-      </section>
+        </Reveal>
 
-      {/* Self-custody banner */}
-      <section className="mt-8 rounded-2xl border border-long/30 bg-long/5 p-5">
-        <div className="flex items-start gap-3">
-          <span className="mt-0.5 grid h-7 w-7 shrink-0 place-items-center rounded-lg bg-long/15 font-display text-long">
-            ◈
-          </span>
-          <div>
-            <div className="font-display text-sm font-semibold text-long">Self-custody. On-chain.</div>
-            <p className="mt-1 text-sm text-muted">
-              The vault is a non-custodial ERC-4626 contract on Mantle Sepolia (chain 5003). Deposits and
-              withdrawals are real transactions signed by your own wallet: a deposit calls
-              {' '}<code className="font-mono text-fg/80">approve</code> (when allowance is insufficient) then{' '}
-              <code className="font-mono text-fg/80">deposit(assets, you)</code>, and a withdrawal calls{' '}
-              <code className="font-mono text-fg/80">redeem(shares, you, you)</code>. Shares are minted to your
-              address — only you can redeem them. Testnet assets only.
-            </p>
-          </div>
-        </div>
-      </section>
-
-      <footer className="mt-14 border-t border-line pt-6 text-center font-mono text-xs text-muted">
-        NAV = idle cash + venue positions · reputation-weighted sizing · no leverage · live on Mantle Sepolia
-      </footer>
+        <footer className="mt-14 border-t border-bureau-line pt-6 text-center font-monod text-[10px] uppercase tracking-[0.3em] text-bureau-muted">
+          NAV = idle cash + venue positions · reputation-weighted sizing · no leverage · live on Mantle Sepolia
+        </footer>
+      </div>
     </div>
   );
 }
 
-function Pill({ children, className }: { children: ReactNode; className?: string }) {
+function Stamp({ children, className }: { children: ReactNode; className?: string }) {
   return (
-    <span className={`rounded-full border border-line bg-card/60 px-3 py-1 text-muted ${className ?? ''}`}>
+    <span
+      className={`border border-bureau-line px-2 py-0.5 font-monod text-[10px] uppercase tracking-[0.18em] text-bureau-muted ${className ?? ''}`}
+    >
       {children}
     </span>
   );

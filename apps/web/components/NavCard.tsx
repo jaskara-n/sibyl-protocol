@@ -2,7 +2,8 @@ import type { ReactNode } from 'react';
 
 /**
  * Vault NAV summary — total assets under management, idle cash, and the
- * ERC-4626 share price, sourced from GET /vault/nav.
+ * ERC-4626 share price, sourced from GET /vault/nav. Set as a bureau
+ * certificate: serif numerals, ruled figure rows, a thin brass deployment gauge.
  *
  * NAV invariant (mirrors SibylVault.totalAssets): totalAssets == cash + sum(positions).
  */
@@ -19,55 +20,59 @@ export function NavCard({
   const deployedPct = totalAssets > 0 ? Math.round((deployed / totalAssets) * 100) : 0;
 
   return (
-    <div className="glass rounded-2xl p-6">
-      <div className="flex items-center justify-between">
-        <div className="text-xs uppercase tracking-widest text-brand">net asset value</div>
-        <span className="rounded-full border border-line bg-card/60 px-2.5 py-1 font-mono text-[10px] uppercase tracking-widest text-muted">
+    <div className="bureau-frame p-6">
+      <div className="bureau-grain" aria-hidden />
+
+      <div className="flex items-baseline justify-between border-b border-bureau-line pb-3">
+        <span className="font-monod text-[10px] uppercase tracking-[0.32em] text-bureau-muted">
+          Net asset value
+        </span>
+        <span className="border border-bureau-line px-2 py-0.5 font-monod text-[10px] uppercase tracking-[0.18em] text-brass">
           ERC-4626
         </span>
       </div>
 
-      <div className="mt-4 font-display text-4xl font-bold tracking-tight">
+      <div className="mt-6 font-serifd text-[clamp(2.6rem,6vw,4rem)] leading-[1] text-bureau-fg">
         {totalAssets.toLocaleString(undefined, { maximumFractionDigits: 2 })}
-        <span className="ml-2 align-middle font-mono text-sm font-normal text-muted">assets</span>
+        <span className="ml-3 align-baseline font-monod text-sm uppercase tracking-[0.2em] text-bureau-muted">
+          assets
+        </span>
       </div>
 
-      <div className="mt-5 grid grid-cols-3 gap-3">
-        <Stat label="idle cash" value={cash.toLocaleString(undefined, { maximumFractionDigits: 2 })} accent="text-cyan" />
-        <Stat
-          label="deployed"
-          value={deployed.toLocaleString(undefined, { maximumFractionDigits: 2 })}
-          accent="text-long"
-        />
-        <Stat
-          label="share price"
+      {/* Ruled figure ledger */}
+      <dl className="mt-6 border-t border-bureau-line/60">
+        <Figure label="Idle cash" value={cash.toLocaleString(undefined, { maximumFractionDigits: 2 })} />
+        <Figure label="Deployed" value={deployed.toLocaleString(undefined, { maximumFractionDigits: 2 })} accent="text-rise" />
+        <Figure
+          label="Share price"
           value={sharePrice.toLocaleString(undefined, { maximumFractionDigits: 6 })}
-          accent="text-brand"
+          accent="text-brass"
         />
-      </div>
+      </dl>
 
-      {/* Cash vs deployed split */}
-      <div className="mt-5">
-        <div className="mb-1.5 flex items-center justify-between font-mono text-[11px] text-muted">
-          <span>capital deployed</span>
-          <span>{deployedPct}%</span>
+      {/* Cash vs deployed split — thin brass gauge */}
+      <div className="mt-6">
+        <div className="mb-2 flex items-baseline justify-between font-monod text-[10px] uppercase tracking-[0.24em] text-bureau-muted">
+          <span>Capital deployed</span>
+          <span className="text-bureau-fg">{deployedPct}%</span>
         </div>
-        <div className="flex h-2.5 w-full overflow-hidden rounded-full bg-ink">
-          <div
-            className="h-full bg-linear-to-r from-brand to-cyan"
-            style={{ width: `${deployedPct}%`, boxShadow: '0 0 12px rgba(139,92,246,0.6)' }}
-          />
+        <div
+          role="img"
+          aria-label={`Capital deployed ${deployedPct} percent`}
+          className="h-[3px] w-full bg-bureau-line/60"
+        >
+          <div className="h-full bg-brass" style={{ width: `${deployedPct}%` }} />
         </div>
       </div>
     </div>
   );
 }
 
-function Stat({ label, value, accent }: { label: string; value: ReactNode; accent?: string }) {
+function Figure({ label, value, accent }: { label: string; value: ReactNode; accent?: string }) {
   return (
-    <div className="rounded-xl border border-line bg-card/40 p-3">
-      <div className="font-mono text-[10px] uppercase tracking-widest text-muted">{label}</div>
-      <div className={`mt-1 font-mono text-sm font-semibold ${accent ?? 'text-fg'}`}>{value}</div>
+    <div className="flex items-baseline justify-between gap-6 border-b border-bureau-line/60 py-3">
+      <dt className="font-monod text-[10px] uppercase tracking-[0.28em] text-bureau-muted">{label}</dt>
+      <dd className={`font-serifd text-2xl leading-none ${accent ?? 'text-bureau-fg'}`}>{value}</dd>
     </div>
   );
 }

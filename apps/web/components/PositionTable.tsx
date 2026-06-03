@@ -6,29 +6,38 @@ function num(v: unknown): number {
 }
 
 /**
- * Per-market vault positions (venue notional) from GET /vault/positions.
- * The bar encodes each position's share of total deployed capital.
+ * Per-market vault positions (venue notional) from GET /vault/positions, set as
+ * a bureau ledger: ruled rows, tabular numerals, a thin brass share gauge.
+ * The gauge encodes each position's share of total deployed capital.
  */
 export function PositionTable({ positions }: { positions: VaultPosition[] }) {
-  const rows = [...positions]
+  // Defensive: the API may answer with an envelope or error shape; only an
+  // actual array is renderable.
+  const source = Array.isArray(positions) ? positions : [];
+  const rows = [...source]
     .map((p) => ({ marketId: p.marketId, value: num(p.value) }))
     .sort((a, b) => b.value - a.value);
   const total = rows.reduce((s, r) => s + r.value, 0);
 
   if (rows.length === 0) {
     return (
-      <div className="glass rounded-2xl p-6 text-center text-muted">
-        No open positions — the vault is holding idle cash.
+      <div className="bureau-frame p-10 text-center">
+        <div className="bureau-grain" aria-hidden />
+        <p className="font-serifd text-2xl italic text-bureau-muted">
+          No open positions — the vault is holding idle cash.
+        </p>
       </div>
     );
   }
 
   return (
-    <div className="glass overflow-x-auto rounded-2xl">
-      <div className="grid min-w-[320px] grid-cols-[1fr_auto_64px] gap-3 border-b border-line px-5 py-3 font-mono text-[11px] uppercase tracking-widest text-muted">
-        <span>market</span>
-        <span className="text-right">value</span>
-        <span className="text-right">share</span>
+    <div className="bureau-frame overflow-x-auto">
+      <div className="bureau-grain" aria-hidden />
+
+      <div className="grid min-w-[320px] grid-cols-[1fr_auto_64px] gap-3 border-b border-bureau-line px-5 py-3 font-monod text-[10px] uppercase tracking-[0.3em] text-bureau-muted">
+        <span>Market</span>
+        <span className="text-right">Value</span>
+        <span className="text-right">Share</span>
       </div>
       <ul>
         {rows.map((r) => {
@@ -36,17 +45,22 @@ export function PositionTable({ positions }: { positions: VaultPosition[] }) {
           return (
             <li
               key={r.marketId}
-              className="relative grid min-w-[320px] grid-cols-[1fr_auto_64px] items-center gap-3 border-b border-line/60 px-5 py-3.5 last:border-0"
+              className="grid min-w-[320px] grid-cols-[1fr_auto_64px] items-center gap-3 border-b border-bureau-line/60 px-5 py-3.5 last:border-0"
             >
-              <div
-                className="pointer-events-none absolute inset-y-0 left-0 bg-brand/10"
-                style={{ width: `${pct}%` }}
-              />
-              <span className="relative z-10 truncate font-mono text-sm text-fg">{r.marketId}</span>
-              <span className="relative z-10 text-right font-mono text-sm text-fg">
+              <span className="min-w-0">
+                <span className="block truncate font-monod text-sm text-bureau-fg">{r.marketId}</span>
+                <span
+                  role="img"
+                  aria-label={`Capital share ${pct} percent`}
+                  className="mt-1.5 block h-[2px] w-full max-w-[12rem] bg-bureau-line/60"
+                >
+                  <span className="block h-full bg-brass" style={{ width: `${pct}%` }} />
+                </span>
+              </span>
+              <span className="text-right font-monod text-sm text-bureau-fg">
                 {r.value.toLocaleString(undefined, { maximumFractionDigits: 2 })}
               </span>
-              <span className="relative z-10 text-right font-mono text-sm text-brand">{pct}%</span>
+              <span className="text-right font-monod text-sm text-brass">{pct}%</span>
             </li>
           );
         })}

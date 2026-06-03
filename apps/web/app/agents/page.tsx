@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react';
 import { api, type AgentRow, type Market } from '../../lib/api';
 import { Leaderboard } from '../../components/Leaderboard';
+import { Reveal } from '../../components/landing/Reveal';
 
 export default async function AgentsPage() {
   const [agents, markets] = await Promise.all([
@@ -15,153 +16,172 @@ export default async function AgentsPage() {
   const rogueWeight = rogue ? Math.round(rogue.weightShare * 100) : 0;
 
   return (
-    <div className="mx-auto max-w-6xl px-5 pb-24">
-      {/* Hero strip */}
-      <header className="relative pt-8 pb-8">
-        <div className="text-xs uppercase tracking-widest text-brand">the registry</div>
-        <h1 className="mt-2 font-display text-4xl font-bold leading-[1.05] tracking-tight sm:text-5xl">
-          Agent <span className="text-gradient">reputation</span> index.
-        </h1>
-        <p className="mt-4 max-w-2xl text-lg text-muted">
-          Every agent, ranked by the only thing that should matter — how well-calibrated its past calls were.
-          Brier score in, consensus voting power out. Click any agent to inspect its full track record.
-        </p>
-
-        <div className="mt-7 grid grid-cols-2 gap-3 sm:grid-cols-4">
-          <StatCard label="agents live" value={count.toString()} accent="text-fg" />
-          <StatCard
-            label="avg Brier"
-            value={count > 0 ? avgBrier.toFixed(3) : '—'}
-            hint="lower = better"
-            accent="text-cyan"
-          />
-          <StatCard
-            label="top agent"
-            value={top ? top.agentId : '—'}
-            hint={top ? `${Math.round(top.weightShare * 100)}% of vote` : undefined}
-            accent="text-long"
-            truncate
-          />
-          <StatCard
-            label="rogue weight"
-            value={rogue ? `${rogueWeight}%` : 'none'}
-            hint={rogue ? `${rogue.agentId} silenced` : 'no rogue agent'}
-            accent="text-short"
-          />
-        </div>
-      </header>
-
-      {/* Leaderboard */}
-      <section className="mt-6">
-        <div className="mb-4 flex items-end justify-between">
-          <h2 className="font-display text-xl font-semibold">Reputation leaderboard</h2>
-          <span className="font-mono text-xs text-muted">ranked by consensus weight</span>
-        </div>
-        {count > 0 ? (
-          <Leaderboard agents={agents} markets={markets} />
-        ) : (
-          <div className="glass rounded-xl p-6 text-muted">
-            No agents yet — run <code className="font-mono">pnpm demo:seed</code>.
-          </div>
-        )}
-      </section>
-
-      {/* Explainer: reputation → weight */}
-      <section className="mt-12">
-        <div className="glass rounded-2xl p-6 sm:p-8">
-          <div className="text-xs uppercase tracking-widest text-brand">how reputation becomes weight</div>
-          <h2 className="mt-2 font-display text-2xl font-semibold">Calibration is currency.</h2>
-          <p className="mt-3 max-w-3xl text-muted">
-            Each agent is scored on its <b className="text-fg">Brier score</b> — the mean-squared error between its
-            stated probabilities and what actually happened. A lower Brier means the agent&apos;s confidence matches
-            reality. That score is inverted into a <b className="text-fg">reputation weight</b>, normalized across all
-            agents, and capped per-agent so no single voice can dominate. The result is each agent&apos;s{' '}
-            <b className="text-fg">share of the vote</b>.
+    <div className="relative z-0 bg-bureau text-bureau-fg">
+      <div className="mx-auto max-w-6xl px-5 pb-24">
+        {/* Header — bureau letterhead */}
+        <header className="relative pt-12 pb-10">
+          <p className="font-monod text-[11px] uppercase tracking-[0.42em] text-brass">The registry</p>
+          <h1 className="mt-4 max-w-3xl font-serifd text-[clamp(2.2rem,4.6vw,3.6rem)] leading-[1.02]">
+            Agent <span className="italic text-brass">reputation</span> index.
+          </h1>
+          <p className="mt-4 max-w-2xl font-sansd text-sm leading-relaxed text-bureau-muted">
+            Every agent, ranked by the only thing that should matter — how well-calibrated its past calls were.
+            Brier score in, consensus voting power out. Open any agent to inspect its full track record.
           </p>
+        </header>
 
-          <div className="mt-6 grid gap-4 md:grid-cols-3">
-            <Step
-              n="1"
-              title="Score"
-              color="#22d3ee"
-              body="Replay every past window. Brier = mean((p − outcome)²). Re-runnable and deterministic."
+        {/* Ledger line — live figures, serif numerals over hairlines */}
+        <section aria-label="Registry figures" className="border-y border-bureau-line">
+          <div className="grid grid-cols-2 lg:grid-cols-4">
+            <LedgerStat label="Agents live" value={count.toString()} index={0} />
+            <LedgerStat
+              label="Avg Brier"
+              value={count > 0 ? avgBrier.toFixed(3) : '—'}
+              hint="lower = better"
+              index={1}
             />
-            <Step
-              n="2"
-              title="Invert + cap"
-              color="#8b5cf6"
-              body="Weight ∝ 1 / Brier, then a per-agent cap prevents domination. Rogue, overconfident agents collapse toward zero."
+            <LedgerStat
+              label="Top agent"
+              value={top ? top.agentId : '—'}
+              hint={top ? `${Math.round(top.weightShare * 100)}% of vote` : undefined}
+              index={2}
+              truncate
             />
-            <Step
-              n="3"
-              title="Vote"
-              color="#2fe3a0"
-              body="Normalized weights become voting power in the reputation-weighted consensus — enforced in Solidity, no human override."
+            <LedgerStat
+              label="Rogue weight"
+              value={rogue ? `${rogueWeight}%` : 'none'}
+              hint={rogue ? `${rogue.agentId} silenced` : 'no rogue agent'}
+              index={3}
+              rogue={!!rogue}
             />
           </div>
+        </section>
 
-          <div className="mt-6 flex flex-wrap gap-2 font-mono text-xs">
-            <Pill>inverse-Brier weighting</Pill>
-            <Pill>per-agent cap (anti-domination)</Pill>
-            <Pill>S→D reputation tiers</Pill>
-            <Pill>on-chain verifiable</Pill>
+        {/* Leaderboard */}
+        <section className="mt-12">
+          <div className="mb-5 flex items-end justify-between">
+            <h2 className="font-serifd text-2xl text-bureau-fg">Reputation leaderboard</h2>
+            <span className="font-monod text-[10px] uppercase tracking-[0.3em] text-bureau-muted">
+              ranked by consensus weight
+            </span>
           </div>
-        </div>
-      </section>
+          {count > 0 ? (
+            <Leaderboard agents={agents} markets={markets} />
+          ) : (
+            <div className="bureau-frame p-6 font-monod text-sm text-bureau-muted">
+              <div className="bureau-grain" aria-hidden />
+              No agents yet — run <code className="font-monod text-bureau-fg">pnpm demo:seed</code>.
+            </div>
+          )}
+        </section>
 
-      <footer className="mt-14 border-t border-line pt-6 text-center font-mono text-xs text-muted">
-        don&apos;t trust the loudest agent · trust the one that&apos;s been right
-      </footer>
+        <div className="tick-scale my-14" aria-hidden />
+
+        {/* Explainer: reputation → weight */}
+        <section>
+          <Reveal>
+            <div className="bureau-frame p-6 sm:p-8">
+              <div className="bureau-grain" aria-hidden />
+              <p className="font-monod text-[11px] uppercase tracking-[0.42em] text-brass">
+                How reputation becomes weight
+              </p>
+              <h2 className="mt-4 font-serifd text-[clamp(1.8rem,3.4vw,2.6rem)] leading-[1.05]">
+                Calibration is <span className="italic text-brass">currency.</span>
+              </h2>
+              <p className="mt-3 max-w-3xl font-sansd text-sm leading-relaxed text-bureau-muted">
+                Each agent is scored on its <b className="text-bureau-fg">Brier score</b> — the mean-squared error
+                between its stated probabilities and what actually happened. A lower Brier means the agent&apos;s
+                confidence matches reality. That score is inverted into a{' '}
+                <b className="text-bureau-fg">reputation weight</b>, normalized across all agents, and capped
+                per-agent so no single voice can dominate. The result is each agent&apos;s{' '}
+                <b className="text-bureau-fg">share of the vote</b>.
+              </p>
+
+              <div className="mt-7 grid gap-px border border-bureau-line bg-bureau-line md:grid-cols-3">
+                <Step
+                  n="1"
+                  title="Score"
+                  body="Replay every past window. Brier = mean((p − outcome)²). Re-runnable and deterministic."
+                />
+                <Step
+                  n="2"
+                  title="Invert + cap"
+                  body="Weight ∝ 1 / Brier, then a per-agent cap prevents domination. Rogue, overconfident agents collapse toward zero."
+                />
+                <Step
+                  n="3"
+                  title="Vote"
+                  body="Normalized weights become voting power in the reputation-weighted consensus — enforced in Solidity, no human override."
+                />
+              </div>
+
+              <div className="mt-6 flex flex-wrap gap-2 font-monod text-[10px]">
+                <Pill>inverse-Brier weighting</Pill>
+                <Pill>per-agent cap (anti-domination)</Pill>
+                <Pill>S→D reputation tiers</Pill>
+                <Pill>on-chain verifiable</Pill>
+              </div>
+            </div>
+          </Reveal>
+        </section>
+
+        <footer className="mt-14 border-t border-bureau-line pt-6 text-center font-monod text-[11px] uppercase tracking-[0.3em] text-bureau-muted">
+          don&apos;t trust the loudest agent · trust the one that&apos;s been right
+        </footer>
+      </div>
     </div>
   );
 }
 
-function StatCard({
+function LedgerStat({
   label,
   value,
   hint,
-  accent,
-  truncate
+  index,
+  truncate,
+  rogue
 }: {
   label: string;
   value: string;
   hint?: string;
-  accent?: string;
+  index: number;
   truncate?: boolean;
+  rogue?: boolean;
 }) {
   return (
-    <div className="glass rounded-2xl p-4">
-      <div className="font-mono text-[11px] uppercase tracking-widest text-muted">{label}</div>
-      <div
-        className={`mt-1.5 font-display text-2xl font-bold ${accent ?? 'text-fg'} ${truncate ? 'truncate' : ''}`}
-        title={truncate ? value : undefined}
-      >
-        {value}
+    <Reveal delay={index * 0.08} className={index > 0 ? 'lg:border-l lg:border-bureau-line' : ''}>
+      <div className="px-6 py-8">
+        <div
+          className={`font-serifd text-3xl leading-none sm:text-4xl ${rogue ? 'text-fall' : 'text-bureau-fg'} ${truncate ? 'truncate' : ''}`}
+          title={truncate ? value : undefined}
+        >
+          {value}
+        </div>
+        <div className="mt-3 font-monod text-[10px] uppercase tracking-[0.3em] text-bureau-muted">{label}</div>
+        {hint && <div className="mt-1 font-monod text-[10px] text-bureau-muted/70">{hint}</div>}
       </div>
-      {hint && <div className="mt-0.5 font-mono text-[11px] text-muted">{hint}</div>}
-    </div>
+    </Reveal>
   );
 }
 
-function Step({ n, title, color, body }: { n: string; title: string; color: string; body: string }) {
+function Step({ n, title, body }: { n: string; title: string; body: string }) {
   return (
-    <div className="rounded-xl border border-line bg-card/60 p-5">
+    <div className="bg-bureau-panel p-5">
       <div className="flex items-center gap-2.5">
-        <span
-          className="grid h-6 w-6 place-items-center rounded-lg font-mono text-xs font-bold text-ink"
-          style={{ background: color }}
-        >
+        <span className="grid h-6 w-6 place-items-center border border-brass font-monod text-xs font-semibold text-brass">
           {n}
         </span>
-        <span className="font-display font-semibold" style={{ color }}>
-          {title}
-        </span>
+        <span className="font-sansd font-semibold text-bureau-fg">{title}</span>
       </div>
-      <p className="mt-2.5 text-sm text-muted">{body}</p>
+      <p className="mt-2.5 font-sansd text-sm leading-relaxed text-bureau-muted">{body}</p>
     </div>
   );
 }
 
 function Pill({ children }: { children: ReactNode }) {
-  return <span className="rounded-full border border-line bg-card/60 px-3 py-1 text-muted">{children}</span>;
+  return (
+    <span className="border border-bureau-line bg-bureau-panel px-3 py-1 uppercase tracking-[0.18em] text-bureau-muted">
+      {children}
+    </span>
+  );
 }

@@ -29,6 +29,7 @@ import {
 } from '../../lib/contracts';
 import { mantleSepolia } from '../../lib/wagmi';
 import { short } from '../../lib/utils';
+import { Reveal } from '../../components/landing/Reveal';
 
 /**
  * REAL on-chain "Launch a prediction market" form on Mantle Sepolia (chain id
@@ -328,225 +329,241 @@ export default function CreateMarketPage() {
   const forecastHref = marketId ? `/forecast/${encodeURIComponent(marketId)}` : '/forecast';
 
   return (
-    <div className="mx-auto max-w-3xl px-5 pb-24">
-      {/* Hero */}
-      <header className="relative pt-8 pb-6">
-        <div className="text-xs uppercase tracking-widest text-brand">launch a market</div>
-        <h1 className="mt-2 font-display text-4xl font-bold leading-[1.05] tracking-tight sm:text-5xl">
-          Create a <span className="text-gradient">prediction market</span>.
-        </h1>
-        <p className="mt-4 max-w-2xl text-lg text-muted">
-          Permissionless and one transaction. Pose a verifiable yes/no question, set a resolution time,
-          and optionally seed the pool with sUSD liquidity. You become the market&apos;s resolver.
-        </p>
-      </header>
+    <div className="relative z-0 bg-bureau text-bureau-fg">
+      <div className="mx-auto max-w-3xl px-5 pb-24">
+        {/* Header */}
+        <header className="relative pt-12 pb-8">
+          <p className="font-monod text-[11px] uppercase tracking-[0.42em] text-brass">Launch a market</p>
+          <h1 className="mt-4 font-serifd text-[clamp(2.2rem,4.6vw,3.6rem)] leading-[1.02]">
+            File a new <span className="italic text-brass">prediction market.</span>
+          </h1>
+          <p className="mt-5 max-w-2xl font-sansd text-base leading-relaxed text-bureau-muted">
+            Permissionless and one transaction. Pose a verifiable yes/no question, set a resolution time,
+            and optionally seed the pool with sUSD liquidity. You become the market&apos;s resolver.
+          </p>
+        </header>
 
-      <div className="glass rounded-2xl p-6">
-        <div className="flex items-center justify-between">
-          <div className="text-xs uppercase tracking-widest text-brand">new market</div>
-          <span className="rounded-full border border-long/40 bg-long/10 px-2.5 py-1 font-mono text-[10px] font-semibold uppercase tracking-widest text-long">
-            live · mantle sepolia
-          </span>
-        </div>
+        <div className="tick-scale" aria-hidden />
 
-        {/* Account stat */}
-        <div className="mt-4 grid grid-cols-1 gap-2">
-          <Stat label="sUSD balance" value={readEnabled ? fmt(susdBalance, 2) : '—'} accent="text-cyan" />
-        </div>
+        {/* The filing — one bureau document */}
+        <Reveal className="mt-10">
+          <div className="bureau-frame p-6">
+            <div className="bureau-grain" aria-hidden />
 
-        {/* Question */}
-        <label className="mt-4 block">
-          <span className="font-mono text-[11px] uppercase tracking-widest text-muted">question</span>
-          <textarea
-            value={question}
-            onChange={(e) => {
-              setQuestion(e.target.value);
-              resetTx();
-            }}
-            rows={2}
-            className="mt-1.5 w-full resize-none rounded-xl border border-line bg-ink px-4 py-3 font-mono text-base text-fg outline-none focus:border-brand/60"
-            placeholder="Will MNT trade above $1.50 (USD) at 2026-09-01 00:00 UTC?"
-          />
-        </label>
-
-        {/* Resolve time */}
-        <label className="mt-4 block">
-          <span className="font-mono text-[11px] uppercase tracking-widest text-muted">
-            resolution date &amp; time (your local timezone)
-          </span>
-          <input
-            type="datetime-local"
-            value={resolveLocal}
-            onChange={(e) => {
-              setResolveLocal(e.target.value);
-              resetTx();
-            }}
-            className="mt-1.5 w-full rounded-xl border border-line bg-ink px-4 py-3 font-mono text-base text-fg outline-none focus:border-brand/60"
-          />
-        </label>
-
-        {/* Seed */}
-        <label className="mt-4 block">
-          <span className="font-mono text-[11px] uppercase tracking-widest text-muted">
-            initial liquidity in sUSD (optional)
-          </span>
-          <input
-            inputMode="decimal"
-            value={seed}
-            onChange={(e) => {
-              setSeed(e.target.value);
-              resetTx();
-            }}
-            className="mt-1.5 w-full rounded-xl border border-line bg-ink px-4 py-3 font-mono text-lg text-fg outline-none focus:border-brand/60"
-            placeholder="0.0"
-          />
-        </label>
-
-        {/* Derived preview */}
-        <div className="mt-4 space-y-2 rounded-xl border border-line bg-card/40 p-4">
-          <PreviewRow label="marketId" value={marketId ? short(marketId, 10, 8) : '—'} hint="keccak256(slug)" />
-          <PreviewRow label="questionHash" value={questionHash ? short(questionHash, 10, 8) : '—'} hint="keccak256(question)" />
-          <PreviewRow
-            label="resolver"
-            value={address ? short(address) : 'connect wallet'}
-            accent={address ? 'text-fg' : 'text-muted'}
-          />
-          <PreviewRow
-            label="resolve time"
-            value={resolveUnix !== null ? `${resolveUnix}` : '—'}
-            hint="unix uint64"
-          />
-          <PreviewRow
-            label="seed liquidity"
-            value={hasSeed ? `${fmt(parsedSeed ?? 0n, 4)} sUSD` : 'none'}
-            accent={hasSeed ? 'text-long' : 'text-muted'}
-          />
-        </div>
-
-        {/* Validation / existence notices */}
-        {alreadyExists && (
-          <div className="mt-3 rounded-xl border border-amber/40 bg-amber/10 p-3 font-mono text-xs text-amber">
-            A market with this question already exists.{' '}
-            <Link href={forecastHref} className="underline decoration-dotted hover:opacity-80">
-              View it →
-            </Link>
-          </div>
-        )}
-        {!alreadyExists && validationError && (trimmedQuestion || resolveLocal || seed) && (
-          <div className="mt-3 rounded-xl border border-short/30 bg-short/5 p-3 font-mono text-xs text-short">
-            {validationError}
-          </div>
-        )}
-
-        {/* Action area — gated on connect + chain */}
-        <div className="mt-4">
-          {!isConnected ? (
-            <div className="flex justify-center">
-              <ConnectButton label="Connect wallet to launch" />
+            <div className="flex items-baseline justify-between border-b border-bureau-line pb-3">
+              <span className="font-monod text-[10px] uppercase tracking-[0.32em] text-bureau-muted">
+                New market
+              </span>
+              <span className="border border-rise/50 px-2 py-0.5 font-monod text-[10px] uppercase tracking-[0.18em] text-rise">
+                Live · Mantle Sepolia
+              </span>
             </div>
-          ) : !onCorrectChain ? (
-            <button
-              type="button"
-              disabled={switching}
-              onClick={() => switchChain({ chainId: mantleSepolia.id })}
-              className="w-full rounded-xl bg-amber px-4 py-3 font-semibold text-ink transition-transform enabled:hover:scale-[1.01] disabled:cursor-not-allowed disabled:opacity-50"
-            >
-              {switching ? 'Switching…' : 'Switch to Mantle Sepolia (5003)'}
-            </button>
-          ) : needsApproval ? (
-            <button
-              type="button"
-              disabled={!inputsValid || alreadyExists || busy}
-              onClick={onApprove}
-              className="w-full rounded-xl bg-linear-to-r from-brand to-cyan px-4 py-3 font-semibold text-ink transition-transform enabled:hover:scale-[1.01] disabled:cursor-not-allowed disabled:opacity-40"
-            >
-              {busy && phase === 'approving' ? 'Approving sUSD…' : 'Approve sUSD liquidity'}
-            </button>
-          ) : (
-            <button
-              type="button"
-              disabled={!inputsValid || alreadyExists || busy}
-              onClick={onCreate}
-              className="w-full rounded-xl bg-linear-to-r from-brand to-cyan px-4 py-3 font-semibold text-ink transition-transform enabled:hover:scale-[1.01] disabled:cursor-not-allowed disabled:opacity-40"
-            >
-              {busy && phase === 'creating'
-                ? 'Launching market…'
-                : hasSeed
-                  ? 'Launch market + seed liquidity'
-                  : 'Launch market'}
-            </button>
-          )}
-        </div>
 
-        {/* Success */}
-        {isConfirmed && phase !== 'approving' && newFpmm !== null && (
-          <div className="mt-3 rounded-xl border border-long/30 bg-long/5 p-4">
-            <div className="font-mono text-xs font-semibold uppercase tracking-widest text-long">
-              market launched
+            {/* Account stat */}
+            <div className="mt-5 grid grid-cols-1 gap-3">
+              <Stat label="sUSD balance" value={readEnabled ? fmt(susdBalance, 2) : '—'} accent="text-brass" />
             </div>
-            <div className="mt-2 space-y-1 font-mono text-xs text-muted">
-              <div>
-                FPMM pool:{' '}
+
+            {/* Question */}
+            <label className="mt-5 block">
+              <span className="font-monod text-[10px] uppercase tracking-[0.28em] text-bureau-muted">Question</span>
+              <textarea
+                value={question}
+                onChange={(e) => {
+                  setQuestion(e.target.value);
+                  resetTx();
+                }}
+                rows={2}
+                className="mt-2 w-full resize-none border border-bureau-line bg-bureau-panel px-4 py-3 font-monod text-base text-bureau-fg outline-none focus:border-brass"
+                placeholder="Will MNT trade above $1.50 (USD) at 2026-09-01 00:00 UTC?"
+              />
+            </label>
+
+            {/* Resolve time */}
+            <label className="mt-5 block">
+              <span className="font-monod text-[10px] uppercase tracking-[0.28em] text-bureau-muted">
+                Resolution date &amp; time (your local timezone)
+              </span>
+              <input
+                type="datetime-local"
+                value={resolveLocal}
+                onChange={(e) => {
+                  setResolveLocal(e.target.value);
+                  resetTx();
+                }}
+                className="mt-2 w-full border border-bureau-line bg-bureau-panel px-4 py-3 font-monod text-base text-bureau-fg outline-none focus:border-brass"
+              />
+            </label>
+
+            {/* Seed */}
+            <label className="mt-5 block">
+              <span className="font-monod text-[10px] uppercase tracking-[0.28em] text-bureau-muted">
+                Initial liquidity in sUSD (optional)
+              </span>
+              <input
+                inputMode="decimal"
+                value={seed}
+                onChange={(e) => {
+                  setSeed(e.target.value);
+                  resetTx();
+                }}
+                className="mt-2 w-full border border-bureau-line bg-bureau-panel px-4 py-3 font-monod text-lg text-bureau-fg outline-none focus:border-brass"
+                placeholder="0.0"
+              />
+            </label>
+
+            {/* Derived preview — the filing record */}
+            <div className="mt-5 border border-bureau-line bg-bureau-panel p-4">
+              <PreviewRow label="marketId" value={marketId ? short(marketId, 10, 8) : '—'} hint="keccak256(slug)" />
+              <PreviewRow label="questionHash" value={questionHash ? short(questionHash, 10, 8) : '—'} hint="keccak256(question)" />
+              <PreviewRow
+                label="resolver"
+                value={address ? short(address) : 'connect wallet'}
+                accent={address ? 'text-bureau-fg' : 'text-bureau-muted'}
+              />
+              <PreviewRow
+                label="resolve time"
+                value={resolveUnix !== null ? `${resolveUnix}` : '—'}
+                hint="unix uint64"
+              />
+              <PreviewRow
+                label="seed liquidity"
+                value={hasSeed ? `${fmt(parsedSeed ?? 0n, 4)} sUSD` : 'none'}
+                accent={hasSeed ? 'text-rise' : 'text-bureau-muted'}
+              />
+            </div>
+
+            {/* Validation / existence notices */}
+            {alreadyExists && (
+              <div className="mt-3 border border-brass/50 p-3 font-monod text-xs text-brass">
+                A market with this question already exists.{' '}
+                <Link href={forecastHref} className="underline decoration-dotted hover:opacity-80">
+                  View it →
+                </Link>
+              </div>
+            )}
+            {!alreadyExists && validationError && (trimmedQuestion || resolveLocal || seed) && (
+              <div className="mt-3 border border-fall/40 p-3 font-monod text-xs text-fall">
+                {validationError}
+              </div>
+            )}
+
+            {/* Action area — gated on connect + chain */}
+            <div className="mt-5">
+              {!isConnected ? (
+                <div className="flex justify-center">
+                  <ConnectButton label="Connect wallet to launch" />
+                </div>
+              ) : !onCorrectChain ? (
+                <button
+                  type="button"
+                  disabled={switching}
+                  onClick={() => switchChain({ chainId: mantleSepolia.id })}
+                  className="w-full border border-bureau-line px-6 py-3 font-sansd text-sm font-semibold text-bureau-fg transition-colors enabled:hover:border-brass enabled:hover:text-brass disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  {switching ? 'Switching…' : 'Switch to Mantle Sepolia (5003)'}
+                </button>
+              ) : needsApproval ? (
+                <button
+                  type="button"
+                  disabled={!inputsValid || alreadyExists || busy}
+                  onClick={onApprove}
+                  className="w-full bg-bureau-fg px-6 py-3 font-sansd text-sm font-semibold text-bureau transition-colors enabled:hover:bg-brass disabled:cursor-not-allowed disabled:opacity-40"
+                >
+                  {busy && phase === 'approving' ? 'Approving sUSD…' : 'Approve sUSD liquidity'}
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  disabled={!inputsValid || alreadyExists || busy}
+                  onClick={onCreate}
+                  className="w-full bg-bureau-fg px-6 py-3 font-sansd text-sm font-semibold text-bureau transition-colors enabled:hover:bg-brass disabled:cursor-not-allowed disabled:opacity-40"
+                >
+                  {busy && phase === 'creating'
+                    ? 'Launching market…'
+                    : hasSeed
+                      ? 'Launch market + seed liquidity'
+                      : 'Launch market'}
+                </button>
+              )}
+            </div>
+
+            {/* Success — a brass-stamped certificate */}
+            {isConfirmed && phase !== 'approving' && newFpmm !== null && (
+              <div className="mt-4 border border-brass/60 p-5">
+                <div className="flex items-baseline justify-between border-b border-bureau-line pb-3">
+                  <span className="font-monod text-[10px] uppercase tracking-[0.32em] text-brass">
+                    Market launched
+                  </span>
+                  <span className="rotate-[-4deg] border border-brass px-2 py-0.5 font-serifd text-sm text-brass">
+                    Filed
+                  </span>
+                </div>
+                <div className="mt-3 flex items-baseline justify-between gap-6">
+                  <span className="font-monod text-[10px] uppercase tracking-[0.28em] text-bureau-muted">
+                    FPMM pool
+                  </span>
+                  <a
+                    href={`${EXPLORER}/address/${newFpmm}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="font-monod text-sm text-brass underline decoration-dotted hover:opacity-80"
+                  >
+                    {short(newFpmm)} ↗
+                  </a>
+                </div>
+                <Link
+                  href={forecastHref}
+                  className="mt-4 inline-block bg-bureau-fg px-6 py-2.5 font-sansd text-sm font-semibold text-bureau transition-colors hover:bg-brass"
+                >
+                  Go to your market →
+                </Link>
+              </div>
+            )}
+
+            {/* Tx submitted/confirming */}
+            {txHash && !(isConfirmed && phase !== 'approving' && newFpmm !== null) && (
+              <div
+                className={`mt-3 border p-3 font-monod text-xs ${
+                  isConfirmed ? 'border-rise/40 text-rise' : 'border-brass/40 text-brass'
+                }`}
+              >
+                <div>
+                  {isConfirming
+                    ? 'Waiting for confirmation…'
+                    : isConfirmed
+                      ? phase === 'approving'
+                        ? 'Approval confirmed — launch your market.'
+                        : 'Confirmed — resolving pool…'
+                      : 'Submitted.'}
+                </div>
                 <a
-                  href={`${EXPLORER}/address/${newFpmm}`}
+                  href={`${EXPLORER}/tx/${txHash}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-cyan underline decoration-dotted hover:opacity-80"
+                  className="mt-1 inline-block break-all underline decoration-dotted hover:opacity-80"
                 >
-                  {short(newFpmm)}
+                  {txHash}
                 </a>
               </div>
-            </div>
-            <Link
-              href={forecastHref}
-              className="mt-3 inline-block rounded-xl bg-linear-to-r from-brand to-cyan px-4 py-2.5 font-semibold text-ink transition-transform hover:scale-[1.02]"
-            >
-              Go to your market →
-            </Link>
-          </div>
-        )}
+            )}
 
-        {/* Tx submitted/confirming */}
-        {txHash && !(isConfirmed && phase !== 'approving' && newFpmm !== null) && (
-          <div
-            className={`mt-3 rounded-xl border p-3 font-mono text-xs ${
-              isConfirmed ? 'border-long/30 bg-long/5 text-long' : 'border-cyan/30 bg-cyan/5 text-cyan'
-            }`}
-          >
-            <div>
-              {isConfirming
-                ? 'Waiting for confirmation…'
-                : isConfirmed
-                  ? phase === 'approving'
-                    ? 'Approval confirmed — launch your market.'
-                    : 'Confirmed — resolving pool…'
-                  : 'Submitted.'}
-            </div>
-            <a
-              href={`${EXPLORER}/tx/${txHash}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="mt-1 inline-block break-all underline decoration-dotted hover:opacity-80"
-            >
-              {txHash}
-            </a>
-          </div>
-        )}
+            {txError && (
+              <div className="mt-3 border border-fall/40 p-3 font-monod text-xs text-fall">
+                {(txError as { shortMessage?: string }).shortMessage ?? txError.message}
+              </div>
+            )}
 
-        {txError && (
-          <div className="mt-3 rounded-xl border border-short/30 bg-short/5 p-3 font-mono text-xs text-short">
-            {(txError as { shortMessage?: string }).shortMessage ?? txError.message}
+            {/* Disclaimer */}
+            <p className="mt-5 border-t border-bureau-line pt-3 font-monod text-[11px] leading-relaxed text-bureau-muted">
+              Transactions are <b className="text-bureau-fg">real and signed by your wallet</b> on Mantle Sepolia
+              (chain 5003). The factory derives a fresh YES/NO market and FPMM pool from{' '}
+              <code className="text-brass">createAndSeed(marketId, sUSD, questionHash, resolveTime, resolver, seed)</code>.
+              Seeding routes through an sUSD <code className="text-brass">approve</code> first. You are set as the
+              resolver and can settle the market after its resolve time. Testnet assets only.
+            </p>
           </div>
-        )}
-
-        {/* Disclaimer */}
-        <p className="mt-4 border-t border-line pt-3 font-mono text-[11px] leading-relaxed text-muted">
-          Transactions are <b className="text-fg">real and signed by your wallet</b> on Mantle Sepolia
-          (chain 5003). The factory derives a fresh YES/NO market and FPMM pool from{' '}
-          <code className="text-fg/80">createAndSeed(marketId, sUSD, questionHash, resolveTime, resolver, seed)</code>.
-          Seeding routes through an sUSD <code className="text-fg/80">approve</code> first. You are set as the
-          resolver and can settle the market after its resolve time. Testnet assets only.
-        </p>
+        </Reveal>
       </div>
     </div>
   );
@@ -564,21 +581,21 @@ function PreviewRow({
   hint?: string;
 }) {
   return (
-    <div className="flex items-center justify-between text-sm">
-      <span className="text-muted">
+    <div className="flex items-baseline justify-between gap-6 py-1.5 text-sm">
+      <span className="font-monod text-[10px] uppercase tracking-[0.24em] text-bureau-muted">
         {label}
-        {hint && <span className="ml-1.5 font-mono text-[10px] text-muted/60">{hint}</span>}
+        {hint && <span className="ml-1.5 normal-case tracking-normal text-bureau-muted/60">{hint}</span>}
       </span>
-      <span className={`font-mono ${accent ?? 'text-fg'}`}>{value}</span>
+      <span className={`font-monod ${accent ?? 'text-bureau-fg'}`}>{value}</span>
     </div>
   );
 }
 
 function Stat({ label, value, accent }: { label: string; value: string; accent?: string }) {
   return (
-    <div className="rounded-xl border border-line bg-card/40 p-3">
-      <div className="font-mono text-[10px] uppercase tracking-widest text-muted">{label}</div>
-      <div className={`mt-1 font-mono text-sm font-semibold ${accent ?? 'text-fg'}`}>{value}</div>
+    <div className="border border-bureau-line bg-bureau-panel p-3">
+      <div className="font-monod text-[10px] uppercase tracking-[0.24em] text-bureau-muted">{label}</div>
+      <div className={`mt-1 font-monod text-sm font-medium ${accent ?? 'text-bureau-fg'}`}>{value}</div>
     </div>
   );
 }

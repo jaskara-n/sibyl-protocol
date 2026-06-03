@@ -55,7 +55,7 @@ export function StaggerList({ children, className }: { children: ReactNode; clas
   );
 }
 
-/** macOS-style terminal frame with lightweight token coloring. */
+/** Terminal frame, set as a bureau panel with lightweight token coloring. */
 export function CodeTerminal({ title, code }: { title: string; code: string }) {
   return (
     <motion.div
@@ -63,16 +63,13 @@ export function CodeTerminal({ title, code }: { title: string; code: string }) {
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: '-60px' }}
       transition={{ duration: 0.5, ease: 'easeOut' }}
-      className="glass overflow-hidden rounded-2xl"
+      className="bureau-frame overflow-hidden"
     >
-      <div className="flex items-center gap-2 border-b border-line bg-ink/60 px-4 py-2.5">
-        <span className="h-3 w-3 rounded-full bg-short/80" />
-        <span className="h-3 w-3 rounded-full bg-amber/80" />
-        <span className="h-3 w-3 rounded-full bg-long/80" />
-        <span className="ml-3 font-mono text-xs text-muted">{title}</span>
-        <span className="ml-auto font-mono text-[11px] text-muted/70">@sibyl/agent-sdk</span>
+      <div className="flex items-center gap-3 border-b border-bureau-line bg-bureau px-4 py-2.5">
+        <span className="font-monod text-[11px] uppercase tracking-[0.16em] text-bureau-muted">{title}</span>
+        <span className="ml-auto font-monod text-[10px] uppercase tracking-[0.16em] text-brass">@sibyl/agent-sdk</span>
       </div>
-      <pre className="overflow-x-auto bg-ink p-5 font-mono text-[12.5px] leading-relaxed">
+      <pre className="overflow-x-auto bg-bureau p-5 font-monod text-[12.5px] leading-relaxed">
         <code>{highlight(code)}</code>
       </pre>
     </motion.div>
@@ -95,7 +92,7 @@ function highlight(code: string): ReactNode {
     // comments
     if (line.trimStart().startsWith('#') || line.trimStart().startsWith('//')) {
       return (
-        <span key={li} className="text-muted/60">
+        <span key={li} className="text-bureau-muted/70">
           {line}
           {'\n'}
         </span>
@@ -109,9 +106,9 @@ function highlight(code: string): ReactNode {
       const rest = inlineComment === -1 ? '' : line.slice(inlineComment);
       return (
         <span key={li}>
-          <span className="text-brand">{line.slice(0, idx)}$ </span>
-          <span className="text-long">{cmd.replace(/^\$\s*/, '')}</span>
-          {rest && <span className="text-muted/60">{rest}</span>}
+          <span className="text-brass">{line.slice(0, idx)}$ </span>
+          <span className="text-rise">{cmd.replace(/^\$\s*/, '')}</span>
+          {rest && <span className="text-bureau-muted/70">{rest}</span>}
           {'\n'}
         </span>
       );
@@ -120,12 +117,12 @@ function highlight(code: string): ReactNode {
     return (
       <span key={li}>
         {tokens.map((tok, ti) => {
-          if (KEYWORDS.has(tok)) return <span key={ti} className="text-brand">{tok}</span>;
-          if (/^"[^"]*"$/.test(tok)) return <span key={ti} className="text-long">{tok}</span>;
-          if (/^(LONG|SHORT|FLAT)$/.test(tok)) return <span key={ti} className="text-cyan">{tok}</span>;
-          if (/^(predict|defineAgent|runRounds|tanh|at)$/.test(tok)) return <span key={ti} className="text-cyan">{tok}</span>;
-          if (/^[0-9.]+$/.test(tok)) return <span key={ti} className="text-amber">{tok}</span>;
-          return <span key={ti} className="text-fg/90">{tok}</span>;
+          if (KEYWORDS.has(tok)) return <span key={ti} className="text-brass">{tok}</span>;
+          if (/^"[^"]*"$/.test(tok)) return <span key={ti} className="text-rise">{tok}</span>;
+          if (/^(LONG|SHORT|FLAT)$/.test(tok)) return <span key={ti} className="text-brass">{tok}</span>;
+          if (/^(predict|defineAgent|runRounds|tanh|at)$/.test(tok)) return <span key={ti} className="text-brass">{tok}</span>;
+          if (/^[0-9.]+$/.test(tok)) return <span key={ti} className="text-bureau-fg">{tok}</span>;
+          return <span key={ti} className="text-bureau-fg/90">{tok}</span>;
         })}
         {'\n'}
       </span>
@@ -217,22 +214,22 @@ export function ConnectWalletCTA() {
           type="button"
           disabled={switching}
           onClick={() => switchChain({ chainId: mantleSepolia.id })}
-          className="w-full rounded-xl bg-amber px-5 py-3 font-display font-semibold text-ink transition-transform enabled:hover:scale-[1.01] disabled:cursor-not-allowed disabled:opacity-50"
+          className="w-full border border-brass bg-transparent px-6 py-3 font-sansd text-sm font-semibold text-brass transition-colors enabled:hover:bg-brass enabled:hover:text-bureau disabled:cursor-not-allowed disabled:opacity-50"
         >
           {switching ? 'Switching…' : 'Switch to Mantle Sepolia (5003)'}
         </button>
       ) : alreadyRegistered ? (
-        <div className="rounded-xl border border-long/30 bg-long/5 p-3 text-center">
-          <div className="font-display font-semibold text-long">Identity registered ✓</div>
+        <div className="border border-rise bg-transparent p-3 text-center">
+          <div className="font-sansd font-semibold text-rise">Identity registered ✓</div>
           <a
             href={`${EXPLORER}/address/${address}`}
             target="_blank"
             rel="noopener noreferrer"
-            className="mt-1 inline-block break-all font-mono text-[11px] text-long underline decoration-dotted hover:opacity-80"
+            className="mt-1 inline-block break-all font-monod text-[11px] text-rise underline decoration-dotted hover:opacity-80"
           >
             {address}
           </a>
-          <p className="mt-1.5 font-mono text-[10px] text-muted">
+          <p className="mt-1.5 font-monod text-[10px] uppercase tracking-[0.14em] text-bureau-muted">
             this wallet owns {identityCount?.toString() ?? '1'} ERC-8004 identity NFT
             {(identityCount ?? 0n) > 1n ? 's' : ''}
           </p>
@@ -242,9 +239,9 @@ export function ConnectWalletCTA() {
           type="button"
           onClick={onRegister}
           disabled={busy}
-          whileHover={busy ? undefined : { scale: 1.03 }}
-          whileTap={busy ? undefined : { scale: 0.97 }}
-          className="w-full rounded-xl bg-linear-to-r from-brand to-cyan px-5 py-3 text-center font-display font-semibold text-ink glow-brand transition-opacity disabled:cursor-not-allowed disabled:opacity-50"
+          whileHover={busy ? undefined : { scale: 1.02 }}
+          whileTap={busy ? undefined : { scale: 0.98 }}
+          className="w-full bg-bureau-fg px-6 py-3 text-center font-sansd text-sm font-semibold text-bureau transition-colors hover:bg-brass disabled:cursor-not-allowed disabled:opacity-50"
         >
           {isSigning
             ? 'Confirm in wallet…'
@@ -256,8 +253,8 @@ export function ConnectWalletCTA() {
 
       {txHash && (
         <div
-          className={`mt-3 rounded-xl border p-3 font-mono text-xs ${
-            isConfirmed ? 'border-long/30 bg-long/5 text-long' : 'border-cyan/30 bg-cyan/5 text-cyan'
+          className={`mt-3 border p-3 font-monod text-xs ${
+            isConfirmed ? 'border-rise text-rise' : 'border-brass text-brass'
           }`}
         >
           <div>
@@ -279,13 +276,13 @@ export function ConnectWalletCTA() {
       )}
 
       {txError && (
-        <div className="mt-3 rounded-xl border border-short/30 bg-short/5 p-3 font-mono text-xs text-short">
+        <div className="mt-3 border border-fall p-3 font-monod text-xs text-fall">
           {(txError as { shortMessage?: string }).shortMessage ?? txError.message}
         </div>
       )}
 
       {isConnected && onCorrectChain && !alreadyRegistered && !txHash && (
-        <p className="mt-2.5 text-center font-mono text-[11px] text-muted">
+        <p className="mt-2.5 text-center font-monod text-[11px] uppercase tracking-[0.14em] text-bureau-muted">
           mints a real ERC-8004 identity NFT to your wallet on Mantle Sepolia (5003)
         </p>
       )}

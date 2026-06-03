@@ -2,7 +2,6 @@
 
 import { motion } from 'framer-motion';
 import type { Decision } from '../lib/api';
-import { dirToken } from '../lib/utils';
 
 function relTime(ts: number): string {
   const ms = Date.now() - ts;
@@ -17,93 +16,99 @@ function relTime(ts: number): string {
   return `${d}d ago`;
 }
 
+function absTime(ts: number): string {
+  const d = new Date(ts);
+  if (Number.isNaN(d.getTime())) return '';
+  return d.toISOString().slice(0, 16).replace('T', ' ') + 'Z';
+}
+
 export function DecisionRow({
   decision,
   index,
   isNewest,
-  explorerBase
+  explorerBase,
+  isLast
 }: {
   decision: Decision;
   index: number;
   isNewest: boolean;
   explorerBase: string;
+  isLast?: boolean;
 }) {
   const dir = (decision.direction || 'FLAT').toUpperCase();
-  const tok = dirToken(dir);
   const conf = Math.round(decision.confidence * 100);
-  const dotColor = dir === 'LONG' ? '#2fe3a0' : dir === 'SHORT' ? '#ff5470' : '#7c8699';
+  const stampColor = dir === 'LONG' ? 'var(--color-rise)' : dir === 'SHORT' ? 'var(--color-fall)' : 'var(--color-bureau-muted)';
+  const accent = dir === 'LONG' ? 'text-rise' : dir === 'SHORT' ? 'text-fall' : 'text-bureau-muted';
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 16 }}
+      initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: index * 0.06, duration: 0.42, ease: 'easeOut' }}
-      className="relative grid grid-cols-[28px_1fr] gap-4 sm:gap-5"
+      transition={{ delay: index * 0.05, duration: 0.4, ease: 'easeOut' }}
+      className={`group relative grid grid-cols-[auto_1fr] gap-4 px-5 py-4 transition-colors hover:bg-bureau-fg/[0.03] sm:gap-5 ${
+        isLast ? '' : 'border-b border-bureau-line/70'
+      }`}
     >
-      {/* Timeline rail + node */}
-      <div className="relative flex flex-col items-center">
+      {/* Direction stamp + node */}
+      <div className="flex flex-col items-center gap-2 pt-0.5">
         <span
-          aria-hidden="true"
-          className={isNewest ? 'live-dot relative z-10 mt-5 h-3 w-3 rounded-full' : 'relative z-10 mt-5 h-3 w-3 rounded-full'}
-          style={{ background: dotColor, boxShadow: `0 0 12px ${dotColor}` }}
-        />
-        <span className="absolute left-1/2 top-7 -z-0 h-[calc(100%+1rem)] w-px -translate-x-1/2 bg-line" />
+          title={`Direction: ${dir}`}
+          aria-label={`Direction: ${dir}`}
+          className="grid h-9 w-[3.6rem] place-items-center border font-monod text-[11px] uppercase tracking-[0.18em]"
+          style={{ borderColor: stampColor, color: stampColor }}
+        >
+          {dir}
+        </span>
+        {isNewest && (
+          <span
+            aria-hidden
+            className="live-dot h-2 w-2 rounded-full"
+            style={{ background: stampColor, boxShadow: `0 0 8px ${stampColor}` }}
+          />
+        )}
       </div>
 
-      {/* Card */}
-      <div
-        className={`group relative mb-3 rounded-2xl border border-line bg-card/60 px-4 py-3.5 transition-colors hover:border-brand/40 ${
-          isNewest ? `glass ${tok.glow}` : ''
-        }`}
-        style={
-          dir === 'LONG'
-            ? { borderColor: isNewest ? 'rgba(47,227,160,0.35)' : undefined }
-            : dir === 'SHORT'
-            ? { borderColor: isNewest ? 'rgba(255,84,112,0.35)' : undefined }
-            : undefined
-        }
-      >
-        <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
-          {/* Direction badge */}
-          <span
-            title={`Direction: ${dir}`}
-            aria-label={`Direction: ${dir}`}
-            className={`grid h-7 place-items-center rounded-lg px-2.5 font-display text-sm font-bold text-ink ${tok.bg}`}
-            style={{ boxShadow: `0 0 14px ${dotColor}55` }}
-          >
-            {dir}
-          </span>
-
-          <span className="font-display font-semibold text-fg">{decision.symbol}</span>
+      {/* Entry body */}
+      <div className="min-w-0">
+        <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
+          <span className="font-sansd font-semibold text-bureau-fg">{decision.symbol}</span>
 
           {isNewest && (
-            <span className="flex items-center gap-1.5 rounded-full border border-brand/40 bg-brand/10 px-2 py-0.5 font-mono text-[10px] font-semibold uppercase tracking-widest text-brand">
-              <span className="live-dot h-1.5 w-1.5 rounded-full bg-brand" /> latest
+            <span
+              aria-label="Latest decision"
+              className="border border-brass px-2 py-0.5 font-monod text-[9px] uppercase tracking-[0.18em] text-brass"
+            >
+              latest
             </span>
           )}
 
-          <span className="ml-auto font-mono text-xs text-muted">{relTime(decision.timestamp)}</span>
+          <span
+            className="ml-auto font-monod text-[11px] text-bureau-muted"
+            title={absTime(decision.timestamp)}
+          >
+            {relTime(decision.timestamp)}
+          </span>
         </div>
 
-        <div className="mt-3 flex flex-wrap items-center gap-x-5 gap-y-2 font-mono text-xs">
-          <Metric label="size" value={`${decision.sizeBps} bps`} accent="text-fg" />
-          <Metric label="confidence" value={`${conf}%`} accent={tok.color} />
+        <div className="mt-3 flex flex-wrap items-center gap-x-5 gap-y-2 font-monod text-xs">
+          <Metric label="size" value={`${decision.sizeBps} bps`} accent="text-bureau-fg" />
+          <Metric label="confidence" value={`${conf}%`} accent={accent} />
           <Metric
             label="contributors"
             value={`${decision.contributors} agent${decision.contributors === 1 ? '' : 's'}`}
-            accent="text-fg"
+            accent="text-bureau-fg"
           />
           {decision.txHash ? (
             <a
               href={`${explorerBase}/tx/${decision.txHash}`}
               target="_blank"
               rel="noreferrer"
-              className="ml-auto text-cyan hover:underline"
+              className="ml-auto text-brass hover:underline"
             >
               {decision.txHash.slice(0, 8)}…{decision.txHash.slice(-6)} ↗
             </a>
           ) : (
-            <span className="ml-auto text-muted/50">off-chain</span>
+            <span className="ml-auto text-bureau-muted/50">off-chain</span>
           )}
         </div>
       </div>
@@ -114,8 +119,8 @@ export function DecisionRow({
 function Metric({ label, value, accent }: { label: string; value: string; accent: string }) {
   return (
     <span className="flex items-baseline gap-1.5">
-      <span className="text-muted">{label}</span>
-      <span className={`font-semibold ${accent}`}>{value}</span>
+      <span className="uppercase tracking-[0.14em] text-bureau-muted">{label}</span>
+      <span className={`font-medium ${accent}`}>{value}</span>
     </span>
   );
 }

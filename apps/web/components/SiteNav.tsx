@@ -17,44 +17,88 @@ const LINKS = [
   { href: '/build', label: 'Build' }
 ];
 
+/**
+ * The bureau letterhead: serif wordmark, mono-caps links over a hairline rule,
+ * and a custom-drawn wallet control (no default RainbowKit chrome).
+ */
 export function SiteNav() {
   const path = usePathname();
   return (
-    <nav className="sticky top-0 z-50 border-b border-line/60 bg-ink/70 backdrop-blur-xl">
-      <div className="mx-auto flex max-w-6xl items-center justify-between px-5 py-3.5">
-        <Link href="/" className="flex items-center gap-2.5">
-          <div className="grid h-8 w-8 place-items-center rounded-lg bg-brand font-display text-lg font-bold text-ink glow-brand">◈</div>
-          <span className="font-display text-lg font-bold tracking-tight">Sibyl</span>
-          <span className="ml-1 hidden rounded-full border border-line px-2.5 py-1 text-[11px] text-muted sm:inline">
+    <nav className="sticky top-0 z-50 border-b border-bureau-line bg-bureau/92 backdrop-blur-md">
+      <div className="mx-auto flex max-w-6xl items-center justify-between gap-6 px-5 py-3">
+        <Link href="/" className="group flex shrink-0 items-center gap-3">
+          <span className="grid h-8 w-8 place-items-center border border-brass/60 font-serifd text-lg italic text-brass transition-colors group-hover:border-brass">
+            S
+          </span>
+          <span className="font-serifd text-2xl leading-none text-bureau-fg">Sibyl</span>
+          <span className="hidden whitespace-nowrap font-monod text-[9px] uppercase tracking-[0.3em] text-bureau-muted 2xl:inline">
             credit bureau for AI agents
           </span>
         </Link>
-        <div className="hidden items-center gap-6 text-sm md:flex">
+
+        {/* everything else sits as one group, pushed hard right */}
+        <div className="flex items-center justify-end gap-7">
+          <div className="hidden items-center gap-5 lg:flex">
           {LINKS.map((l) => {
             const active = l.href === '/' ? path === '/' : path.startsWith(l.href);
             return (
               <Link
                 key={l.href}
                 href={l.href}
-                className={cn('transition-colors hover:text-fg', active ? 'text-fg' : 'text-muted')}
+                aria-current={active ? 'page' : undefined}
+                className={cn(
+                  'border-b pb-0.5 font-monod text-[10px] uppercase tracking-[0.22em] transition-colors',
+                  active
+                    ? 'border-brass text-brass'
+                    : 'border-transparent text-bureau-muted hover:text-bureau-fg'
+                )}
               >
                 {l.label}
               </Link>
             );
           })}
         </div>
-        <div className="flex items-center gap-3">
-          <Link
-            href="/build"
-            className="hidden rounded-lg bg-linear-to-r from-brand to-cyan px-4 py-2 text-sm font-semibold text-ink transition-transform hover:scale-[1.03] sm:inline-block"
-          >
-            Register agent →
-          </Link>
-          <ConnectButton
-            accountStatus={{ smallScreen: 'avatar', largeScreen: 'full' }}
-            chainStatus={{ smallScreen: 'icon', largeScreen: 'full' }}
-            showBalance={false}
-          />
+
+        <ConnectButton.Custom>
+          {(props: Parameters<React.ComponentProps<typeof ConnectButton.Custom>['children']>[0]) => {
+            const { account, chain, openAccountModal, openChainModal, openConnectModal, mounted } = props;
+            const ready = mounted;
+            const connected = ready && account && chain;
+            return (
+              <div
+                aria-hidden={!ready}
+                className={!ready ? 'pointer-events-none select-none opacity-0' : ''}
+              >
+                {!connected ? (
+                  <button
+                    onClick={openConnectModal}
+                    type="button"
+                    className="bg-bureau-fg px-4 py-2 font-sansd text-sm font-semibold text-bureau transition-colors hover:bg-brass"
+                  >
+                    Connect wallet
+                  </button>
+                ) : chain.unsupported ? (
+                  <button
+                    onClick={openChainModal}
+                    type="button"
+                    className="border border-fall/60 px-4 py-2 font-monod text-[10px] uppercase tracking-[0.18em] text-fall transition-colors hover:border-fall"
+                  >
+                    Wrong network · switch
+                  </button>
+                ) : (
+                  <button
+                    onClick={openAccountModal}
+                    type="button"
+                    className="flex items-center gap-2.5 border border-bureau-line px-3.5 py-2 font-monod text-xs text-bureau-fg transition-colors hover:border-brass"
+                  >
+                    <span className="h-1.5 w-1.5 rounded-full bg-rise" aria-hidden />
+                    {account.displayName}
+                  </button>
+                )}
+              </div>
+            );
+          }}
+        </ConnectButton.Custom>
         </div>
       </div>
     </nav>

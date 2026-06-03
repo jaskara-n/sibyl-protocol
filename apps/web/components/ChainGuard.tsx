@@ -32,7 +32,7 @@ export function useOnSibylChain() {
  * Global wrong-network guard.
  *
  * When a wallet is connected but sitting on a chain other than Mantle Sepolia
- * (5003), renders a sticky, dismissible top banner in the cosmic-neon style
+ * (5003), renders a sticky, dismissible top banner in the bureau style
  * prompting a one-click switch. Renders nothing when disconnected or already on
  * the correct chain.
  *
@@ -53,21 +53,21 @@ export function ChainGuard() {
 
   return (
     <div className="sticky top-0 z-[60] w-full" role="region" aria-label="Network warning">
-      <div className="glass border-b border-amber/40 bg-amber/[0.06]">
+      <div className="border-b border-fall/50 bg-bureau-panel">
         <div className="mx-auto flex max-w-6xl flex-col gap-3 px-5 py-3 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-start gap-3">
             <span
               aria-hidden
-              className="mt-0.5 grid h-6 w-6 shrink-0 place-items-center rounded-md border border-amber/50 bg-amber/10 font-mono text-sm text-amber"
+              className="mt-0.5 grid h-6 w-6 shrink-0 place-items-center border border-fall/60 font-monod text-sm text-fall"
             >
               !
             </span>
-            <p role="alert" className="text-sm leading-relaxed text-fg">
-              <span className="font-semibold text-amber">Wrong network.</span>{' '}
-              You&rsquo;re connected to the wrong network — Sibyl runs on{' '}
-              <span className="font-semibold">Mantle Sepolia</span> (chain 5003).
+            <p role="alert" className="font-monod text-[12px] uppercase tracking-[0.14em] leading-relaxed text-bureau-fg">
+              <span className="text-fall">Wrong network.</span>{' '}
+              This wallet is on the wrong network — Sibyl operates on{' '}
+              <span className="text-brass">Mantle Sepolia</span> (chain 5003).
               {errorMessage && (
-                <span className="mt-1 block font-mono text-[11px] text-short">{errorMessage}</span>
+                <span className="mt-1 block text-[11px] normal-case tracking-normal text-fall">{errorMessage}</span>
               )}
             </p>
           </div>
@@ -76,7 +76,7 @@ export function ChainGuard() {
               type="button"
               disabled={switching}
               onClick={() => promptSwitch()}
-              className="rounded-xl bg-amber px-4 py-2 text-sm font-semibold text-ink transition-transform enabled:hover:scale-[1.02] disabled:cursor-not-allowed disabled:opacity-50"
+              className="bg-bureau-fg px-6 py-3 font-sansd text-sm font-semibold text-bureau transition-colors enabled:hover:bg-brass disabled:cursor-not-allowed disabled:opacity-50"
             >
               {switching ? 'Switching…' : 'Switch to Mantle Sepolia'}
             </button>
@@ -84,7 +84,7 @@ export function ChainGuard() {
               type="button"
               onClick={() => setDismissed(true)}
               aria-label="Dismiss network warning"
-              className="grid h-9 w-9 place-items-center rounded-xl border border-line text-muted transition-colors hover:text-fg"
+              className="grid h-10 w-10 place-items-center border border-bureau-line text-bureau-muted transition-colors hover:border-brass hover:text-brass"
             >
               <span aria-hidden className="text-lg leading-none">×</span>
             </button>

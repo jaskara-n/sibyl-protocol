@@ -3,6 +3,7 @@ import type { ReactNode } from 'react';
 import { api, type Consensus, type Market } from '../../lib/api';
 import { ConsensusGauge } from '../../components/ConsensusGauge';
 import { ConvictionBar } from '../../components/ConvictionBar';
+import { Reveal } from '../../components/landing/Reveal';
 
 function num(v: unknown): number {
   const n = typeof v === 'number' ? v : Number(v);
@@ -34,126 +35,132 @@ export default async function MarketsPage() {
   const totalAgents = markets.reduce((s, m) => s + num(m.conviction?.activeAgentCount), 0);
 
   return (
-    <div className="mx-auto max-w-6xl px-5 pb-24">
-      {/* Hero */}
-      <header className="relative pt-8 pb-8">
-        <div className="text-xs uppercase tracking-widest text-brand">the arenas</div>
-        <h1 className="mt-2 font-display text-4xl font-bold leading-[1.05] tracking-tight sm:text-5xl">
-          Markets, ranked by <span className="text-gradient">conviction</span>.
-        </h1>
-        <p className="mt-4 max-w-2xl text-lg text-muted">
-          Markets ranked by conviction — where the most reputed agents are actively positioned.
-        </p>
-        <p className="mt-3 max-w-2xl text-sm text-muted/80">
-          Each market runs its own reputation-weighted consensus. The Conviction Index combines the total
-          reputation weight backing a market with how many agents are actively voting — the louder and
-          better-calibrated the crowd, the higher the conviction.
-        </p>
-        <div className="mt-6 flex flex-wrap items-center gap-2 font-mono text-xs">
-          <Pill>{markets.length} markets</Pill>
-          <Pill className="text-long">{activeCount} active</Pill>
-          <Pill>{totalAgents} agent slots voting</Pill>
-        </div>
-      </header>
+    <div className="relative z-0 bg-bureau text-bureau-fg">
+      <div className="mx-auto max-w-6xl px-5 pb-24">
+        {/* Header */}
+        <header className="relative pt-12 pb-10">
+          <p className="font-monod text-[11px] uppercase tracking-[0.42em] text-brass">The map</p>
+          <h1 className="mt-4 font-serifd text-[clamp(2.2rem,4.6vw,3.6rem)] leading-[1.02]">
+            Markets, ranked by <span className="italic text-brass">conviction.</span>
+          </h1>
+          <p className="mt-5 max-w-2xl font-sansd text-bureau-muted">
+            Each market runs its own reputation-weighted consensus. The Conviction Index combines the
+            total reputation weight backing a market with how many agents are actively voting — the
+            louder and better-calibrated the crowd, the higher the conviction.
+          </p>
+          <div className="mt-7 flex flex-wrap items-center gap-2">
+            <Stamp>{markets.length} markets</Stamp>
+            <Stamp className="text-rise">{activeCount} active</Stamp>
+            <Stamp>{totalAgents} agent slots voting</Stamp>
+          </div>
+        </header>
 
-      {/* Grid */}
-      <section className="mt-4">
-        {markets.length > 0 ? (
-          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-            {markets.map((m, i) => {
-              const c = consensuses[i];
-              return (
-                <Link
-                  key={m.marketId}
-                  href={`/markets/${encodeURIComponent(m.marketId)}`}
-                  className={`group glass relative flex flex-col gap-4 rounded-2xl p-5 transition-all hover:border-brand/40 hover:shadow-[0_0_36px_-14px_rgba(139,92,246,0.7)] ${
-                    i === 0 ? 'border-brand/40 shadow-[0_0_36px_-16px_rgba(139,92,246,0.7)]' : ''
-                  }`}
-                >
-                  {i === 0 && (
-                    <span className="absolute -top-2.5 left-4 rounded-full border border-brand/50 bg-brand/15 px-2.5 py-0.5 font-mono text-[10px] font-semibold uppercase tracking-widest text-brand glow-brand">
-                      🔥 Most active
-                    </span>
-                  )}
-                  <div className="flex items-start justify-between gap-3">
-                    <div className="flex min-w-0 items-start gap-3">
-                      <span
-                        className={`grid h-8 w-8 shrink-0 place-items-center rounded-lg border font-display text-sm font-bold ${
-                          i === 0
-                            ? 'border-brand/50 bg-brand/15 text-brand'
-                            : 'border-line bg-card/60 text-muted'
-                        }`}
-                        title={`Conviction rank #${i + 1}`}
-                      >
-                        {i + 1}
-                      </span>
-                      <div className="min-w-0">
-                        <div className="truncate font-display text-lg font-semibold text-fg transition-colors group-hover:text-brand">
-                          {m.name ?? m.marketId}
-                        </div>
-                        <div className="mt-0.5 truncate font-mono text-[11px] text-muted">{m.marketId}</div>
-                      </div>
-                    </div>
-                    <span
-                      title={m.active ? 'Market is live' : 'Market is idle'}
-                      aria-label={m.active ? 'Market status: live' : 'Market status: idle'}
-                      className={`shrink-0 rounded-full border px-2 py-0.5 font-mono text-[10px] font-semibold uppercase tracking-widest ${
-                        m.active
-                          ? 'border-long/50 bg-long/10 text-long'
-                          : 'border-line bg-card/60 text-muted'
-                      }`}
+        <div className="tick-scale" aria-hidden />
+
+        {/* Grid */}
+        <section className="mt-10">
+          {markets.length > 0 ? (
+            <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+              {markets.map((m, i) => {
+                const c = consensuses[i];
+                return (
+                  <Reveal key={m.marketId} delay={i * 0.06}>
+                    <Link
+                      href={`/markets/${encodeURIComponent(m.marketId)}`}
+                      className="group relative flex h-full flex-col gap-4 bureau-frame p-6 transition-colors hover:border-brass"
                     >
-                      {m.active ? 'live' : 'idle'}
-                    </span>
-                  </div>
+                      <div className="bureau-grain" aria-hidden />
+                      {i === 0 && (
+                        <span
+                          aria-label="Conviction rank one: most active market"
+                          className="absolute -top-3 right-5 grid h-10 w-10 rotate-[-6deg] place-items-center border border-brass font-serifd text-base text-brass transition-transform group-hover:rotate-0"
+                        >
+                          №1
+                        </span>
+                      )}
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="flex min-w-0 items-start gap-3">
+                          <span
+                            className={`shrink-0 font-monod text-sm ${
+                              i === 0 ? 'text-brass' : 'text-bureau-muted'
+                            }`}
+                            title={`Conviction rank #${i + 1}`}
+                          >
+                            {String(i + 1).padStart(2, '0')}
+                          </span>
+                          <div className="min-w-0">
+                            <div className="truncate font-sansd text-lg font-semibold text-bureau-fg transition-colors group-hover:text-brass">
+                              {m.name ?? m.marketId}
+                            </div>
+                            <div className="mt-0.5 truncate font-monod text-[10px] uppercase tracking-[0.2em] text-bureau-muted">
+                              {m.marketId}
+                            </div>
+                          </div>
+                        </div>
+                        <span
+                          title={m.active ? 'Market is live' : 'Market is idle'}
+                          aria-label={m.active ? 'Market status: live' : 'Market status: idle'}
+                          className={`shrink-0 border px-2 py-0.5 font-monod text-[10px] uppercase tracking-[0.18em] ${
+                            m.active ? 'border-rise text-rise' : 'border-bureau-line text-bureau-muted'
+                          }`}
+                        >
+                          {m.active ? 'live' : 'idle'}
+                        </span>
+                      </div>
 
-                  <ConsensusGauge
-                    direction={c.direction}
-                    confidence={c.confidence}
-                    sizeBps={c.sizeBps}
-                    contributors={c.contributors.length}
-                  />
+                      <ConsensusGauge
+                        direction={c.direction}
+                        confidence={c.confidence}
+                        sizeBps={c.sizeBps}
+                        contributors={c.contributors.length}
+                      />
 
-                  <ConvictionBar
-                    totalWeight={num(m.conviction?.totalWeight)}
-                    activeAgentCount={num(m.conviction?.activeAgentCount)}
-                    maxWeight={maxWeight}
-                    index={i}
-                  />
+                      <ConvictionBar
+                        totalWeight={num(m.conviction?.totalWeight)}
+                        activeAgentCount={num(m.conviction?.activeAgentCount)}
+                        maxWeight={maxWeight}
+                        index={i}
+                      />
 
-                  <div className="mt-auto flex items-center justify-between border-t border-line pt-3 font-mono text-xs text-muted">
-                    <span>{num(m.conviction?.activeAgentCount)} active agents</span>
-                    <span className="text-brand opacity-0 transition-opacity group-hover:opacity-100">
-                      enter arena →
-                    </span>
-                  </div>
-                </Link>
-              );
-            })}
-          </div>
-        ) : (
-          <div className="glass rounded-2xl p-8 text-center">
-            <div className="mx-auto grid h-12 w-12 place-items-center rounded-xl bg-brand/15 font-display text-2xl text-brand glow-brand">
-              ◈
+                      <div className="mt-auto flex items-center justify-between border-t border-bureau-line pt-3 font-monod text-[10px] uppercase tracking-[0.2em] text-bureau-muted">
+                        <span>{num(m.conviction?.activeAgentCount)} active agents</span>
+                        <span className="text-brass opacity-0 transition-opacity group-hover:opacity-100">
+                          enter →
+                        </span>
+                      </div>
+                    </Link>
+                  </Reveal>
+                );
+              })}
             </div>
-            <h2 className="mt-4 font-display text-xl font-semibold">No markets yet</h2>
-            <p className="mx-auto mt-2 max-w-md text-muted">
-              Markets appear here once agents start voting and a reputation-weighted consensus forms.
-            </p>
-          </div>
-        )}
-      </section>
+          ) : (
+            <div className="bureau-frame p-10 text-center">
+              <div className="bureau-grain" aria-hidden />
+              <p className="font-serifd text-2xl italic text-bureau-muted">
+                No markets on record yet.
+              </p>
+              <p className="mx-auto mt-3 max-w-md font-sansd text-sm text-bureau-muted">
+                Markets appear here once agents start voting and a reputation-weighted consensus forms.
+              </p>
+            </div>
+          )}
+        </section>
 
-      <footer className="mt-14 border-t border-line pt-6 text-center font-mono text-xs text-muted">
-        conviction = reputation weight × active agents · per-market reputation-weighted consensus
-      </footer>
+        <footer className="mt-16 border-t border-bureau-line pt-6 text-center font-monod text-[10px] uppercase tracking-[0.3em] text-bureau-muted">
+          conviction = reputation weight × active agents · per-market reputation-weighted consensus
+        </footer>
+      </div>
     </div>
   );
 }
 
-function Pill({ children, className }: { children: ReactNode; className?: string }) {
+function Stamp({ children, className }: { children: ReactNode; className?: string }) {
   return (
-    <span className={`rounded-full border border-line bg-card/60 px-3 py-1 text-muted ${className ?? ''}`}>
+    <span
+      className={`border border-bureau-line px-2.5 py-1 font-monod text-[10px] uppercase tracking-[0.18em] text-bureau-muted ${
+        className ?? ''
+      }`}
+    >
       {children}
     </span>
   );

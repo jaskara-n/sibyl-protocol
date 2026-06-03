@@ -1,7 +1,7 @@
 import Link from 'next/link';
-import type { ReactNode } from 'react';
 import { api, type Prediction } from '../../lib/api';
 import { ProbabilityBar } from '../../components/ProbabilityBar';
+import { Reveal } from '../../components/landing/Reveal';
 
 const SUSD_DECIMALS = 18;
 
@@ -17,18 +17,18 @@ function fmtReserve(v: string | null): string {
   }
 }
 
-/** Resolution status descriptor for the badge. */
+/** Resolution status descriptor for the badge stamp. */
 function statusOf(p: Prediction): { label: string; cls: string } {
   if (p.resolved && p.outcomeLabel && p.outcomeLabel !== 'UNRESOLVED') {
-    if (p.outcomeLabel === 'YES') return { label: 'resolved · YES', cls: 'border-long/50 bg-long/10 text-long' };
-    if (p.outcomeLabel === 'NO') return { label: 'resolved · NO', cls: 'border-short/50 bg-short/10 text-short' };
-    return { label: 'resolved · invalid', cls: 'border-amber/50 bg-amber/10 text-amber' };
+    if (p.outcomeLabel === 'YES') return { label: 'resolved · YES', cls: 'border-rise text-rise' };
+    if (p.outcomeLabel === 'NO') return { label: 'resolved · NO', cls: 'border-fall text-fall' };
+    return { label: 'resolved · invalid', cls: 'border-brass text-brass' };
   }
   const now = Math.floor(Date.now() / 1000);
   if (p.resolveTime && now >= p.resolveTime) {
-    return { label: 'awaiting resolution', cls: 'border-amber/50 bg-amber/10 text-amber' };
+    return { label: 'awaiting resolution', cls: 'border-brass text-brass' };
   }
-  return { label: 'open · trading', cls: 'border-long/50 bg-long/10 text-long' };
+  return { label: 'open · trading', cls: 'border-rise text-rise' };
 }
 
 function fmtResolveTime(ts: number | null): string {
@@ -49,93 +49,101 @@ export default async function ForecastPage() {
   const live = markets.filter((m) => m.source === 'chain').length;
 
   return (
-    <div className="mx-auto max-w-6xl px-5 pb-24">
-      {/* Hero */}
-      <header className="relative pt-8 pb-8">
-        <div className="text-xs uppercase tracking-widest text-brand">forecast markets</div>
-        <h1 className="mt-2 font-display text-4xl font-bold leading-[1.05] tracking-tight sm:text-5xl">
-          Trade the <span className="text-gradient">probability</span> of the future.
-        </h1>
-        <p className="mt-4 max-w-2xl text-lg text-muted">
-          Binary prediction markets on Mantle. Each market has a fixed-product market maker where the
-          YES price <span className="text-fg">is</span> the implied probability — buy YES or NO, mint and
-          redeem complete sets, and claim winnings after resolution.
-        </p>
-        <div className="mt-6 flex flex-wrap items-center gap-2 font-mono text-xs">
-          <Pill>{markets.length} markets</Pill>
-          <Pill className="text-long">{open} open</Pill>
-          <Pill className="text-cyan">{live} live on-chain</Pill>
-        </div>
-      </header>
+    <div className="relative z-0 bg-bureau text-bureau-fg">
+      <div className="mx-auto max-w-6xl px-5 pb-24">
+        {/* Header */}
+        <header className="relative pt-12 pb-10">
+          <p className="font-monod text-[11px] uppercase tracking-[0.42em] text-brass">The forecast</p>
+          <h1 className="mt-4 max-w-3xl font-serifd text-[clamp(2.2rem,4.6vw,3.6rem)] leading-[1.02]">
+            Trade the <span className="italic text-brass">probability</span> of the future.
+          </h1>
+          <p className="mt-5 max-w-2xl font-sansd text-sm leading-relaxed text-bureau-muted">
+            Binary prediction markets on Mantle. Each market has a fixed-product market maker where the YES
+            price is the implied probability — buy YES or NO, mint and redeem complete sets, and claim
+            winnings after resolution.
+          </p>
+          <div className="mt-7 flex flex-wrap items-center gap-2 font-monod text-[11px] uppercase tracking-[0.18em]">
+            <Stamp>{markets.length} markets</Stamp>
+            <Stamp className="border-rise text-rise">{open} open</Stamp>
+            <Stamp className="border-brass text-brass">{live} live on-chain</Stamp>
+          </div>
+        </header>
 
-      {/* Grid */}
-      <section className="mt-4">
-        {markets.length > 0 ? (
-          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-            {markets.map((m, i) => {
-              const st = statusOf(m);
-              return (
-                <Link
-                  key={m.marketId}
-                  href={`/forecast/${encodeURIComponent(m.marketId)}`}
-                  className="group glass relative flex flex-col gap-4 rounded-2xl p-5 transition-all hover:border-brand/40 hover:shadow-[0_0_36px_-14px_rgba(139,92,246,0.7)]"
-                >
-                  <div className="flex items-start justify-between gap-3">
-                    <div className="min-w-0">
-                      <div className="font-display text-base font-semibold leading-snug text-fg transition-colors group-hover:text-brand">
-                        {m.question ?? m.marketId}
-                      </div>
-                      <div className="mt-1 truncate font-mono text-[11px] text-muted">{m.marketId}</div>
-                    </div>
-                    <span
-                      title={`Status: ${st.label}`}
-                      aria-label={`Market status: ${st.label}`}
-                      className={`shrink-0 rounded-full border px-2 py-0.5 font-mono text-[10px] font-semibold uppercase tracking-widest ${st.cls}`}
+        <div className="tick-scale" aria-hidden />
+
+        {/* Dossier grid */}
+        <section className="mt-12">
+          {markets.length > 0 ? (
+            <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+              {markets.map((m, i) => {
+                const st = statusOf(m);
+                return (
+                  <Reveal key={m.marketId} delay={i * 0.05}>
+                    <Link
+                      href={`/forecast/${encodeURIComponent(m.marketId)}`}
+                      className="bureau-frame group flex h-full flex-col gap-4 p-6 transition-colors hover:border-brass"
                     >
-                      {st.label}
-                    </span>
-                  </div>
+                      <div className="bureau-grain" aria-hidden />
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="min-w-0">
+                          <div className="font-serifd text-xl leading-snug text-bureau-fg transition-colors group-hover:text-brass">
+                            {m.question ?? m.marketId}
+                          </div>
+                          <div className="mt-1 truncate font-monod text-[11px] text-bureau-muted">{m.marketId}</div>
+                        </div>
+                        <span
+                          title={`Status: ${st.label}`}
+                          aria-label={`Market status: ${st.label}`}
+                          className={`shrink-0 border px-2 py-0.5 font-monod text-[10px] uppercase tracking-[0.18em] ${st.cls}`}
+                        >
+                          {st.label}
+                        </span>
+                      </div>
 
-                  <ProbabilityBar yesPct={m.priceYesPct} index={i} />
+                      <ProbabilityBar yesPct={m.priceYesPct} index={i} />
 
-                  <div className="grid grid-cols-2 gap-2">
-                    <Stat label="YES reserve" value={fmtReserve(m.reserveYes)} accent="text-long" />
-                    <Stat label="NO reserve" value={fmtReserve(m.reserveNo)} accent="text-short" />
-                  </div>
+                      <div className="grid grid-cols-2 gap-3">
+                        <Stat label="YES reserve" value={fmtReserve(m.reserveYes)} accent="text-rise" />
+                        <Stat label="NO reserve" value={fmtReserve(m.reserveNo)} accent="text-fall" />
+                      </div>
 
-                  <div className="mt-auto flex items-center justify-between border-t border-line pt-3 font-mono text-xs text-muted">
-                    <span>resolves {fmtResolveTime(m.resolveTime)}</span>
-                    <span className="text-brand opacity-0 transition-opacity group-hover:opacity-100">
-                      trade →
-                    </span>
-                  </div>
-                </Link>
-              );
-            })}
-          </div>
-        ) : (
-          <div className="glass rounded-2xl p-8 text-center">
-            <div className="mx-auto grid h-12 w-12 place-items-center rounded-xl bg-brand/15 font-display text-2xl text-brand glow-brand">
-              ◈
+                      <div className="mt-auto flex items-center justify-between border-t border-bureau-line pt-3 font-monod text-[11px] uppercase tracking-[0.18em] text-bureau-muted">
+                        <span>resolves {fmtResolveTime(m.resolveTime)}</span>
+                        <span className="text-brass opacity-0 transition-opacity group-hover:opacity-100">
+                          trade →
+                        </span>
+                      </div>
+                    </Link>
+                  </Reveal>
+                );
+              })}
             </div>
-            <h2 className="mt-4 font-display text-xl font-semibold">No prediction markets yet</h2>
-            <p className="mx-auto mt-2 max-w-md text-muted">
-              No prediction markets yet — launch one from <Link href="/create" className="text-brand hover:underline">/create</Link>.
-            </p>
-          </div>
-        )}
-      </section>
+          ) : (
+            <div className="bureau-frame relative p-10 text-center">
+              <div className="bureau-grain" aria-hidden />
+              <h2 className="font-serifd text-2xl text-bureau-fg">No prediction markets yet</h2>
+              <p className="mx-auto mt-3 max-w-md font-sansd text-sm text-bureau-muted">
+                No prediction markets yet — launch one from{' '}
+                <Link href="/create" className="text-brass hover:underline">
+                  /create
+                </Link>
+                .
+              </p>
+            </div>
+          )}
+        </section>
 
-      <footer className="mt-14 border-t border-line pt-6 text-center font-mono text-xs text-muted">
-        FPMM price = implied probability · complete-set mint/redeem · resolver-gated resolution on Mantle
-      </footer>
+        <footer className="mt-16 border-t border-bureau-line pt-6 text-center font-monod text-[10px] uppercase tracking-[0.3em] text-bureau-muted/70">
+          FPMM price = implied probability · complete-set mint/redeem · resolver-gated resolution on Mantle
+        </footer>
+      </div>
     </div>
   );
 }
 
-function Pill({ children, className }: { children: ReactNode; className?: string }) {
+function Stamp({ children, className }: { children: React.ReactNode; className?: string }) {
   return (
-    <span className={`rounded-full border border-line bg-card/60 px-3 py-1 text-muted ${className ?? ''}`}>
+    <span className={`border border-bureau-line px-2 py-0.5 text-bureau-muted ${className ?? ''}`}>
       {children}
     </span>
   );
@@ -143,9 +151,9 @@ function Pill({ children, className }: { children: ReactNode; className?: string
 
 function Stat({ label, value, accent }: { label: string; value: string; accent?: string }) {
   return (
-    <div className="rounded-xl border border-line bg-card/40 p-3">
-      <div className="font-mono text-[10px] uppercase tracking-widest text-muted">{label}</div>
-      <div className={`mt-1 font-mono text-sm font-semibold ${accent ?? 'text-fg'}`}>{value}</div>
+    <div className="border border-bureau-line bg-bureau p-3">
+      <div className="font-monod text-[10px] uppercase tracking-[0.18em] text-bureau-muted">{label}</div>
+      <div className={`mt-1 font-monod text-sm font-semibold ${accent ?? 'text-bureau-fg'}`}>{value}</div>
     </div>
   );
 }

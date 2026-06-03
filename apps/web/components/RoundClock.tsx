@@ -14,7 +14,11 @@ export function RoundClock() {
   }, []);
 
   if (now === null) {
-    return <div className="font-mono text-sm text-muted">round · syncing…</div>;
+    return (
+      <div className="font-monod text-[11px] uppercase tracking-[0.2em] text-bureau-muted">
+        round · syncing…
+      </div>
+    );
   }
 
   const msToNextHour = 3_600_000 - (now % 3_600_000);
@@ -24,13 +28,13 @@ export function RoundClock() {
   const round = Math.floor(now / 3_600_000);
 
   return (
-    <div className="flex items-center gap-3">
-      <span className="relative flex h-2.5 w-2.5">
-        <span className="live-dot absolute inline-flex h-2.5 w-2.5 rounded-full bg-long" />
+    <div className="flex items-center gap-3 font-monod text-[11px] uppercase tracking-[0.2em]">
+      <span className="relative flex h-2 w-2">
+        <span className="live-dot absolute inline-flex h-2 w-2 rounded-full bg-rise" />
       </span>
-      <span className="text-xs uppercase tracking-widest text-muted">Round #{round}</span>
-      <span className="font-mono text-sm text-fg">
-        next consensus in <span className="text-long">{mm}:{ss}</span>
+      <span className="text-bureau-muted">Round #{round}</span>
+      <span className="text-bureau-fg">
+        next consensus in <span className="text-rise">{mm}:{ss}</span>
       </span>
     </div>
   );

@@ -227,22 +227,26 @@ export function VaultForm({ sharePrice }: { sharePrice: number }) {
   const txError = writeError ?? receiptError;
 
   return (
-    <div className="glass rounded-2xl p-6">
-      <div className="flex items-center justify-between">
-        <div className="text-xs uppercase tracking-widest text-brand">deposit / withdraw</div>
-        <span className="rounded-full border border-long/40 bg-long/10 px-2.5 py-1 font-mono text-[10px] font-semibold uppercase tracking-widest text-long">
-          live · mantle sepolia
+    <div className="bureau-frame p-6">
+      <div className="bureau-grain" aria-hidden />
+
+      <div className="flex items-baseline justify-between border-b border-bureau-line pb-3">
+        <span className="font-monod text-[10px] uppercase tracking-[0.32em] text-bureau-muted">
+          Deposit / withdraw
+        </span>
+        <span className="border border-rise/50 px-2 py-0.5 font-monod text-[10px] uppercase tracking-[0.18em] text-rise">
+          Live · Mantle Sepolia
         </span>
       </div>
 
       {/* Account balances */}
-      <div className="mt-4 grid grid-cols-2 gap-2">
-        <Stat label="sUSD balance" value={readEnabled ? fmt(susdBalance, 2) : '—'} accent="text-cyan" />
-        <Stat label="your shares" value={readEnabled ? fmt(shares, 6) : '—'} accent="text-brand" />
+      <div className="mt-5 grid grid-cols-2 gap-3">
+        <Stat label="sUSD balance" value={readEnabled ? fmt(susdBalance, 2) : '—'} accent="text-brass" />
+        <Stat label="Your shares" value={readEnabled ? fmt(shares, 6) : '—'} accent="text-bureau-fg" />
       </div>
 
       {/* Mode toggle */}
-      <div className="mt-4 grid grid-cols-2 gap-1 rounded-xl border border-line bg-ink p-1">
+      <div className="mt-5 grid grid-cols-2 border border-bureau-line">
         {(['deposit', 'withdraw'] as Mode[]).map((m) => (
           <button
             key={m}
@@ -252,8 +256,8 @@ export function VaultForm({ sharePrice }: { sharePrice: number }) {
               resetWrite();
               setPhase('idle');
             }}
-            className={`rounded-lg px-3 py-2 font-mono text-xs uppercase tracking-widest transition-colors ${
-              mode === m ? 'bg-brand text-ink' : 'text-muted hover:text-fg'
+            className={`px-3 py-2.5 font-monod text-[11px] uppercase tracking-[0.24em] transition-colors first:border-r first:border-bureau-line ${
+              mode === m ? 'bg-bureau-fg text-bureau' : 'text-bureau-muted hover:text-brass'
             }`}
           >
             {m}
@@ -262,8 +266,8 @@ export function VaultForm({ sharePrice }: { sharePrice: number }) {
       </div>
 
       {/* Amount */}
-      <label className="mt-4 block">
-        <span className="font-mono text-[11px] uppercase tracking-widest text-muted">
+      <label className="mt-5 block">
+        <span className="font-monod text-[10px] uppercase tracking-[0.28em] text-bureau-muted">
           {mode === 'deposit' ? 'sUSD assets to deposit' : 'shares to redeem'}
         </span>
         <input
@@ -274,36 +278,36 @@ export function VaultForm({ sharePrice }: { sharePrice: number }) {
             resetWrite();
             setPhase('idle');
           }}
-          className="mt-1.5 w-full rounded-xl border border-line bg-ink px-4 py-3 font-mono text-lg text-fg outline-none focus:border-brand/60"
+          className="mt-2 w-full border border-bureau-line bg-bureau-panel px-4 py-3 font-monod text-lg text-bureau-fg outline-none focus:border-brass"
           placeholder="0.0"
         />
       </label>
 
       {/* Preview */}
-      <div className="mt-4 space-y-2 rounded-xl border border-line bg-card/40 p-4">
+      <div className="mt-5 border border-bureau-line bg-bureau-panel p-4">
         <PreviewRow
-          label="share price"
+          label="Share price"
           value={price.toLocaleString(undefined, { maximumFractionDigits: 6 })}
         />
         {mode === 'deposit' ? (
           <PreviewRow
-            label="shares you'd receive"
+            label="Shares you'd receive"
             value={previewText}
-            accent="text-long"
+            accent="text-rise"
             hint="previewDeposit"
           />
         ) : (
           <PreviewRow
-            label="assets you'd receive"
+            label="Assets you'd receive"
             value={previewText}
-            accent="text-long"
+            accent="text-rise"
             hint="previewRedeem"
           />
         )}
       </div>
 
       {/* Action area — gated on connect + chain */}
-      <div className="mt-4">
+      <div className="mt-5">
         {!isConnected ? (
           <div className="flex justify-center">
             <ConnectButton label="Connect wallet to transact" />
@@ -313,7 +317,7 @@ export function VaultForm({ sharePrice }: { sharePrice: number }) {
             type="button"
             disabled={switching}
             onClick={() => switchChain({ chainId: mantleSepolia.id })}
-            className="w-full rounded-xl bg-amber px-4 py-3 font-semibold text-ink transition-transform enabled:hover:scale-[1.01] disabled:cursor-not-allowed disabled:opacity-50"
+            className="w-full border border-bureau-line px-6 py-3 font-sansd text-sm font-semibold text-bureau-fg transition-colors enabled:hover:border-brass enabled:hover:text-brass disabled:cursor-not-allowed disabled:opacity-50"
           >
             {switching ? 'Switching…' : 'Switch to Mantle Sepolia (5003)'}
           </button>
@@ -322,7 +326,7 @@ export function VaultForm({ sharePrice }: { sharePrice: number }) {
             type="button"
             disabled={!validAmount || busy}
             onClick={onApprove}
-            className="w-full rounded-xl bg-linear-to-r from-brand to-cyan px-4 py-3 font-semibold text-ink transition-transform enabled:hover:scale-[1.01] disabled:cursor-not-allowed disabled:opacity-40"
+            className="w-full bg-bureau-fg px-6 py-3 font-sansd text-sm font-semibold text-bureau transition-colors enabled:hover:bg-brass disabled:cursor-not-allowed disabled:opacity-40"
           >
             {busy && phase === 'approving' ? 'Approving sUSD…' : 'Approve sUSD'}
           </button>
@@ -331,7 +335,7 @@ export function VaultForm({ sharePrice }: { sharePrice: number }) {
             type="button"
             disabled={!validAmount || busy}
             onClick={onDeposit}
-            className="w-full rounded-xl bg-linear-to-r from-brand to-cyan px-4 py-3 font-semibold text-ink transition-transform enabled:hover:scale-[1.01] disabled:cursor-not-allowed disabled:opacity-40"
+            className="w-full bg-bureau-fg px-6 py-3 font-sansd text-sm font-semibold text-bureau transition-colors enabled:hover:bg-brass disabled:cursor-not-allowed disabled:opacity-40"
           >
             {busy ? 'Depositing…' : 'Deposit'}
           </button>
@@ -340,7 +344,7 @@ export function VaultForm({ sharePrice }: { sharePrice: number }) {
             type="button"
             disabled={!validAmount || busy}
             onClick={onWithdraw}
-            className="w-full rounded-xl bg-linear-to-r from-brand to-cyan px-4 py-3 font-semibold text-ink transition-transform enabled:hover:scale-[1.01] disabled:cursor-not-allowed disabled:opacity-40"
+            className="w-full bg-bureau-fg px-6 py-3 font-sansd text-sm font-semibold text-bureau transition-colors enabled:hover:bg-brass disabled:cursor-not-allowed disabled:opacity-40"
           >
             {busy ? 'Redeeming…' : 'Redeem shares'}
           </button>
@@ -350,10 +354,8 @@ export function VaultForm({ sharePrice }: { sharePrice: number }) {
       {/* Tx status */}
       {txHash && (
         <div
-          className={`mt-3 rounded-xl border p-3 font-mono text-xs ${
-            isConfirmed
-              ? 'border-long/30 bg-long/5 text-long'
-              : 'border-cyan/30 bg-cyan/5 text-cyan'
+          className={`mt-3 border p-3 font-monod text-xs ${
+            isConfirmed ? 'border-rise/40 text-rise' : 'border-brass/40 text-brass'
           }`}
         >
           <div>{isConfirming ? 'Waiting for confirmation…' : isConfirmed ? 'Confirmed.' : 'Submitted.'}</div>
@@ -369,17 +371,17 @@ export function VaultForm({ sharePrice }: { sharePrice: number }) {
       )}
 
       {txError && (
-        <div className="mt-3 rounded-xl border border-short/30 bg-short/5 p-3 font-mono text-xs text-short">
+        <div className="mt-3 border border-fall/40 p-3 font-monod text-xs text-fall">
           {(txError as { shortMessage?: string }).shortMessage ?? txError.message}
         </div>
       )}
 
       {/* Disclaimer */}
-      <p className="mt-4 border-t border-line pt-3 font-mono text-[11px] leading-relaxed text-muted">
-        Transactions are <b className="text-fg">real and signed by your wallet</b> on Mantle Sepolia
-        (chain 5003). Deposits route through an ERC-20 <code className="text-fg/80">approve</code> when
-        allowance is insufficient, then <code className="text-fg/80">deposit(assets, you)</code>; withdrawals
-        call <code className="text-fg/80">redeem(shares, you, you)</code>. Testnet assets only.
+      <p className="mt-5 border-t border-bureau-line pt-3 font-monod text-[11px] leading-relaxed text-bureau-muted">
+        Transactions are <b className="text-bureau-fg">real and signed by your wallet</b> on Mantle Sepolia
+        (chain 5003). Deposits route through an ERC-20 <code className="text-brass">approve</code> when
+        allowance is insufficient, then <code className="text-brass">deposit(assets, you)</code>; withdrawals
+        call <code className="text-brass">redeem(shares, you, you)</code>. Testnet assets only.
       </p>
     </div>
   );
@@ -397,21 +399,21 @@ function PreviewRow({
   hint?: string;
 }) {
   return (
-    <div className="flex items-center justify-between text-sm">
-      <span className="text-muted">
+    <div className="flex items-baseline justify-between gap-6 py-1.5 text-sm">
+      <span className="font-monod text-[10px] uppercase tracking-[0.24em] text-bureau-muted">
         {label}
-        {hint && <span className="ml-1.5 font-mono text-[10px] text-muted/60">{hint}()</span>}
+        {hint && <span className="ml-1.5 normal-case tracking-normal text-bureau-muted/60">{hint}()</span>}
       </span>
-      <span className={`font-mono ${accent ?? 'text-fg'}`}>{value}</span>
+      <span className={`font-monod ${accent ?? 'text-bureau-fg'}`}>{value}</span>
     </div>
   );
 }
 
 function Stat({ label, value, accent }: { label: string; value: string; accent?: string }) {
   return (
-    <div className="rounded-xl border border-line bg-card/40 p-3">
-      <div className="font-mono text-[10px] uppercase tracking-widest text-muted">{label}</div>
-      <div className={`mt-1 font-mono text-sm font-semibold ${accent ?? 'text-fg'}`}>{value}</div>
+    <div className="border border-bureau-line bg-bureau-panel p-3">
+      <div className="font-monod text-[10px] uppercase tracking-[0.24em] text-bureau-muted">{label}</div>
+      <div className={`mt-1 font-monod text-sm font-medium ${accent ?? 'text-bureau-fg'}`}>{value}</div>
     </div>
   );
 }

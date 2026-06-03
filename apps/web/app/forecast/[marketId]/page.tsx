@@ -4,6 +4,7 @@ import type { Address } from 'viem';
 import { api, type Prediction } from '../../../lib/api';
 import { ProbabilityBar } from '../../../components/ProbabilityBar';
 import { ForecastTradePanel } from '../../../components/ForecastTradePanel';
+import { Reveal } from '../../../components/landing/Reveal';
 import { short } from '../../../lib/utils';
 
 const SUSD_DECIMALS = 18;
@@ -34,15 +35,15 @@ function fmtResolveTime(ts: number | null): string {
 
 function statusOf(p: Prediction): { label: string; cls: string } {
   if (p.resolved && p.outcomeLabel && p.outcomeLabel !== 'UNRESOLVED') {
-    if (p.outcomeLabel === 'YES') return { label: 'resolved · YES', cls: 'border-long/50 bg-long/10 text-long' };
-    if (p.outcomeLabel === 'NO') return { label: 'resolved · NO', cls: 'border-short/50 bg-short/10 text-short' };
-    return { label: 'resolved · invalid', cls: 'border-amber/50 bg-amber/10 text-amber' };
+    if (p.outcomeLabel === 'YES') return { label: 'resolved · YES', cls: 'border-rise text-rise' };
+    if (p.outcomeLabel === 'NO') return { label: 'resolved · NO', cls: 'border-fall text-fall' };
+    return { label: 'resolved · invalid', cls: 'border-brass text-brass' };
   }
   const now = Math.floor(Date.now() / 1000);
   if (p.resolveTime && now >= p.resolveTime) {
-    return { label: 'awaiting resolution', cls: 'border-amber/50 bg-amber/10 text-amber' };
+    return { label: 'awaiting resolution', cls: 'border-brass text-brass' };
   }
-  return { label: 'open · trading', cls: 'border-long/50 bg-long/10 text-long' };
+  return { label: 'open · trading', cls: 'border-rise text-rise' };
 }
 
 export default async function ForecastDetailPage({
@@ -63,17 +64,20 @@ export default async function ForecastDetailPage({
 
   if (!market) {
     return (
-      <div className="mx-auto max-w-3xl px-5 pb-24 pt-8">
-        <Link
-          href="/forecast"
-          aria-label="Back to all forecast markets"
-          className="font-mono text-xs text-muted transition-colors hover:text-brand"
-        >
-          ← all forecast markets
-        </Link>
-        <div className="glass mt-8 rounded-2xl p-8 text-center">
-          <h1 className="font-display text-2xl font-semibold">Market not found</h1>
-          <p className="mt-2 text-muted">No prediction market matches “{id}”.</p>
+      <div className="relative z-0 bg-bureau text-bureau-fg">
+        <div className="mx-auto max-w-3xl px-5 pb-24 pt-12">
+          <Link
+            href="/forecast"
+            aria-label="Back to all forecast markets"
+            className="font-monod text-[11px] uppercase tracking-[0.18em] text-bureau-muted transition-colors hover:text-brass"
+          >
+            ← all forecast markets
+          </Link>
+          <div className="bureau-frame relative mt-8 p-10 text-center">
+            <div className="bureau-grain" aria-hidden />
+            <h1 className="font-serifd text-3xl text-bureau-fg">Market not found</h1>
+            <p className="mt-3 font-sansd text-sm text-bureau-muted">No prediction market matches &ldquo;{id}&rdquo;.</p>
+          </div>
         </div>
       </div>
     );
@@ -84,81 +88,98 @@ export default async function ForecastDetailPage({
   const noPct = typeof yesPct === 'number' ? 100 - yesPct : null;
 
   return (
-    <div className="mx-auto max-w-6xl px-5 pb-24">
-      {/* Hero */}
-      <header className="relative pt-8 pb-6">
-        <Link
-          href="/forecast"
-          aria-label="Back to all forecast markets"
-          className="font-mono text-xs text-muted transition-colors hover:text-brand"
-        >
-          ← all forecast markets
-        </Link>
-        <div className="mt-4 flex flex-wrap items-start justify-between gap-3">
-          <h1 className="max-w-3xl font-display text-3xl font-bold leading-[1.1] tracking-tight sm:text-4xl">
-            {market.question ?? id}
-          </h1>
-          <span
-            title={`Status: ${st.label}`}
-            aria-label={`Market status: ${st.label}`}
-            className={`shrink-0 rounded-full border px-2.5 py-1 font-mono text-[11px] font-semibold uppercase tracking-widest ${st.cls}`}
+    <div className="relative z-0 bg-bureau text-bureau-fg">
+      <div className="mx-auto max-w-6xl px-5 pb-24">
+        {/* Header */}
+        <header className="relative pt-12 pb-8">
+          <Link
+            href="/forecast"
+            aria-label="Back to all forecast markets"
+            className="font-monod text-[11px] uppercase tracking-[0.18em] text-bureau-muted transition-colors hover:text-brass"
           >
-            {st.label}
-          </span>
+            ← all forecast markets
+          </Link>
+          <p className="mt-6 font-monod text-[11px] uppercase tracking-[0.42em] text-brass">The forecast</p>
+          <div className="mt-4 flex flex-wrap items-start justify-between gap-3">
+            <h1 className="max-w-3xl font-serifd text-[clamp(2rem,4vw,3.2rem)] leading-[1.04]">
+              {market.question ?? id}
+            </h1>
+            <span
+              title={`Status: ${st.label}`}
+              aria-label={`Market status: ${st.label}`}
+              className={`shrink-0 border px-2.5 py-1 font-monod text-[10px] uppercase tracking-[0.18em] ${st.cls}`}
+            >
+              {st.label}
+            </span>
+          </div>
+          <div className="mt-3 font-monod text-[11px] text-bureau-muted">{id}</div>
+        </header>
+
+        <div className="tick-scale" aria-hidden />
+
+        <div className="mt-10 flex flex-col items-stretch gap-6 lg:flex-row lg:items-start">
+          {/* Probability + facts */}
+          <div className="min-w-0 flex-1 space-y-6">
+            <Reveal>
+              <section className="bureau-frame relative p-6">
+                <div className="bureau-grain" aria-hidden />
+                <div className="font-monod text-[11px] uppercase tracking-[0.32em] text-brass">
+                  implied probability
+                </div>
+                <div className="mt-5 flex items-end gap-10">
+                  <ProbValue label="YES" value={yesPct} accent="text-rise" />
+                  <ProbValue label="NO" value={noPct} accent="text-fall" />
+                </div>
+                <div className="mt-6">
+                  <ProbabilityBar yesPct={yesPct} />
+                </div>
+                <p className="mt-5 font-monod text-[11px] leading-relaxed text-bureau-muted">
+                  The FPMM sets{' '}
+                  <span className="text-bureau-fg">price(YES) = reserveNO / (reserveYES + reserveNO)</span>, so
+                  the YES price <span className="text-bureau-fg">is</span> the market-implied probability.
+                  Buying YES pushes its price up; buying NO pushes it down.
+                </p>
+              </section>
+            </Reveal>
+
+            <Reveal delay={0.1}>
+              <section className="bureau-frame relative p-6">
+                <div className="bureau-grain" aria-hidden />
+                <div className="flex items-baseline justify-between border-b border-bureau-line pb-3">
+                  <span className="font-monod text-[11px] uppercase tracking-[0.32em] text-brass">
+                    market facts
+                  </span>
+                  <span className="font-monod text-[10px] uppercase tracking-[0.28em] text-bureau-muted">
+                    {market.source === 'chain' ? 'live on-chain' : 'fallback · cached'}
+                  </span>
+                </div>
+                <dl className="mt-5 space-y-3.5">
+                  <FactRow label="YES reserve" value={fmtReserve(market.reserveYes)} />
+                  <FactRow label="NO reserve" value={fmtReserve(market.reserveNo)} />
+                  <FactRow label="resolves" value={fmtResolveTime(market.resolveTime)} />
+                  <FactRow label="outcome" value={market.outcomeLabel ?? (market.resolved ? '—' : 'unresolved')} />
+                  <FactLink label="FPMM pool" value={market.fpmm} />
+                  <FactLink label="collateral" value={market.collateral} />
+                  <FactLink label="resolver" value={market.resolver} last />
+                </dl>
+              </section>
+            </Reveal>
+          </div>
+
+          {/* Trade panel */}
+          <ForecastTradePanel
+            marketIdHex={market.marketIdHex as Address}
+            fpmm={(market.fpmm as Address | null) ?? null}
+            resolver={(market.resolver as Address | null) ?? null}
+            resolveTime={market.resolveTime}
+            resolved={Boolean(market.resolved)}
+          />
         </div>
-        <div className="mt-2 font-mono text-xs text-muted">{id}</div>
-      </header>
 
-      <div className="flex flex-col items-stretch gap-6 lg:flex-row lg:items-start">
-        {/* Probability + facts */}
-        <div className="min-w-0 flex-1 space-y-6">
-          <section className="glass rounded-2xl p-6">
-            <div className="text-xs uppercase tracking-widest text-brand">implied probability</div>
-            <div className="mt-4 flex items-end gap-8">
-              <ProbValue label="YES" value={yesPct} accent="text-long" />
-              <ProbValue label="NO" value={noPct} accent="text-short" />
-            </div>
-            <div className="mt-5">
-              <ProbabilityBar yesPct={yesPct} />
-            </div>
-            <p className="mt-4 font-mono text-[11px] leading-relaxed text-muted">
-              The FPMM sets <span className="text-fg">price(YES) = reserveNO / (reserveYES + reserveNO)</span>,
-              so the YES price <span className="text-fg">is</span> the market-implied probability. Buying YES
-              pushes its price up; buying NO pushes it down.
-            </p>
-          </section>
-
-          <section className="glass rounded-2xl p-6">
-            <div className="text-xs uppercase tracking-widest text-brand">market facts</div>
-            <div className="mt-4 grid grid-cols-2 gap-3">
-              <Fact label="YES reserve" value={fmtReserve(market.reserveYes)} />
-              <Fact label="NO reserve" value={fmtReserve(market.reserveNo)} />
-              <Fact label="resolves" value={fmtResolveTime(market.resolveTime)} />
-              <Fact label="outcome" value={market.outcomeLabel ?? (market.resolved ? '—' : 'unresolved')} />
-              <FactLink label="FPMM pool" value={market.fpmm} />
-              <FactLink label="collateral" value={market.collateral} />
-              <FactLink label="resolver" value={market.resolver} />
-              <Fact
-                label="data source"
-                value={market.source === 'chain' ? 'live on-chain' : 'fallback (cached)'}
-              />
-            </div>
-          </section>
-        </div>
-
-        {/* Trade panel */}
-        <ForecastTradePanel
-          marketIdHex={market.marketIdHex as Address}
-          fpmm={(market.fpmm as Address | null) ?? null}
-          resolver={(market.resolver as Address | null) ?? null}
-          resolveTime={market.resolveTime}
-          resolved={Boolean(market.resolved)}
-        />
+        <footer className="mt-16 border-t border-bureau-line pt-6 text-center font-monod text-[10px] uppercase tracking-[0.3em] text-bureau-muted/70">
+          binary prediction market · FPMM price = implied probability · settled on Mantle
+        </footer>
       </div>
-
-      <footer className="mt-14 border-t border-line pt-6 text-center font-mono text-xs text-muted">
-        binary prediction market · FPMM price = implied probability · settled on Mantle
-      </footer>
     </div>
   );
 }
@@ -167,39 +188,45 @@ function ProbValue({ label, value, accent }: { label: string; value: number | nu
   const known = typeof value === 'number' && Number.isFinite(value);
   return (
     <div>
-      <div className="font-mono text-[11px] uppercase tracking-widest text-muted">{label}</div>
-      <div className={`mt-1 font-display text-4xl font-bold tracking-tight ${accent}`}>
+      <div className="font-monod text-[11px] uppercase tracking-[0.18em] text-bureau-muted">{label}</div>
+      <div className={`mt-1 font-serifd text-5xl leading-none ${accent}`}>
         {known ? `${(value as number).toFixed(1)}%` : '—'}
       </div>
     </div>
   );
 }
 
-function Fact({ label, value }: { label: string; value: ReactNode }) {
+function FactRow({ label, value, last }: { label: string; value: ReactNode; last?: boolean }) {
   return (
-    <div className="rounded-xl border border-line bg-card/40 p-3">
-      <div className="font-mono text-[10px] uppercase tracking-widest text-muted">{label}</div>
-      <div className="mt-1 font-mono text-sm text-fg">{value}</div>
+    <div
+      className={`flex items-baseline justify-between gap-6 pb-3.5 ${last ? '' : 'border-b border-bureau-line/60'}`}
+    >
+      <dt className="font-monod text-[10px] uppercase tracking-[0.28em] text-bureau-muted">{label}</dt>
+      <dd className="text-right font-monod text-sm text-bureau-fg">{value}</dd>
     </div>
   );
 }
 
-function FactLink({ label, value }: { label: string; value: string | null }) {
+function FactLink({ label, value, last }: { label: string; value: string | null; last?: boolean }) {
   return (
-    <div className="rounded-xl border border-line bg-card/40 p-3">
-      <div className="font-mono text-[10px] uppercase tracking-widest text-muted">{label}</div>
-      {value ? (
-        <a
-          href={`${EXPLORER}/address/${value}`}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="mt-1 block font-mono text-sm text-cyan underline decoration-dotted hover:opacity-80"
-        >
-          {short(value)}
-        </a>
-      ) : (
-        <div className="mt-1 font-mono text-sm text-muted">—</div>
-      )}
+    <div
+      className={`flex items-baseline justify-between gap-6 pb-3.5 ${last ? '' : 'border-b border-bureau-line/60'}`}
+    >
+      <dt className="font-monod text-[10px] uppercase tracking-[0.28em] text-bureau-muted">{label}</dt>
+      <dd className="text-right">
+        {value ? (
+          <a
+            href={`${EXPLORER}/address/${value}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="font-monod text-sm text-brass hover:underline"
+          >
+            {short(value)} ↗
+          </a>
+        ) : (
+          <span className="font-monod text-sm text-bureau-muted">—</span>
+        )}
+      </dd>
     </div>
   );
 }

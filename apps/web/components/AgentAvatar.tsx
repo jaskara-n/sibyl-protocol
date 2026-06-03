@@ -1,15 +1,19 @@
-import { avatarGradient, agentInitials } from '../lib/utils';
+import { agentInitials } from '../lib/utils';
 
+/**
+ * Bureau monogram — a square, hairline-framed initials plate. `ring`, when
+ * provided, tints the hairline border (a calibration-rating cue); otherwise it
+ * falls back to the standard bureau hairline.
+ */
 export function AgentAvatar({ id, size = 38, ring }: { id: string; size?: number; ring?: string }) {
   return (
     <div
-      className="grid place-items-center rounded-xl font-display font-bold text-ink shrink-0"
+      className="grid shrink-0 place-items-center bg-bureau-panel font-serifd text-bureau-fg"
       style={{
         width: size,
         height: size,
-        background: avatarGradient(id),
-        fontSize: size * 0.36,
-        boxShadow: ring ? `0 0 0 2px ${ring}, 0 6px 20px -8px rgba(0,0,0,0.6)` : '0 6px 20px -8px rgba(0,0,0,0.6)'
+        fontSize: size * 0.4,
+        border: `1px solid ${ring ?? 'var(--color-bureau-line)'}`
       }}
       title={id}
     >

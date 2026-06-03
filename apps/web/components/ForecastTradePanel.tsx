@@ -350,23 +350,24 @@ export function ForecastTradePanel({
   const noPool = !fpmm;
 
   return (
-    <div className="glass w-full shrink-0 rounded-2xl p-6 lg:w-[420px]">
+    <div className="bureau-frame relative w-full shrink-0 p-6 lg:w-[420px]">
+      <div className="bureau-grain" aria-hidden />
       <div className="flex items-center justify-between">
-        <div className="text-xs uppercase tracking-widest text-brand">trade · positions</div>
-        <span className="rounded-full border border-long/40 bg-long/10 px-2.5 py-1 font-mono text-[10px] font-semibold uppercase tracking-widest text-long">
+        <div className="font-monod text-[11px] uppercase tracking-[0.32em] text-brass">trade · positions</div>
+        <span className="border border-rise px-2 py-0.5 font-monod text-[10px] uppercase tracking-[0.18em] text-rise">
           live · mantle sepolia
         </span>
       </div>
 
       {/* Balances */}
-      <div className="mt-4 grid grid-cols-3 gap-2">
-        <Stat label="sUSD" value={readEnabled ? fmt(susdBalance, 2) : '—'} accent="text-cyan" />
-        <Stat label="YES shares" value={readEnabled ? fmt(yesBalance as bigint | undefined) : '—'} accent="text-long" />
-        <Stat label="NO shares" value={readEnabled ? fmt(noBalance as bigint | undefined) : '—'} accent="text-short" />
+      <div className="mt-5 grid grid-cols-3 gap-2">
+        <Stat label="sUSD" value={readEnabled ? fmt(susdBalance, 2) : '—'} accent="text-brass" />
+        <Stat label="YES shares" value={readEnabled ? fmt(yesBalance as bigint | undefined) : '—'} accent="text-rise" />
+        <Stat label="NO shares" value={readEnabled ? fmt(noBalance as bigint | undefined) : '—'} accent="text-fall" />
       </div>
 
-      {/* Tabs */}
-      <div className="mt-4 grid grid-cols-3 gap-1 rounded-xl border border-line bg-ink p-1">
+      {/* Tabs — mono-caps with a brass active underline */}
+      <div className="mt-5 grid grid-cols-3 border-b border-bureau-line">
         {(['trade', 'set', 'resolve'] as Tab[]).map((t) => (
           <button
             key={t}
@@ -375,8 +376,10 @@ export function ForecastTradePanel({
               setTab(t);
               resetWrite();
             }}
-            className={`rounded-lg px-3 py-2 font-mono text-xs uppercase tracking-widest transition-colors ${
-              tab === t ? 'bg-brand text-ink' : 'text-muted hover:text-fg'
+            className={`-mb-px border-b-2 px-3 py-2.5 font-monod text-[11px] uppercase tracking-[0.18em] transition-colors ${
+              tab === t
+                ? 'border-brass text-brass'
+                : 'border-transparent text-bureau-muted hover:text-bureau-fg'
             }`}
           >
             {t === 'set' ? 'mint/redeem' : t}
@@ -393,8 +396,8 @@ export function ForecastTradePanel({
             <Notice>Market resolved — trading is closed. Redeem winnings under the Resolve tab.</Notice>
           ) : (
             <>
-              {/* Side toggle */}
-              <div className="grid grid-cols-2 gap-1 rounded-xl border border-line bg-ink p-1">
+              {/* Side toggle — YES rise-accented, NO fall-accented */}
+              <div className="grid grid-cols-2 gap-2">
                 {(['YES', 'NO'] as Side[]).map((s) => (
                   <button
                     key={s}
@@ -403,12 +406,12 @@ export function ForecastTradePanel({
                       setSide(s);
                       resetWrite();
                     }}
-                    className={`rounded-lg px-3 py-2 font-mono text-xs font-semibold uppercase tracking-widest transition-colors ${
+                    className={`border px-3 py-2 font-monod text-[11px] font-semibold uppercase tracking-[0.18em] transition-colors ${
                       side === s
                         ? s === 'YES'
-                          ? 'bg-long text-ink'
-                          : 'bg-short text-ink'
-                        : 'text-muted hover:text-fg'
+                          ? 'border-rise bg-rise/10 text-rise'
+                          : 'border-fall bg-fall/10 text-fall'
+                        : 'border-bureau-line text-bureau-muted hover:text-bureau-fg'
                     }`}
                   >
                     {s}
@@ -417,7 +420,7 @@ export function ForecastTradePanel({
               </div>
 
               {/* Buy/Sell toggle */}
-              <div className="mt-2 grid grid-cols-2 gap-1 rounded-xl border border-line bg-ink p-1">
+              <div className="mt-2 grid grid-cols-2 gap-2">
                 {(['buy', 'sell'] as const).map((m) => (
                   <button
                     key={m}
@@ -426,8 +429,10 @@ export function ForecastTradePanel({
                       setTradeMode(m);
                       resetWrite();
                     }}
-                    className={`rounded-lg px-3 py-2 font-mono text-xs uppercase tracking-widest transition-colors ${
-                      tradeMode === m ? 'bg-card text-fg' : 'text-muted hover:text-fg'
+                    className={`border px-3 py-2 font-monod text-[11px] uppercase tracking-[0.18em] transition-colors ${
+                      tradeMode === m
+                        ? 'border-brass text-brass'
+                        : 'border-bureau-line text-bureau-muted hover:text-bureau-fg'
                     }`}
                   >
                     {m}
@@ -436,7 +441,7 @@ export function ForecastTradePanel({
               </div>
 
               <label className="mt-4 block">
-                <span className="font-mono text-[11px] uppercase tracking-widest text-muted">
+                <span className="font-monod text-[11px] uppercase tracking-[0.18em] text-bureau-muted">
                   {tradeMode === 'buy'
                     ? `sUSD to spend on ${side}`
                     : `sUSD to receive for selling ${side}`}
@@ -448,20 +453,20 @@ export function ForecastTradePanel({
                     setAmount(e.target.value);
                     resetWrite();
                   }}
-                  className="mt-1.5 w-full rounded-xl border border-line bg-ink px-4 py-3 font-mono text-lg text-fg outline-none focus:border-brand/60"
+                  className="mt-1.5 w-full border border-bureau-line bg-bureau-panel px-4 py-3 font-monod text-lg text-bureau-fg outline-none focus:border-brass"
                   placeholder="0.0"
                 />
               </label>
 
-              <div className="mt-4 space-y-2 rounded-xl border border-line bg-card/40 p-4">
+              <div className="mt-4 space-y-2 border border-bureau-line bg-bureau p-4">
                 {tradeMode === 'buy' ? (
                   <>
-                    <PreviewRow label={`${side} shares (quote)`} value={fmt(buyQuote as bigint | undefined)} accent="text-long" hint="calcBuyAmount" />
+                    <PreviewRow label={`${side} shares (quote)`} value={fmt(buyQuote as bigint | undefined)} accent="text-rise" hint="calcBuyAmount" />
                     <PreviewRow label="min received (1% slippage)" value={fmt(minOut)} />
                   </>
                 ) : (
                   <>
-                    <PreviewRow label={`${side} shares spent (quote)`} value={fmt(sellQuote as bigint | undefined)} accent="text-short" hint="calcSellAmount" />
+                    <PreviewRow label={`${side} shares spent (quote)`} value={fmt(sellQuote as bigint | undefined)} accent="text-fall" hint="calcSellAmount" />
                     <PreviewRow label="max spent (1% slippage)" value={fmt(maxIn)} />
                   </>
                 )}
@@ -479,7 +484,11 @@ export function ForecastTradePanel({
                       {busy ? 'Approving sUSD…' : 'Approve sUSD'}
                     </PrimaryButton>
                   ) : (
-                    <PrimaryButton disabled={!validAmount || busy || minOut === undefined} onClick={onBuy}>
+                    <PrimaryButton
+                      disabled={!validAmount || busy || minOut === undefined}
+                      onClick={onBuy}
+                      accent={side === 'YES' ? 'rise' : 'fall'}
+                    >
                       {busy ? 'Buying…' : `Buy ${side}`}
                     </PrimaryButton>
                   )
@@ -488,7 +497,11 @@ export function ForecastTradePanel({
                     {busy ? `Approving ${side}…` : `Approve ${side} shares`}
                   </PrimaryButton>
                 ) : (
-                  <PrimaryButton disabled={!validAmount || busy || maxIn === undefined} onClick={onSell}>
+                  <PrimaryButton
+                    disabled={!validAmount || busy || maxIn === undefined}
+                    onClick={onSell}
+                    accent={side === 'YES' ? 'rise' : 'fall'}
+                  >
                     {busy ? 'Selling…' : `Sell ${side}`}
                   </PrimaryButton>
                 )}
@@ -501,12 +514,12 @@ export function ForecastTradePanel({
       {/* MINT / REDEEM SET tab */}
       {tab === 'set' && (
         <div className="mt-4">
-          <p className="rounded-xl border border-line bg-card/40 p-3 font-mono text-[11px] leading-relaxed text-muted">
-            A complete set is 1 YES + 1 NO per unit of collateral. <span className="text-fg">mintSet</span> locks
-            sUSD to mint both; <span className="text-fg">redeemSet</span> burns equal YES+NO back into sUSD.
+          <p className="border border-bureau-line bg-bureau p-3 font-monod text-[11px] leading-relaxed text-bureau-muted">
+            A complete set is 1 YES + 1 NO per unit of collateral. <span className="text-bureau-fg">mintSet</span> locks
+            sUSD to mint both; <span className="text-bureau-fg">redeemSet</span> burns equal YES+NO back into sUSD.
           </p>
           <label className="mt-4 block">
-            <span className="font-mono text-[11px] uppercase tracking-widest text-muted">complete-set amount (collateral units)</span>
+            <span className="font-monod text-[11px] uppercase tracking-[0.18em] text-bureau-muted">complete-set amount (collateral units)</span>
             <input
               inputMode="decimal"
               value={amount}
@@ -514,7 +527,7 @@ export function ForecastTradePanel({
                 setAmount(e.target.value);
                 resetWrite();
               }}
-              className="mt-1.5 w-full rounded-xl border border-line bg-ink px-4 py-3 font-mono text-lg text-fg outline-none focus:border-brand/60"
+              className="mt-1.5 w-full border border-bureau-line bg-bureau-panel px-4 py-3 font-monod text-lg text-bureau-fg outline-none focus:border-brass"
               placeholder="0.0"
             />
           </label>
@@ -531,7 +544,7 @@ export function ForecastTradePanel({
                   type="button"
                   disabled={!validAmount || busy}
                   onClick={approveSusdToMarket}
-                  className="col-span-2 rounded-xl bg-linear-to-r from-brand to-cyan px-4 py-3 font-semibold text-ink transition-transform enabled:hover:scale-[1.01] disabled:cursor-not-allowed disabled:opacity-40"
+                  className="col-span-2 bg-bureau-fg px-4 py-3 font-sansd text-sm font-semibold text-bureau transition-colors enabled:hover:bg-brass disabled:cursor-not-allowed disabled:opacity-40"
                 >
                   {busy ? 'Approving sUSD…' : 'Approve sUSD for mintSet'}
                 </button>
@@ -540,7 +553,7 @@ export function ForecastTradePanel({
                   type="button"
                   disabled={!validAmount || busy}
                   onClick={onMintSet}
-                  className="rounded-xl bg-long px-4 py-3 font-semibold text-ink transition-transform enabled:hover:scale-[1.01] disabled:cursor-not-allowed disabled:opacity-40"
+                  className="border border-rise bg-rise/10 px-4 py-3 font-sansd text-sm font-semibold text-rise transition-colors enabled:hover:bg-rise/20 disabled:cursor-not-allowed disabled:opacity-40"
                 >
                   {busy ? 'Minting…' : 'Mint set'}
                 </button>
@@ -549,7 +562,7 @@ export function ForecastTradePanel({
                 type="button"
                 disabled={!validAmount || busy || needsSusdApprovalForMint}
                 onClick={onRedeemSet}
-                className="rounded-xl border border-line bg-card px-4 py-3 font-semibold text-fg transition-transform enabled:hover:scale-[1.01] disabled:cursor-not-allowed disabled:opacity-40"
+                className="border border-bureau-line bg-bureau-panel px-4 py-3 font-sansd text-sm font-semibold text-bureau-fg transition-colors enabled:hover:border-brass enabled:hover:text-brass disabled:cursor-not-allowed disabled:opacity-40"
               >
                 {busy ? 'Redeeming…' : 'Redeem set'}
               </button>
@@ -561,20 +574,20 @@ export function ForecastTradePanel({
       {/* RESOLVE tab */}
       {tab === 'resolve' && (
         <div className="mt-4 space-y-4">
-          <div className="rounded-xl border border-line bg-card/40 p-4 font-mono text-[11px] leading-relaxed text-muted">
+          <div className="border border-bureau-line bg-bureau p-4 font-monod text-[11px] uppercase tracking-[0.14em] leading-relaxed text-bureau-muted">
             <div className="flex items-center justify-between">
               <span>status</span>
-              <span className={resolved ? 'text-long' : 'text-amber'}>
+              <span className={resolved ? 'text-rise' : 'text-brass'}>
                 {resolved ? 'resolved' : pastResolveTime ? 'awaiting resolution' : 'open'}
               </span>
             </div>
             <div className="mt-1 flex items-center justify-between">
               <span>you are resolver</span>
-              <span className={isResolver ? 'text-long' : 'text-muted'}>{isResolver ? 'yes' : 'no'}</span>
+              <span className={isResolver ? 'text-rise' : 'text-bureau-muted'}>{isResolver ? 'yes' : 'no'}</span>
             </div>
             <div className="mt-1 flex items-center justify-between">
               <span>resolve time reached</span>
-              <span className={pastResolveTime ? 'text-long' : 'text-muted'}>{pastResolveTime ? 'yes' : 'no'}</span>
+              <span className={pastResolveTime ? 'text-rise' : 'text-bureau-muted'}>{pastResolveTime ? 'yes' : 'no'}</span>
             </div>
           </div>
 
@@ -592,7 +605,7 @@ export function ForecastTradePanel({
                       type="button"
                       disabled={busy}
                       onClick={() => onResolve(OUTCOME.YES)}
-                      className="rounded-xl bg-long px-3 py-3 font-semibold text-ink transition-transform enabled:hover:scale-[1.01] disabled:cursor-not-allowed disabled:opacity-40"
+                      className="border border-rise bg-rise/10 px-3 py-3 font-sansd text-sm font-semibold text-rise transition-colors enabled:hover:bg-rise/20 disabled:cursor-not-allowed disabled:opacity-40"
                     >
                       YES
                     </button>
@@ -600,7 +613,7 @@ export function ForecastTradePanel({
                       type="button"
                       disabled={busy}
                       onClick={() => onResolve(OUTCOME.NO)}
-                      className="rounded-xl bg-short px-3 py-3 font-semibold text-ink transition-transform enabled:hover:scale-[1.01] disabled:cursor-not-allowed disabled:opacity-40"
+                      className="border border-fall bg-fall/10 px-3 py-3 font-sansd text-sm font-semibold text-fall transition-colors enabled:hover:bg-fall/20 disabled:cursor-not-allowed disabled:opacity-40"
                     >
                       NO
                     </button>
@@ -608,7 +621,7 @@ export function ForecastTradePanel({
                       type="button"
                       disabled={busy}
                       onClick={() => onResolve(OUTCOME.INVALID)}
-                      className="rounded-xl border border-amber/50 bg-amber/10 px-3 py-3 font-semibold text-amber transition-transform enabled:hover:scale-[1.01] disabled:cursor-not-allowed disabled:opacity-40"
+                      className="border border-brass bg-brass/10 px-3 py-3 font-sansd text-sm font-semibold text-brass transition-colors enabled:hover:bg-brass/20 disabled:cursor-not-allowed disabled:opacity-40"
                     >
                       INVALID
                     </button>
@@ -625,7 +638,7 @@ export function ForecastTradePanel({
                   type="button"
                   disabled={busy}
                   onClick={onRedeemWinnings}
-                  className="w-full rounded-xl bg-linear-to-r from-brand to-cyan px-4 py-3 font-semibold text-ink transition-transform enabled:hover:scale-[1.01] disabled:cursor-not-allowed disabled:opacity-40"
+                  className="w-full bg-bureau-fg px-4 py-3 font-sansd text-sm font-semibold text-bureau transition-colors enabled:hover:bg-brass disabled:cursor-not-allowed disabled:opacity-40"
                 >
                   {busy ? 'Redeeming…' : 'Redeem winnings'}
                 </button>
@@ -638,8 +651,8 @@ export function ForecastTradePanel({
       {/* Tx status */}
       {txHash && (
         <div
-          className={`mt-3 rounded-xl border p-3 font-mono text-xs ${
-            isConfirmed ? 'border-long/30 bg-long/5 text-long' : 'border-cyan/30 bg-cyan/5 text-cyan'
+          className={`mt-3 border p-3 font-monod text-xs ${
+            isConfirmed ? 'border-rise text-rise' : 'border-brass text-brass'
           }`}
         >
           <div>{isConfirming ? 'Waiting for confirmation…' : isConfirmed ? 'Confirmed.' : 'Submitted.'}</div>
@@ -655,16 +668,16 @@ export function ForecastTradePanel({
       )}
 
       {txError && (
-        <div className="mt-3 rounded-xl border border-short/30 bg-short/5 p-3 font-mono text-xs text-short">
+        <div className="mt-3 border border-fall p-3 font-monod text-xs text-fall">
           {(txError as { shortMessage?: string }).shortMessage ?? txError.message}
         </div>
       )}
 
-      <p className="mt-4 border-t border-line pt-3 font-mono text-[11px] leading-relaxed text-muted">
-        Transactions are <b className="text-fg">real and signed by your wallet</b> on Mantle Sepolia (chain
-        5003). Buys route through an sUSD <code className="text-fg/80">approve</code> to the pool, then
-        <code className="text-fg/80"> buy(outcome, in, minOut)</code> at a 1% slippage floor; sells approve the
-        outcome token then <code className="text-fg/80">sell(outcome, out, maxIn)</code>. Testnet assets only.
+      <p className="mt-4 border-t border-bureau-line pt-3 font-monod text-[11px] leading-relaxed text-bureau-muted">
+        Transactions are <b className="text-bureau-fg">real and signed by your wallet</b> on Mantle Sepolia (chain
+        5003). Buys route through an sUSD <code className="text-bureau-fg/80">approve</code> to the pool, then
+        <code className="text-bureau-fg/80"> buy(outcome, in, minOut)</code> at a 1% slippage floor; sells approve the
+        outcome token then <code className="text-bureau-fg/80">sell(outcome, out, maxIn)</code>. Testnet assets only.
       </p>
     </div>
   );
@@ -694,7 +707,7 @@ function ActionArea({
           type="button"
           disabled={switching}
           onClick={onSwitch}
-          className="w-full rounded-xl bg-amber px-4 py-3 font-semibold text-ink transition-transform enabled:hover:scale-[1.01] disabled:cursor-not-allowed disabled:opacity-50"
+          className="w-full border border-brass bg-brass/10 px-4 py-3 font-sansd text-sm font-semibold text-brass transition-colors enabled:hover:bg-brass/20 disabled:cursor-not-allowed disabled:opacity-50"
         >
           {switching ? 'Switching…' : 'Switch to Mantle Sepolia (5003)'}
         </button>
@@ -708,18 +721,27 @@ function ActionArea({
 function PrimaryButton({
   disabled,
   onClick,
+  accent,
   children
 }: {
   disabled: boolean;
   onClick: () => void;
+  /** Optional directional accent for buy/sell actions. */
+  accent?: 'rise' | 'fall';
   children: React.ReactNode;
 }) {
+  const cls =
+    accent === 'rise'
+      ? 'border border-rise bg-rise/10 text-rise enabled:hover:bg-rise/20'
+      : accent === 'fall'
+        ? 'border border-fall bg-fall/10 text-fall enabled:hover:bg-fall/20'
+        : 'bg-bureau-fg text-bureau enabled:hover:bg-brass';
   return (
     <button
       type="button"
       disabled={disabled}
       onClick={onClick}
-      className="w-full rounded-xl bg-linear-to-r from-brand to-cyan px-4 py-3 font-semibold text-ink transition-transform enabled:hover:scale-[1.01] disabled:cursor-not-allowed disabled:opacity-40"
+      className={`w-full px-4 py-3 font-sansd text-sm font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-40 ${cls}`}
     >
       {children}
     </button>
@@ -728,7 +750,7 @@ function PrimaryButton({
 
 function Notice({ children }: { children: React.ReactNode }) {
   return (
-    <div className="rounded-xl border border-line bg-card/40 p-4 text-center font-mono text-xs text-muted">
+    <div className="border border-bureau-line bg-bureau p-4 text-center font-monod text-xs text-bureau-muted">
       {children}
     </div>
   );
@@ -747,20 +769,20 @@ function PreviewRow({
 }) {
   return (
     <div className="flex items-center justify-between text-sm">
-      <span className="text-muted">
+      <span className="font-monod text-bureau-muted">
         {label}
-        {hint && <span className="ml-1.5 font-mono text-[10px] text-muted/60">{hint}()</span>}
+        {hint && <span className="ml-1.5 font-monod text-[10px] text-bureau-muted/60">{hint}()</span>}
       </span>
-      <span className={`font-mono ${accent ?? 'text-fg'}`}>{value}</span>
+      <span className={`font-monod ${accent ?? 'text-bureau-fg'}`}>{value}</span>
     </div>
   );
 }
 
 function Stat({ label, value, accent }: { label: string; value: string; accent?: string }) {
   return (
-    <div className="rounded-xl border border-line bg-card/40 p-3">
-      <div className="font-mono text-[10px] uppercase tracking-widest text-muted">{label}</div>
-      <div className={`mt-1 font-mono text-sm font-semibold ${accent ?? 'text-fg'}`}>{value}</div>
+    <div className="border border-bureau-line bg-bureau p-3">
+      <div className="font-monod text-[10px] uppercase tracking-[0.18em] text-bureau-muted">{label}</div>
+      <div className={`mt-1 font-monod text-sm font-semibold ${accent ?? 'text-bureau-fg'}`}>{value}</div>
     </div>
   );
 }

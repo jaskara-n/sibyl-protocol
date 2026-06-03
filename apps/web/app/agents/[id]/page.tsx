@@ -28,18 +28,22 @@ export default async function AgentPage({ params }: { params: Promise<{ id: stri
 
   if (!exists) {
     return (
-      <div className="mx-auto max-w-6xl px-5 pb-24 pt-16">
-        <div className="glass rounded-2xl p-10 text-center">
-          <div className="font-display text-2xl font-semibold">Agent not found</div>
-          <p className="mt-2 text-muted">
-            No reputation record for <span className="font-mono text-fg">{id}</span>.
-          </p>
-          <Link
-            href="/agents"
-            className="mt-6 inline-block rounded-lg bg-linear-to-r from-brand to-cyan px-4 py-2 text-sm font-semibold text-ink transition-transform hover:scale-[1.03]"
-          >
-            ← Back to agents
-          </Link>
+      <div className="relative z-0 bg-bureau text-bureau-fg">
+        <div className="mx-auto max-w-6xl px-5 pb-24 pt-16">
+          <div className="bureau-frame p-10 text-center">
+            <div className="bureau-grain" aria-hidden />
+            <p className="font-monod text-[11px] uppercase tracking-[0.42em] text-brass">No record</p>
+            <div className="mt-3 font-serifd text-3xl">Agent not found</div>
+            <p className="mt-2 font-sansd text-sm text-bureau-muted">
+              No reputation record for <span className="font-monod text-bureau-fg">{id}</span>.
+            </p>
+            <Link
+              href="/agents"
+              className="mt-6 inline-block border border-bureau-line px-6 py-3 font-sansd text-sm font-semibold text-bureau-fg transition-colors hover:border-brass hover:text-brass"
+            >
+              ← Back to agents
+            </Link>
+          </div>
         </div>
       </div>
     );
