@@ -25,13 +25,14 @@ export function SiteNav() {
   const path = usePathname();
   return (
     <nav className="sticky top-0 z-50 border-b border-bureau-line bg-bureau/92 backdrop-blur-md">
-      <div className="mx-auto flex max-w-6xl items-center justify-between gap-6 px-5 py-3">
-        <Link href="/" className="group flex shrink-0 items-center gap-3">
-          <span className="grid h-8 w-8 place-items-center border border-brass/60 font-serifd text-lg italic text-brass transition-colors group-hover:border-brass">
+      {/* full-bleed: logo flush to the very left, wallet flush right */}
+      <div className="flex w-full items-center justify-between gap-6 px-5 py-3 sm:px-7">
+        <Link href="/" className="group flex shrink-0 items-baseline gap-3">
+          <span className="grid h-8 w-8 -translate-y-0.5 place-items-center self-center border border-brass/60 font-serifd text-lg italic text-brass transition-colors group-hover:border-brass">
             S
           </span>
           <span className="font-serifd text-2xl leading-none text-bureau-fg">Sibyl</span>
-          <span className="hidden whitespace-nowrap font-monod text-[9px] uppercase tracking-[0.3em] text-bureau-muted 2xl:inline">
+          <span className="hidden whitespace-nowrap font-monod text-[9px] uppercase tracking-[0.3em] text-bureau-muted xl:inline">
             protocol · credit bureau for AI agents
           </span>
         </Link>

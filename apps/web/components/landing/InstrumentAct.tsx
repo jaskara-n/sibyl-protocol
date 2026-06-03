@@ -15,12 +15,17 @@ import { CalibrationDial } from './CalibrationDial';
 
 // WebGL only on the client; the page never blocks on it. (.js extension per
 // the repo's nodenext module resolution — resolves to the .tsx at build time.)
-const Instrument3D = dynamic(() => import('./Instrument3D.js'), {
-  ssr: false
-}) as import('react').ComponentType<{
+type Instrument3DProps = {
   progressRef: import('react').MutableRefObject<number>;
   active?: boolean;
-}>;
+};
+const Instrument3D = dynamic<Instrument3DProps>(
+  () =>
+    import('./Instrument3D.js').then(
+      (m) => m.default as import('react').ComponentType<Instrument3DProps>
+    ),
+  { ssr: false }
+);
 
 type HeroConsensus = {
   direction: string;
