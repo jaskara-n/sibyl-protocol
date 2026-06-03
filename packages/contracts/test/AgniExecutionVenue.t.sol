@@ -5,7 +5,7 @@ import {Test} from "forge-std/Test.sol";
 import {AgniExecutionVenue} from "../src/venues/AgniExecutionVenue.sol";
 import {TestUSD} from "../src/tokens/TestUSD.sol";
 import {MockERC20} from "./mocks/MockERC20.sol";
-import {StubAgniRouter, StubAgniQuoter} from "./mocks/StubAgniRouter.sol";
+import {StubAgniRouter, StubAgniV3Factory, StubAgniV3Pool} from "./mocks/StubAgniRouter.sol";
 import {IAgniSwapRouter} from "../src/interfaces/IAgniSwapRouter.sol";
 
 contract AgniExecutionVenueTest is Test {
@@ -13,7 +13,10 @@ contract AgniExecutionVenueTest is Test {
     TestUSD internal base; // sUSD base asset
     MockERC20 internal mkt; // market token
     StubAgniRouter internal router;
-    StubAgniQuoter internal quoter;
+    StubAgniV3Factory internal factory;
+    StubAgniV3Pool internal pool;
+
+    uint256 internal constant Q96 = 0x1000000000000000000000000; // 2**96
 
     address internal owner = address(this);
     address internal vault = address(0xDEAD01);
@@ -27,9 +30,12 @@ contract AgniExecutionVenueTest is Test {
         base = new TestUSD();
         mkt = new MockERC20();
         router = new StubAgniRouter();
-        quoter = new StubAgniQuoter();
+        factory = new StubAgniV3Factory();
+        // Start at a 1:1 spot price (sqrtPriceX96 == 2**96 => price 1.0).
+        pool = new StubAgniV3Pool(uint160(Q96));
+        factory.setPool(address(pool));
 
-        venue = new AgniExecutionVenue(address(router), address(base), address(quoter), owner);
+        venue = new AgniExecutionVenue(address(router), address(base), address(factory), owner);
         venue.setMarket(MARKET, address(mkt), FEE);
 
         // Fund the router with market-token inventory for opens and base for closes.
@@ -46,26 +52,38 @@ contract AgniExecutionVenueTest is Test {
                               CONSTRUCTOR
     //////////////////////////////////////////////////////////////*/
 
+    /// @dev Mirrors the venue's price math for the (small) magnitudes used in tests,
+    ///      where the intermediate products fit in 256 bits so plain arithmetic
+    ///      matches the contract's 512-bit mulDiv exactly.
+    function _expectedValue(uint256 held, uint160 sqrtPriceX96) internal view returns (uint256) {
+        uint256 priceX96 = (uint256(sqrtPriceX96) * uint256(sqrtPriceX96)) / Q96;
+        if (address(mkt) < address(base)) {
+            return (held * priceX96) / Q96;
+        } else {
+            return (held * Q96) / priceX96;
+        }
+    }
+
     function test_Constructor_SetsOwnerAndImmutables() public view {
         assertEq(venue.owner(), owner);
         assertEq(address(venue.router()), address(router));
-        assertEq(address(venue.quoter()), address(quoter));
+        assertEq(address(venue.factory()), address(factory));
         assertEq(venue.baseAsset(), address(base));
         assertEq(venue.positionToken(), address(0));
     }
 
     function test_Constructor_RevertsOnZeroAddress() public {
         vm.expectRevert(AgniExecutionVenue.ZeroAddress.selector);
-        new AgniExecutionVenue(address(0), address(base), address(quoter), owner);
+        new AgniExecutionVenue(address(0), address(base), address(factory), owner);
         vm.expectRevert(AgniExecutionVenue.ZeroAddress.selector);
-        new AgniExecutionVenue(address(router), address(0), address(quoter), owner);
+        new AgniExecutionVenue(address(router), address(0), address(factory), owner);
         vm.expectRevert(AgniExecutionVenue.ZeroAddress.selector);
         new AgniExecutionVenue(address(router), address(base), address(0), owner);
     }
 
     function test_Constructor_AssignsCustomOwner() public {
         AgniExecutionVenue v =
-            new AgniExecutionVenue(address(router), address(base), address(quoter), vault);
+            new AgniExecutionVenue(address(router), address(base), address(factory), vault);
         assertEq(v.owner(), vault);
     }
 
@@ -252,20 +270,40 @@ contract AgniExecutionVenueTest is Test {
                              positionValue
     //////////////////////////////////////////////////////////////*/
 
-    function test_PositionValue_UsesQuoter() public {
+    function test_PositionValue_OneToOneAtUnitPrice() public {
         _open(1_000e18);
-        quoter.setRate(2e18); // market token worth 2x base
-        assertEq(venue.positionValue(MARKET), 2_000e18);
+        // Default pool price is 1.0 (sqrtPriceX96 == 2**96): value == held.
+        assertEq(venue.positionValue(MARKET), 1_000e18);
+    }
+
+    function test_PositionValue_UsesPoolSpotPrice() public {
+        uint256 held = 1_000e18;
+        _open(held);
+        // priceX96 = sqrtPriceX96^2 / 2**96; pick sqrt = 2 * 2**96 => price 4.0.
+        uint160 sqrtPriceX96 = uint160(2 * Q96);
+        pool.setSqrtPriceX96(sqrtPriceX96);
+
+        uint256 expected = _expectedValue(held, sqrtPriceX96);
+        // Sanity: at price 4, value is either 4x (mkt is token0) or 0.25x (base token0).
+        assertTrue(expected == 4_000e18 || expected == 250e18, "ordering-aware spot value");
+        assertEq(venue.positionValue(MARKET), expected);
     }
 
     function test_PositionValue_ZeroWhenNoHeld() public view {
         assertEq(venue.positionValue(MARKET), 0);
     }
 
-    function test_PositionValue_FallbackOnQuoterRevert() public {
+    function test_PositionValue_FallbackOnSlot0Revert() public {
         _open(1_000e18);
-        quoter.setShouldRevert(true);
-        // Falls back to raw held balance.
+        pool.setShouldRevert(true);
+        // Falls back to raw held balance when slot0 reverts.
+        assertEq(venue.positionValue(MARKET), 1_000e18);
+    }
+
+    function test_PositionValue_FallbackWhenNoPool() public {
+        _open(1_000e18);
+        factory.setPool(address(0));
+        // Falls back to raw held balance when the factory has no pool.
         assertEq(venue.positionValue(MARKET), 1_000e18);
     }
 

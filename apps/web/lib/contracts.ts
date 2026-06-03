@@ -3,7 +3,7 @@ import { parseAbi, type Address } from 'viem';
 /**
  * Deployed Sibyl protocol addresses on Mantle Sepolia (chain id 5003).
  */
-export const SIBYL_VAULT_ADDRESS = '0xc1291707f5Af0aBEaC2bf483053330BF1798189d' as Address;
+export const SIBYL_VAULT_ADDRESS = '0x88DF879F8AA796F0e2859BDfb255A143d5b2EffF' as Address;
 /** Base asset of the vault: sUSD (18 decimals). */
 export const SUSD_ADDRESS = '0x6f5BdBe611aE3c84153BD9d2216ce076C2FBba18' as Address;
 export const SUSD_DECIMALS = 18;

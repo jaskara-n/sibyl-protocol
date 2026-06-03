@@ -73,7 +73,6 @@ contract DeployVaultStack is Script {
 
     address constant SWAP_ROUTER = 0xe38cfa32cCd918d94E2e20230dFaD1A4Fd8aEF16;
     address constant FACTORY = 0xA9AcD50B042A72c33d05fDcC8ad209d3aD361762;
-    address constant QUOTER_V2 = 0x9Da17239a4170f50A5A2c11813BD0C601b5c9693;
     address constant NPM = 0x71959543c31EC4d68D9D6C492Bf69A1C174bb394;
     address constant WMNT = 0x67A1f4A939b477A6b7c5BF94D97E45dE87E608eF;
 
@@ -202,7 +201,7 @@ contract DeployVaultStack is Script {
     /// @dev Steps 5 + 6 + 7: deploy venue (+ setMarket), reward distributor, and the
     ///      vault (+ setMarketCapBps).
     function _deployStack(Deployed memory d, address deployer) internal {
-        AgniExecutionVenue venue = new AgniExecutionVenue(SWAP_ROUTER, d.susd, QUOTER_V2, deployer);
+        AgniExecutionVenue venue = new AgniExecutionVenue(SWAP_ROUTER, d.susd, FACTORY, deployer);
         venue.setMarket(MARKET_ID, WMNT, d.fee);
         d.venue = address(venue);
         console2.log("AgniExecutionVenue:", d.venue);

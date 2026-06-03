@@ -41,7 +41,8 @@ contract MockVenueSelfCheck is Test {
 
         assertEq(received, amountIn, "1:1 fill");
         assertEq(venue.positionValue(MARKET), amountIn, "notional recorded");
-        assertEq(asset.balanceOf(trader), amountIn, "trader got asset");
+        // The venue holds the bought asset itself; the trader is not paid out.
+        assertEq(venue.heldBalance(MARKET), amountIn, "venue holds the asset");
         assertEq(cash.balanceOf(address(venue)), amountIn, "venue got cash");
     }
 
@@ -51,11 +52,13 @@ contract MockVenueSelfCheck is Test {
         venue.openPosition(MARKET, LONG, amountIn, amountIn, block.timestamp);
 
         uint256 cashBefore = cash.balanceOf(trader);
+        // Closing draws from the venue's own held inventory (a market-token amount).
         uint256 received = venue.closePosition(MARKET, amountIn, amountIn, block.timestamp);
         vm.stopPrank();
 
         assertEq(received, amountIn, "1:1 close fill");
         assertEq(venue.positionValue(MARKET), 0, "notional cleared");
+        assertEq(venue.heldBalance(MARKET), 0, "held inventory drained");
         assertEq(cash.balanceOf(trader), cashBefore + amountIn, "trader got cash back");
     }
 

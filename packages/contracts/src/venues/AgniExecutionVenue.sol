@@ -4,7 +4,7 @@ pragma solidity ^0.8.28;
 import {IExecutionVenue} from "../interfaces/IExecutionVenue.sol";
 import {IERC20} from "../interfaces/IERC20.sol";
 import {IAgniSwapRouter} from "../interfaces/IAgniSwapRouter.sol";
-import {IAgniQuoterV2} from "../interfaces/IAgniQuoterV2.sol";
+import {IAgniV3Factory, IAgniV3Pool} from "../interfaces/IAgniV3.sol";
 import {Ownable2Step} from "../access/Ownable2Step.sol";
 import {ReentrancyGuard} from "../access/ReentrancyGuard.sol";
 
@@ -33,8 +33,11 @@ contract AgniExecutionVenue is IExecutionVenue, Ownable2Step, ReentrancyGuard {
     /// @notice The Agni SwapRouter all fills are routed through.
     IAgniSwapRouter public immutable router;
 
-    /// @notice The Agni QuoterV2 used to value held positions in base-asset terms.
-    IAgniQuoterV2 public immutable quoter;
+    /// @notice The Agni V3 factory used to resolve pools when valuing held positions.
+    IAgniV3Factory public immutable factory;
+
+    /// @notice Fixed-point scaling constant 2**96 used by the Q64.96 price math.
+    uint256 private constant Q96 = 0x1000000000000000000000000;
 
     /// @notice The cash/base asset (e.g. sUSD) positions are opened with and closed back into.
     address public immutable baseAsset;
@@ -81,15 +84,15 @@ contract AgniExecutionVenue is IExecutionVenue, Ownable2Step, ReentrancyGuard {
 
     /// @param swapRouter The Agni SwapRouter address.
     /// @param baseAsset_ The cash/base asset address.
-    /// @param quoter_ The Agni QuoterV2 address.
+    /// @param factory_ The Agni V3 factory address (used to resolve pools for pricing).
     /// @param owner_ The initial owner (receives ownership immediately).
-    constructor(address swapRouter, address baseAsset_, address quoter_, address owner_) {
-        if (swapRouter == address(0) || baseAsset_ == address(0) || quoter_ == address(0)) {
+    constructor(address swapRouter, address baseAsset_, address factory_, address owner_) {
+        if (swapRouter == address(0) || baseAsset_ == address(0) || factory_ == address(0)) {
             revert ZeroAddress();
         }
         router = IAgniSwapRouter(swapRouter);
         baseAsset = baseAsset_;
-        quoter = IAgniQuoterV2(quoter_);
+        factory = IAgniV3Factory(factory_);
 
         // Ownable2Step sets owner = msg.sender; transfer to the requested owner if different.
         if (owner_ != address(0) && owner_ != msg.sender) {
@@ -209,10 +212,16 @@ contract AgniExecutionVenue is IExecutionVenue, Ownable2Step, ReentrancyGuard {
     }
 
     /// @inheritdoc IExecutionVenue
-    /// @dev Values the held marketToken in {baseAsset} terms via the Agni QuoterV2.
-    ///      The quoter is not a true `view` on-chain (it simulates via revert), so
-    ///      this is implemented with a low-level call and falls back to the raw
-    ///      held balance if the quote cannot be obtained.
+    /// @dev Values the held marketToken in {baseAsset} terms using the Agni V3 pool
+    ///      spot price (`slot0().sqrtPriceX96`). Both tokens are assumed 18 decimals.
+    ///      The price is `(token1/token0) * 2**96 == sqrtPriceX96^2 / 2**96`; the held
+    ///      market token is converted to base depending on whether the base asset is
+    ///      token0 or token1. All multiplications use a 512-bit {_mulDiv} so the
+    ///      intermediate `sqrtPriceX96^2` and `held * priceX96` cannot overflow.
+    ///
+    ///      Fallback: if the pool does not exist (`getPool == address(0)`) or `slot0`
+    ///      reverts, the held balance is returned 1:1 as a best-effort estimate. This
+    ///      is a deliberate degradation when the venue cannot resolve a live price.
     function positionValue(bytes32 marketId) external view returns (uint256) {
         uint256 held = heldBalance[marketId];
         if (held == 0) return 0;
@@ -220,27 +229,32 @@ contract AgniExecutionVenue is IExecutionVenue, Ownable2Step, ReentrancyGuard {
         Market memory m = markets[marketId];
         if (!m.configured) return 0;
 
-        bytes memory callData = abi.encodeCall(
-            IAgniQuoterV2.quoteExactInputSingle,
-            (
-                IAgniQuoterV2.QuoteExactInputSingleParams({
-                    tokenIn: m.marketToken,
-                    tokenOut: baseAsset,
-                    amountIn: held,
-                    fee: m.feeTier,
-                    sqrtPriceLimitX96: 0
-                })
-            )
-        );
+        // Resolve the pool that prices marketToken against baseAsset.
+        address pool = factory.getPool(baseAsset, m.marketToken, m.feeTier);
+        if (pool == address(0)) return held; // fallback: no pool, value 1:1.
 
-        (bool ok, bytes memory ret) = address(quoter).staticcall(callData);
-        if (ok && ret.length >= 32) {
-            uint256 amountOut = abi.decode(ret, (uint256));
-            return amountOut;
+        // Read the current spot sqrt price; degrade to 1:1 if the read reverts.
+        (bool ok, bytes memory ret) =
+            pool.staticcall(abi.encodeWithSelector(IAgniV3Pool.slot0.selector));
+        if (!ok || ret.length < 32) return held; // fallback: slot0 unavailable.
+
+        uint160 sqrtPriceX96 = abi.decode(ret, (uint160));
+        if (sqrtPriceX96 == 0) return held; // fallback: uninitialized pool.
+
+        // priceX96 = (token1/token0) * 2**96, computed overflow-safe.
+        uint256 priceX96 = _mulDiv(uint256(sqrtPriceX96), uint256(sqrtPriceX96), Q96);
+
+        // Token ordering: lower address is token0.
+        if (m.marketToken < baseAsset) {
+            // marketToken == token0, baseAsset == token1:
+            // base = held * (token1/token0) = held * priceX96 / 2**96.
+            return _mulDiv(held, priceX96, Q96);
+        } else {
+            // baseAsset == token0, marketToken == token1:
+            // base = held / (token1/token0) = held * 2**96 / priceX96.
+            if (priceX96 == 0) return held; // fallback: degenerate price.
+            return _mulDiv(held, Q96, priceX96);
         }
-
-        // Fallback: held-balance estimate (1:1) when the quoter is unavailable.
-        return held;
     }
 
     /// @inheritdoc IExecutionVenue
@@ -270,5 +284,74 @@ contract AgniExecutionVenue is IExecutionVenue, Ownable2Step, ReentrancyGuard {
         (bool ok, bytes memory ret) =
             token.call(abi.encodeWithSelector(IERC20.approve.selector, spender, amount));
         if (!ok || (ret.length != 0 && !abi.decode(ret, (bool)))) revert TransferFailed();
+    }
+
+    /*//////////////////////////////////////////////////////////////
+                              FIXED-POINT MATH
+    //////////////////////////////////////////////////////////////*/
+
+    /// @notice Calculates floor(a * b / denominator) with full 512-bit precision.
+    /// @dev Uniswap-V3 `FullMath.mulDiv`: handles intermediate products that exceed
+    ///      256 bits without overflow. Reverts if `denominator == 0` or the result
+    ///      overflows uint256.
+    /// @param a The multiplicand.
+    /// @param b The multiplier.
+    /// @param denominator The divisor (must be > 0).
+    /// @return result floor(a * b / denominator).
+    function _mulDiv(uint256 a, uint256 b, uint256 denominator) internal pure returns (uint256 result) {
+        unchecked {
+            // 512-bit multiply [prod1 prod0] = a * b.
+            uint256 prod0; // least significant 256 bits
+            uint256 prod1; // most significant 256 bits
+            assembly {
+                let mm := mulmod(a, b, not(0))
+                prod0 := mul(a, b)
+                prod1 := sub(sub(mm, prod0), lt(mm, prod0))
+            }
+
+            // Handle non-overflow case (256-bit result).
+            if (prod1 == 0) {
+                require(denominator > 0, "DENOM_ZERO");
+                assembly {
+                    result := div(prod0, denominator)
+                }
+                return result;
+            }
+
+            // Make sure the result fits in 256 bits.
+            require(denominator > prod1, "MULDIV_OVERFLOW");
+
+            // 512 by 256 division.
+            // Subtract remainder from [prod1 prod0].
+            uint256 remainder;
+            assembly {
+                remainder := mulmod(a, b, denominator)
+                prod1 := sub(prod1, gt(remainder, prod0))
+                prod0 := sub(prod0, remainder)
+            }
+
+            // Factor powers of two out of denominator.
+            uint256 twos = denominator & (~denominator + 1);
+            assembly {
+                denominator := div(denominator, twos)
+                prod0 := div(prod0, twos)
+                twos := add(div(sub(0, twos), twos), 1)
+            }
+
+            // Shift in bits from prod1 into prod0.
+            prod0 |= prod1 * twos;
+
+            // Invert denominator mod 2**256.
+            uint256 inv = (3 * denominator) ^ 2;
+            inv *= 2 - denominator * inv; // mod 2**8
+            inv *= 2 - denominator * inv; // mod 2**16
+            inv *= 2 - denominator * inv; // mod 2**32
+            inv *= 2 - denominator * inv; // mod 2**64
+            inv *= 2 - denominator * inv; // mod 2**128
+            inv *= 2 - denominator * inv; // mod 2**256
+
+            result = prod0 * inv;
+            return result;
+        }
     }
 }

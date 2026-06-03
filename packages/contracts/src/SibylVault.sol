@@ -235,10 +235,15 @@ contract SibylVault is ISibylVault, ERC4626, Ownable2Step, Pausable, ReentrancyG
             routedDir = DIR_LONG;
         } else if (target < current) {
             // Decrease exposure: unwind the over-target portion back to cash.
+            // `delta` is a BASE-VALUE amount; the venue closes a MARKET-TOKEN amount
+            // from its own held inventory, so convert proportionally and let the
+            // venue sell directly (no vault approval needed — it holds the token).
             uint256 delta = current - target;
-            // The venue pulls the position (asset) token to close; approve it.
-            IERC20(venue.positionToken()).approve(address(venue), delta);
-            routed = venue.closePosition(marketId, delta, minOut, deadline);
+            uint256 held = venue.heldBalance(marketId);
+            uint256 closeAmt = current == 0 ? 0 : (held * delta) / current;
+            if (closeAmt > 0) {
+                routed = venue.closePosition(marketId, closeAmt, minOut, deadline);
+            }
             routedDir = uint8(Direction.FLAT);
         }
 

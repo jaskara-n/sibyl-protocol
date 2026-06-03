@@ -15,13 +15,14 @@
       "maxAgentWeightPpm": 900000
     },
     "SibylVault": {
-      "_comment": "ERC-4626 vault DEPLOYED on Mantle Sepolia. Base asset sUSD; executes real swaps via Agni Finance. No mocks.",
-      "address": "0xc1291707f5Af0aBEaC2bf483053330BF1798189d",
+      "_comment": "ERC-4626 vault, LIVE on Mantle Sepolia. Base asset sUSD; executes real swaps via Agni Finance. Full round-trip verified (deposit -> Agni swap -> spot-priced NAV -> close -> withdraw). Supersedes 0xc129... (fixed positionValue spot-pricing + proportional close).",
+      "address": "0x88DF879F8AA796F0e2859BDfb255A143d5b2EffF",
       "asset": "0x6f5BdBe611aE3c84153BD9d2216ce076C2FBba18",
-      "venue": "0x1e3cF40A002dd9B68B9a5f9D5bb7d396de9CB62D",
-      "takeRateBps": 200
+      "venue": "0x09dc432D56616A204B79ABAd351D84aD78153d5D",
+      "takeRateBps": 200,
+      "superseded": "0xc1291707f5Af0aBEaC2bf483053330BF1798189d"
     },
-    "AgniExecutionVenue": { "address": "0x1e3cF40A002dd9B68B9a5f9D5bb7d396de9CB62D" },
+    "AgniExecutionVenue": { "address": "0x09dc432D56616A204B79ABAd351D84aD78153d5D", "superseded": "0x1e3cF40A002dd9B68B9a5f9D5bb7d396de9CB62D" },
     "RewardDistributor": { "address": "0x141eA5d5536d81123B4F34Fc3F3aEbd9603aa1AB" },
     "TestUSD": { "address": "0x6f5BdBe611aE3c84153BD9d2216ce076C2FBba18", "symbol": "sUSD", "decimals": 18, "_comment": "real testnet base asset" }
   },

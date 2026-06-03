@@ -2,7 +2,7 @@
 pragma solidity ^0.8.28;
 
 import {IAgniSwapRouter} from "../../src/interfaces/IAgniSwapRouter.sol";
-import {IAgniQuoterV2} from "../../src/interfaces/IAgniQuoterV2.sol";
+import {IAgniV3Factory, IAgniV3Pool} from "../../src/interfaces/IAgniV3.sol";
 import {IERC20} from "../../src/interfaces/IERC20.sol";
 
 /// @title StubAgniRouter
@@ -75,28 +75,49 @@ contract StubAgniRouter is IAgniSwapRouter {
     }
 }
 
-/// @title StubAgniQuoter
-/// @notice TEST-ONLY stub of the Agni QuoterV2. Returns amountIn * rate / 1e18.
-contract StubAgniQuoter is IAgniQuoterV2 {
-    uint256 public rate = 1e18;
+/// @title StubAgniV3Pool
+/// @notice TEST-ONLY stub of an Agni V3 pool. Exposes a settable `slot0().sqrtPriceX96`
+///         and can be armed to revert so the venue's fallback path can be exercised.
+contract StubAgniV3Pool is IAgniV3Pool {
+    uint160 public sqrtPriceX96;
     bool public shouldRevert;
 
-    function setRate(uint256 newRate) external {
-        rate = newRate;
+    constructor(uint160 sqrtPriceX96_) {
+        sqrtPriceX96 = sqrtPriceX96_;
+    }
+
+    function setSqrtPriceX96(uint160 v) external {
+        sqrtPriceX96 = v;
     }
 
     function setShouldRevert(bool v) external {
         shouldRevert = v;
     }
 
-    /// @inheritdoc IAgniQuoterV2
-    function quoteExactInputSingle(QuoteExactInputSingleParams memory params)
+    /// @inheritdoc IAgniV3Pool
+    function slot0()
         external
         view
-        returns (uint256 amountOut, uint160, uint32, uint256)
+        returns (uint160, int24, uint16, uint16, uint16, uint8, bool)
     {
-        if (shouldRevert) revert("QUOTER");
-        amountOut = (params.amountIn * rate) / 1e18;
-        return (amountOut, 0, 0, 0);
+        if (shouldRevert) revert("SLOT0");
+        return (sqrtPriceX96, int24(0), uint16(0), uint16(0), uint16(0), uint8(0), true);
+    }
+}
+
+/// @title StubAgniV3Factory
+/// @notice TEST-ONLY stub of the Agni V3 factory. Returns a configured pool address
+///         for any (tokenA, tokenB, fee) triple; defaults to address(0) so the
+///         venue's "no pool" fallback can be tested.
+contract StubAgniV3Factory is IAgniV3Factory {
+    address public pool;
+
+    function setPool(address pool_) external {
+        pool = pool_;
+    }
+
+    /// @inheritdoc IAgniV3Factory
+    function getPool(address, address, uint24) external view returns (address) {
+        return pool;
     }
 }

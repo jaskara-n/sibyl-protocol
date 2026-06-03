@@ -49,4 +49,12 @@ interface IExecutionVenue {
     ///         return (via allowance) when closing.
     /// @return The ERC20 position token address.
     function positionToken() external view returns (address);
+
+    /// @notice The amount of the market (asset) token currently held by the venue
+    ///         for `marketId` (received on open, sold on close).
+    /// @dev Denominated in the market token, NOT in base-asset terms. Callers use
+    ///      this to compute a market-token amount to pass to {closePosition}.
+    /// @param marketId Scoping/routing identifier for the target market.
+    /// @return The held market-token balance for the market.
+    function heldBalance(bytes32 marketId) external view returns (uint256);
 }
