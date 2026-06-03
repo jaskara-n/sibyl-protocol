@@ -15,11 +15,26 @@
       "maxAgentWeightPpm": 900000
     },
     "SibylVault": {
-      "_comment": "ERC-4626 strategy vault — built + tested (148 forge tests) but NOT deployed (Option A scope = ledger + markets + reputation only). The API /vault endpoints fall back to an artifact/snapshot shape while address is null.",
-      "address": null,
-      "asset": null,
-      "venue": null
-    }
+      "_comment": "ERC-4626 vault DEPLOYED on Mantle Sepolia. Base asset sUSD; executes real swaps via Agni Finance. No mocks.",
+      "address": "0xc1291707f5Af0aBEaC2bf483053330BF1798189d",
+      "asset": "0x6f5BdBe611aE3c84153BD9d2216ce076C2FBba18",
+      "venue": "0x1e3cF40A002dd9B68B9a5f9D5bb7d396de9CB62D",
+      "takeRateBps": 200
+    },
+    "AgniExecutionVenue": { "address": "0x1e3cF40A002dd9B68B9a5f9D5bb7d396de9CB62D" },
+    "RewardDistributor": { "address": "0x141eA5d5536d81123B4F34Fc3F3aEbd9603aa1AB" },
+    "TestUSD": { "address": "0x6f5BdBe611aE3c84153BD9d2216ce076C2FBba18", "symbol": "sUSD", "decimals": 18, "_comment": "real testnet base asset" }
+  },
+  "dex": {
+    "name": "Agni Finance — Uniswap-V3-style, live on Mantle Sepolia",
+    "swapRouter": "0xe38cfa32cCd918d94E2e20230dFaD1A4Fd8aEF16",
+    "factory": "0xA9AcD50B042A72c33d05fDcC8ad209d3aD361762",
+    "quoterV2": "0x9Da17239a4170f50A5A2c11813BD0C601b5c9693",
+    "WMNT": "0x67A1f4A939b477A6b7c5BF94D97E45dE87E608eF",
+    "pool_sUSD_WMNT": "0x49253825F99f01f85344992B0e68402De06Bb960",
+    "poolFeeTier": 500,
+    "seedPositionTokenId": 120,
+    "seedLiquidity": "2 WMNT + 2000 sUSD (1 WMNT = 1000 sUSD)"
   },
   "markets": [
     {
