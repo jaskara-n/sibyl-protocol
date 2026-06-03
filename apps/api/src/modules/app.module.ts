@@ -8,6 +8,7 @@ import { ChainController } from '../chain/chain.controller.js';
 import { DecisionsController } from '../decisions/decisions.controller.js';
 import { MarketsController } from '../markets/markets.controller.js';
 import { VaultController } from '../vault/vault.controller.js';
+import { PredictionsController } from '../predictions/predictions.controller.js';
 
 @Module({
   controllers: [
@@ -19,7 +20,8 @@ import { VaultController } from '../vault/vault.controller.js';
     ChainController,
     DecisionsController,
     MarketsController,
-    VaultController
+    VaultController,
+    PredictionsController
   ]
 })
 export class AppModule {}

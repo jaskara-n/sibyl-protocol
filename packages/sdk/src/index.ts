@@ -23,5 +23,6 @@ export function brierToPpm(brier: number): number {
 export * from './sibylLedger.js';
 export * from './erc8004.js';
 export * from './sibylVault.js';
+export * from './predictionMarket.js';
 export * from './rewardDistributor.js';
 export * from './agentBond.js';

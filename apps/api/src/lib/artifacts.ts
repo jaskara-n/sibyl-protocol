@@ -220,6 +220,69 @@ export function readDeployedMarkets(): DeployedMarket[] {
     }));
 }
 
+/// A prediction market entry from deployments/mantle-sepolia.json ("predictionMarkets".markets[]).
+/// Mirrors the on-chain SibylPredictionMarket + paired OutcomeFPMM for one binary market.
+export type DeployedPredictionMarket = {
+  marketId: string;
+  marketIdHex: `0x${string}`;
+  question?: string;
+  resolveTime?: number;
+  resolver?: `0x${string}`;
+  fpmm?: `0x${string}`;
+  collateral?: `0x${string}`;
+};
+
+/// The address of the deployed SibylPredictionMarket factory, if configured.
+/// Source of truth: deployments/mantle-sepolia.json "predictionMarkets".SibylPredictionMarket
+/// (overridable via SIBYL_PREDICTION_MARKET_ADDRESS).
+export function readPredictionMarketAddress(): `0x${string}` | null {
+  const path = resolve(process.cwd(), '../../deployments/mantle-sepolia.json');
+  let factory: string | undefined;
+  if (existsSync(path)) {
+    const d = JSON.parse(readFileSync(path, 'utf8')) as {
+      predictionMarkets?: { SibylPredictionMarket?: string };
+    };
+    factory = d.predictionMarkets?.SibylPredictionMarket;
+  }
+  const address = process.env.SIBYL_PREDICTION_MARKET_ADDRESS ?? factory ?? null;
+  return address ? (address as `0x${string}`) : null;
+}
+
+/// The list of deployed prediction markets. Source of truth:
+/// deployments/mantle-sepolia.json "predictionMarkets".markets[] — adding a json entry is all
+/// a new prediction market needs to surface on the API.
+export function readDeployedPredictionMarkets(): DeployedPredictionMarket[] {
+  const path = resolve(process.cwd(), '../../deployments/mantle-sepolia.json');
+  if (!existsSync(path)) return [];
+  const d = JSON.parse(readFileSync(path, 'utf8')) as {
+    predictionMarkets?: {
+      markets?: Array<{
+        marketId?: string;
+        marketIdHex?: string;
+        question?: string;
+        resolveTime?: number;
+        resolver?: string;
+        fpmm?: string;
+        collateral?: string;
+      }>;
+    };
+  };
+  return (d.predictionMarkets?.markets ?? [])
+    .filter(
+      (m): m is { marketId: string; marketIdHex: string } & Record<string, unknown> =>
+        typeof m.marketId === 'string' && typeof m.marketIdHex === 'string'
+    )
+    .map((m) => ({
+      marketId: m.marketId,
+      marketIdHex: m.marketIdHex as `0x${string}`,
+      question: typeof m.question === 'string' ? m.question : undefined,
+      resolveTime: typeof m.resolveTime === 'number' ? m.resolveTime : undefined,
+      resolver: typeof m.resolver === 'string' ? (m.resolver as `0x${string}`) : undefined,
+      fpmm: typeof m.fpmm === 'string' ? (m.fpmm as `0x${string}`) : undefined,
+      collateral: typeof m.collateral === 'string' ? (m.collateral as `0x${string}`) : undefined
+    }));
+}
+
 /// Canonical on-chain deployment record (single source of truth: deployments/mantle-sepolia.json).
 export function readDeployedLedger(): DeployedLedger | null {
   const path = resolve(process.cwd(), '../../deployments/mantle-sepolia.json');
