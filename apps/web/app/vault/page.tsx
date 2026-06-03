@@ -2,7 +2,7 @@ import type { ReactNode } from 'react';
 import { api, type VaultNav, type VaultPosition } from '../../lib/api';
 import { NavCard } from '../../components/NavCard';
 import { PositionTable } from '../../components/PositionTable';
-import { VaultSimulateForm } from '../../components/VaultSimulateForm';
+import { VaultForm } from '../../components/VaultForm';
 
 function num(v: unknown): number {
   const n = typeof v === 'number' ? v : Number(v);
@@ -34,7 +34,7 @@ export default async function VaultPage() {
         <div className="mt-6 flex flex-wrap items-center gap-2 font-mono text-xs">
           <Pill>{totalAssets.toLocaleString(undefined, { maximumFractionDigits: 0 })} assets</Pill>
           <Pill className="text-cyan">{positions.length} positions</Pill>
-          <Pill className="text-amber">deposit / withdraw is simulation-only</Pill>
+          <Pill className="text-long">live deposit / withdraw on Mantle Sepolia</Pill>
         </div>
       </header>
 
@@ -50,33 +50,31 @@ export default async function VaultPage() {
             <PositionTable positions={positions} />
           </div>
         </div>
-        <VaultSimulateForm sharePrice={sharePrice} />
+        <VaultForm sharePrice={sharePrice} />
       </section>
 
-      {/* Custody / safety banner */}
-      <section className="mt-8 rounded-2xl border border-amber/30 bg-amber/5 p-5">
+      {/* Self-custody banner */}
+      <section className="mt-8 rounded-2xl border border-long/30 bg-long/5 p-5">
         <div className="flex items-start gap-3">
-          <span className="mt-0.5 grid h-7 w-7 shrink-0 place-items-center rounded-lg bg-amber/15 font-display text-amber">
-            !
+          <span className="mt-0.5 grid h-7 w-7 shrink-0 place-items-center rounded-lg bg-long/15 font-display text-long">
+            ◈
           </span>
           <div>
-            <div className="font-display text-sm font-semibold text-amber">No custody. No broadcast.</div>
+            <div className="font-display text-sm font-semibold text-long">Self-custody. On-chain.</div>
             <p className="mt-1 text-sm text-muted">
-              This page is read-only. Balances come from the protocol API, and the deposit/withdraw panel only
-              calls the vault&apos;s ERC-4626 preview functions
-              (<code className="font-mono text-fg/80">convertToShares</code>,{' '}
-              <code className="font-mono text-fg/80">convertToAssets</code>,{' '}
-              <code className="font-mono text-fg/80">previewDeposit</code>,{' '}
-              <code className="font-mono text-fg/80">previewRedeem</code>) to estimate outcomes. There is no
-              connected wallet, no signer, and no transaction is ever sent — your funds are never custodied or
-              moved.
+              The vault is a non-custodial ERC-4626 contract on Mantle Sepolia (chain 5003). Deposits and
+              withdrawals are real transactions signed by your own wallet: a deposit calls
+              {' '}<code className="font-mono text-fg/80">approve</code> (when allowance is insufficient) then{' '}
+              <code className="font-mono text-fg/80">deposit(assets, you)</code>, and a withdrawal calls{' '}
+              <code className="font-mono text-fg/80">redeem(shares, you, you)</code>. Shares are minted to your
+              address — only you can redeem them. Testnet assets only.
             </p>
           </div>
         </div>
       </section>
 
       <footer className="mt-14 border-t border-line pt-6 text-center font-mono text-xs text-muted">
-        NAV = idle cash + venue positions · reputation-weighted sizing · no leverage · display-and-simulate only
+        NAV = idle cash + venue positions · reputation-weighted sizing · no leverage · live on Mantle Sepolia
       </footer>
     </div>
   );

@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { ConnectButton } from '@rainbow-me/rainbowkit';
 import { cn } from '../lib/utils';
 
 const LINKS = [
@@ -40,12 +41,19 @@ export function SiteNav() {
             );
           })}
         </div>
-        <Link
-          href="/build"
-          className="rounded-lg bg-linear-to-r from-brand to-cyan px-4 py-2 text-sm font-semibold text-ink transition-transform hover:scale-[1.03]"
-        >
-          Register agent →
-        </Link>
+        <div className="flex items-center gap-3">
+          <Link
+            href="/build"
+            className="hidden rounded-lg bg-linear-to-r from-brand to-cyan px-4 py-2 text-sm font-semibold text-ink transition-transform hover:scale-[1.03] sm:inline-block"
+          >
+            Register agent →
+          </Link>
+          <ConnectButton
+            accountStatus={{ smallScreen: 'avatar', largeScreen: 'full' }}
+            chainStatus={{ smallScreen: 'icon', largeScreen: 'full' }}
+            showBalance={false}
+          />
+        </div>
       </div>
     </nav>
   );
