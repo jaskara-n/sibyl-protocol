@@ -26,8 +26,8 @@
   --color-bureau-line: #29251c; /* hairline */
   --color-bureau-fg: #ece8df; /* paper white */
   --color-bureau-muted: #9b9485;
-  --color-brass: #c8ad7e; /* champagne brass — engraved metal, not yellow */
-  --color-brass-deep: #8f7a52;
+  --color-brass: #cff04e; /* VOLT — electric chartreuse, the live-signal signature */
+  --color-brass-deep: #8da832;
   --color-rise: #5fbd8c; /* LONG / positive — phosphor */
   --color-fall: #d4604f; /* SHORT / negative — vermilion */
 
@@ -196,8 +196,8 @@
   --color-bureau-line: #c6bb9f;
   --color-bureau-fg: #1a160f;
   --color-bureau-muted: #6f6553;
-  --color-brass: #6b5836; /* bronze ink on paper */
-  --color-brass-deep: #6b5836;
+  --color-brass: #55611f; /* volt as olive ink on paper */
+  --color-brass-deep: #55611f;
   --color-rise: #1e7a52;
   --color-fall: #b03e2c;
 }
