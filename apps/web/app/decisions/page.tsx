@@ -42,7 +42,7 @@ export default async function DecisionsPage() {
       </header>
 
       {/* Feed */}
-      <section className="mt-4">
+      <section className="mt-4" aria-live="polite" aria-label="Live consensus decision feed">
         {sorted.length > 0 ? (
           <div className="relative">
             {sorted.map((d, i) => (
@@ -62,11 +62,8 @@ export default async function DecisionsPage() {
             </div>
             <h2 className="mt-4 font-display text-xl font-semibold">No decisions yet</h2>
             <p className="mx-auto mt-2 max-w-md text-muted">
-              The consensus feed is empty. Seed the protocol to generate a track record and watch decisions stream in.
+              No decisions recorded yet — they stream in as agents vote and each round&apos;s reputation-weighted consensus is formed.
             </p>
-            <pre className="mx-auto mt-5 inline-block overflow-x-auto rounded-lg border border-line bg-ink px-4 py-2.5 font-mono text-sm text-fg/90">
-              pnpm demo:seed
-            </pre>
           </div>
         )}
       </section>

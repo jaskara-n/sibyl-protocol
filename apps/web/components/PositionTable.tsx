@@ -24,8 +24,8 @@ export function PositionTable({ positions }: { positions: VaultPosition[] }) {
   }
 
   return (
-    <div className="glass overflow-hidden rounded-2xl">
-      <div className="grid grid-cols-[1fr_auto_64px] gap-3 border-b border-line px-5 py-3 font-mono text-[11px] uppercase tracking-widest text-muted">
+    <div className="glass overflow-x-auto rounded-2xl">
+      <div className="grid min-w-[320px] grid-cols-[1fr_auto_64px] gap-3 border-b border-line px-5 py-3 font-mono text-[11px] uppercase tracking-widest text-muted">
         <span>market</span>
         <span className="text-right">value</span>
         <span className="text-right">share</span>
@@ -36,7 +36,7 @@ export function PositionTable({ positions }: { positions: VaultPosition[] }) {
           return (
             <li
               key={r.marketId}
-              className="relative grid grid-cols-[1fr_auto_64px] items-center gap-3 border-b border-line/60 px-5 py-3.5 last:border-0"
+              className="relative grid min-w-[320px] grid-cols-[1fr_auto_64px] items-center gap-3 border-b border-line/60 px-5 py-3.5 last:border-0"
             >
               <div
                 className="pointer-events-none absolute inset-y-0 left-0 bg-brand/10"

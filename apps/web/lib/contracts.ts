@@ -131,3 +131,41 @@ export const PREDICTION_FACTORY_ABI = parseAbi([
   'function allMarketIds(uint256 index) view returns (bytes32)',
   'function allMarketIdsCount() view returns (uint256)'
 ]);
+
+/*//////////////////////////////////////////////////////////////
+                    ERC-8004 IDENTITY REGISTRY
+//////////////////////////////////////////////////////////////*/
+
+/**
+ * ERC-8004 ("Trustless Agents") IdentityRegistry on Mantle Sepolia (chain id
+ * 5003). Mirrors `@sibyl/sdk` (packages/sdk/src/erc8004.ts) — duplicated as a
+ * plain viem `parseAbi` so the web wallet layer never imports the SDK's node
+ * build at bundle time. Address is the CREATE2-deterministic testnet registry
+ * (deployments/mantle-sepolia.json -> erc8004.identityRegistry); the same
+ * registry already holds Sibyl's five agent identity NFTs (ids 98-102).
+ */
+export const ERC8004_IDENTITY_ADDRESS =
+  '0x8004A818BFB912233c491871b3d84c89A494BD9e' as Address;
+
+/**
+ * IdentityRegistry ABI subset.
+ *
+ * `register(string agentURI) returns (uint256 agentId)` is the real, PERMISSIONLESS
+ * self-registration call — it mints an ERC-721 identity NFT to `msg.sender` and
+ * returns the assigned agentId. Verified on-chain: simulating the call from a
+ * fresh address (owning zero identities) succeeds and returns the next id, so
+ * any connected wallet can mint its own identity (no owner gating).
+ *
+ * Reads used to detect an "already registered" wallet: `balanceOf(owner)` is the
+ * standard ERC-721 ownership count (the connected wallet owns >= 1 identity NFT
+ * when already registered). `ownerOf` / `tokenURI` round out the read surface.
+ * NOTE: this registry does NOT implement `totalSupply()` (it reverts on-chain),
+ * so do not rely on it.
+ */
+export const ERC8004_IDENTITY_ABI = parseAbi([
+  'function register(string agentURI) returns (uint256 agentId)',
+  'function balanceOf(address owner) view returns (uint256)',
+  'function ownerOf(uint256 tokenId) view returns (address)',
+  'function tokenURI(uint256 tokenId) view returns (string)',
+  'function getAgentWallet(uint256 agentId) view returns (address)'
+]);

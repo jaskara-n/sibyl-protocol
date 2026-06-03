@@ -68,7 +68,15 @@ export function ReliabilityDiagram({ data }: { data: Bucket[] }) {
         </div>
       </div>
 
-      <div className="mt-5 h-80 w-full">
+      <div
+        className="mt-5 h-80 w-full"
+        role="img"
+        aria-label={
+          hasData
+            ? `Reliability diagram: ${pts.length} calibration buckets plotting predicted probability against observed frequency. Points on the y equals x line are perfectly calibrated; below the line is overconfident, above is underconfident.`
+            : 'Reliability diagram: no calibration data yet'
+        }
+      >
         {hasData ? (
           <ResponsiveContainer width="100%" height="100%">
             <ComposedChart margin={{ top: 12, right: 18, bottom: 28, left: 8 }}>

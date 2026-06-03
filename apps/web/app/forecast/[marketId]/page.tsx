@@ -64,7 +64,11 @@ export default async function ForecastDetailPage({
   if (!market) {
     return (
       <div className="mx-auto max-w-3xl px-5 pb-24 pt-8">
-        <Link href="/forecast" className="font-mono text-xs text-muted transition-colors hover:text-brand">
+        <Link
+          href="/forecast"
+          aria-label="Back to all forecast markets"
+          className="font-mono text-xs text-muted transition-colors hover:text-brand"
+        >
           ← all forecast markets
         </Link>
         <div className="glass mt-8 rounded-2xl p-8 text-center">
@@ -83,7 +87,11 @@ export default async function ForecastDetailPage({
     <div className="mx-auto max-w-6xl px-5 pb-24">
       {/* Hero */}
       <header className="relative pt-8 pb-6">
-        <Link href="/forecast" className="font-mono text-xs text-muted transition-colors hover:text-brand">
+        <Link
+          href="/forecast"
+          aria-label="Back to all forecast markets"
+          className="font-mono text-xs text-muted transition-colors hover:text-brand"
+        >
           ← all forecast markets
         </Link>
         <div className="mt-4 flex flex-wrap items-start justify-between gap-3">
@@ -91,6 +99,8 @@ export default async function ForecastDetailPage({
             {market.question ?? id}
           </h1>
           <span
+            title={`Status: ${st.label}`}
+            aria-label={`Market status: ${st.label}`}
             className={`shrink-0 rounded-full border px-2.5 py-1 font-mono text-[11px] font-semibold uppercase tracking-widest ${st.cls}`}
           >
             {st.label}
@@ -99,9 +109,9 @@ export default async function ForecastDetailPage({
         <div className="mt-2 font-mono text-xs text-muted">{id}</div>
       </header>
 
-      <div className="grid items-start gap-6 lg:grid-cols-[1fr_420px]">
+      <div className="flex flex-col items-stretch gap-6 lg:flex-row lg:items-start">
         {/* Probability + facts */}
-        <div className="space-y-6">
+        <div className="min-w-0 flex-1 space-y-6">
           <section className="glass rounded-2xl p-6">
             <div className="text-xs uppercase tracking-widest text-brand">implied probability</div>
             <div className="mt-4 flex items-end gap-8">

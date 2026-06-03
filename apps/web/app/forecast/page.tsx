@@ -88,6 +88,8 @@ export default async function ForecastPage() {
                       <div className="mt-1 truncate font-mono text-[11px] text-muted">{m.marketId}</div>
                     </div>
                     <span
+                      title={`Status: ${st.label}`}
+                      aria-label={`Market status: ${st.label}`}
                       className={`shrink-0 rounded-full border px-2 py-0.5 font-mono text-[10px] font-semibold uppercase tracking-widest ${st.cls}`}
                     >
                       {st.label}
@@ -118,12 +120,8 @@ export default async function ForecastPage() {
             </div>
             <h2 className="mt-4 font-display text-xl font-semibold">No prediction markets yet</h2>
             <p className="mx-auto mt-2 max-w-md text-muted">
-              Launch one permissionlessly through the PredictionFactory, or seed the demo to spin up a
-              sample market.
+              No prediction markets yet — launch one from <Link href="/create" className="text-brand hover:underline">/create</Link>.
             </p>
-            <pre className="mx-auto mt-5 inline-block overflow-x-auto rounded-lg border border-line bg-ink px-4 py-2.5 font-mono text-sm text-fg/90">
-              pnpm demo:seed
-            </pre>
           </div>
         )}
       </section>

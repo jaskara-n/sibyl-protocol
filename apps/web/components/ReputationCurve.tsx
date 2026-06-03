@@ -57,7 +57,11 @@ export function ReputationCurve({ data }: { data: Point[] }) {
         </div>
       </div>
 
-      <div className="mt-5 h-64 w-full">
+      <div
+        className="mt-5 h-64 w-full"
+        role="img"
+        aria-label={`Reputation trajectory: cumulative Brier score over ${data.length} windows, currently ${last.toFixed(3)}, ${improving ? 'improving' : 'degrading'}. Lower is better.`}
+      >
         {data.length > 1 ? (
           <ResponsiveContainer width="100%" height="100%">
             <AreaChart data={data} margin={{ top: 8, right: 12, bottom: 8, left: 0 }}>

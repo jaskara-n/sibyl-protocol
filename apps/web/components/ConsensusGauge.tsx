@@ -28,9 +28,18 @@ export function ConsensusGauge({
   // semicircle path, left (0%) → right (100%)
   const d = `M ${CX - R} ${CY} A ${R} ${R} 0 0 1 ${CX + R} ${CY}`;
 
+  const gaugeLabel = `Consensus ${direction}, ${Math.round(conf * 1000) / 10}% confidence, size ${sizeBps} bps, ${contributors} contributing agents`;
+
   return (
     <div className={`relative grid place-items-center rounded-2xl glass p-5 ${glow}`}>
-      <svg width={W} height={H} className="overflow-visible">
+      <svg
+        width={W}
+        height={H}
+        className="overflow-visible"
+        role="img"
+        aria-label={gaugeLabel}
+      >
+        <title>{gaugeLabel}</title>
         <defs>
           <linearGradient id="gaugegrad" x1="0" y1="0" x2="1" y2="0">
             <stop offset="0%" stopColor={color} stopOpacity="0.4" />

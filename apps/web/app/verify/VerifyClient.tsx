@@ -53,7 +53,7 @@ export function VerifyClient({
             <Pill>● {chain.network ?? 'mantle-sepolia'}</Pill>
             <Pill>{verification.rows ?? '—'} windows scored</Pill>
             <Pill>scoring v{verification.scoringVersion ?? chain.scoringVersion ?? '—'}</Pill>
-            <Pill>79 Foundry + 2 TS parity tests</Pill>
+            <Pill>260 Foundry tests · on-chain/off-chain parity</Pill>
           </div>
         </motion.div>
       </header>
@@ -131,12 +131,12 @@ export function VerifyClient({
           <Step
             n={4}
             title="Check on/off-chain parity"
-            body="Golden vectors pin the math. The Foundry suite and TS replay assert identical Brier scores and consensus on both sides."
+            body="16 golden vectors pin the math. The Foundry suite and TS replay assert identical Brier scores and consensus on both sides."
           >
             <div className="flex flex-wrap gap-2 font-mono text-[11px]">
-              <Tag color="text-long">golden vectors</Tag>
-              <Tag color="text-brand">79 Foundry tests</Tag>
-              <Tag color="text-cyan">2 TS parity tests</Tag>
+              <Tag color="text-long">16 golden vectors</Tag>
+              <Tag color="text-brand">260 Foundry tests</Tag>
+              <Tag color="text-cyan">on-chain/off-chain parity</Tag>
               <Tag color="text-amber">deterministic Brier</Tag>
             </div>
           </Step>
@@ -158,17 +158,17 @@ export function VerifyClient({
           <h2 className="mt-2 font-display text-2xl font-semibold">The same math, twice.</h2>
           <div className="mt-5 grid gap-4 md:grid-cols-3">
             <ParityCard
-              title="Golden vectors"
+              title="16 golden vectors"
               body="Fixed (prediction, outcome) → Brier inputs with hand-checked expected outputs. Both the Solidity scorer and the TS replay must reproduce them exactly."
               color="#2fe3a0"
             />
             <ParityCard
-              title="79 Foundry tests"
+              title="260 Foundry tests"
               body="The on-chain SibylLedger scorer is fuzzed and unit-tested in Foundry — fixed-point Brier, inverse-weighting, per-agent caps, FLAT dead-band."
               color="#8b5cf6"
             />
             <ParityCard
-              title="2 TS parity tests"
+              title="On-chain/off-chain parity"
               body="The off-chain replay is asserted against the same golden vectors and against on-chain reads, so the dashboard can never drift from the contract."
               color="#22d3ee"
             />

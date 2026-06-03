@@ -350,7 +350,7 @@ export function ForecastTradePanel({
   const noPool = !fpmm;
 
   return (
-    <div className="glass rounded-2xl p-6">
+    <div className="glass w-full shrink-0 rounded-2xl p-6 lg:w-[420px]">
       <div className="flex items-center justify-between">
         <div className="text-xs uppercase tracking-widest text-brand">trade · positions</div>
         <span className="rounded-full border border-long/40 bg-long/10 px-2.5 py-1 font-mono text-[10px] font-semibold uppercase tracking-widest text-long">

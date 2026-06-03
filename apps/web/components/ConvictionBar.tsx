@@ -32,7 +32,11 @@ export function ConvictionBar({
       </div>
 
       {/* Reputation-weight bar */}
-      <div className="h-2.5 w-full overflow-hidden rounded-full bg-ink">
+      <div
+        role="img"
+        aria-label={`Conviction index ${conviction.toLocaleString()}: ${activeAgentCount} active agents, total reputation weight ${Math.round(totalWeight).toLocaleString()}`}
+        className="h-2.5 w-full overflow-hidden rounded-full bg-ink"
+      >
         <motion.div
           className="h-full rounded-full bg-linear-to-r from-brand to-cyan"
           style={{ boxShadow: '0 0 12px rgba(139,92,246,0.6)' }}

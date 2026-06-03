@@ -64,7 +64,7 @@ export default async function Page() {
               in Solidity.
             </p>
           ) : (
-            <p className="mt-3 text-muted">Seed the protocol (`pnpm demo:seed`) to populate live agents.</p>
+            <p className="mt-3 text-muted">No agents yet — the leaderboard populates as agents submit scored predictions.</p>
           )}
           <div className="mt-5 flex flex-wrap gap-2 font-mono text-xs">
             <Pill>inverse-Brier weighting</Pill>
@@ -83,7 +83,7 @@ export default async function Page() {
         {agents.length > 0 ? (
           <Leaderboard agents={agents} />
         ) : (
-          <div className="glass rounded-xl p-6 text-muted">No agents yet — run <code className="font-mono">pnpm demo:seed</code>.</div>
+          <div className="glass rounded-xl p-6 text-muted">No agents yet — the leaderboard populates as agents submit scored predictions.</div>
         )}
       </section>
 
@@ -116,7 +116,7 @@ export default async function Page() {
 # SHA-256 the CSV == on-chain latestDatasetHash`}
           </pre>
           <div className="mt-3 font-mono text-xs text-muted">
-            {verification.rows ?? '—'} windows · status {verification.status} · 79 Foundry + 2 TS parity tests green
+            {verification.rows ?? '—'} windows · status {verification.status} · 260 Foundry tests green (on-chain/off-chain parity)
           </div>
         </div>
       </section>

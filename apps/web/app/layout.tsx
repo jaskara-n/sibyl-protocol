@@ -1,6 +1,7 @@
 import './globals.css';
 import type { ReactNode } from 'react';
 import { SiteNav } from '../components/SiteNav';
+import { ChainGuard } from '../components/ChainGuard';
 import { Providers } from './providers';
 
 export const metadata = {
@@ -25,6 +26,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         />
         <Providers>
           <SiteNav />
+          <ChainGuard />
           {children}
         </Providers>
       </body>

@@ -47,13 +47,19 @@ function LeaderboardRows({ agents }: { agents: AgentRow[] }) {
                       {a.agentId}
                     </span>
                     <span
+                      title={`Reputation tier ${t.label}`}
+                      aria-label={`Reputation tier ${t.label}`}
                       className="grid h-5 min-w-5 place-items-center rounded px-1 font-mono text-[11px] font-bold text-ink"
                       style={{ background: t.color }}
                     >
                       {t.label}
                     </span>
                     {a.isRogue && (
-                      <span className="rounded border border-short/50 px-1.5 text-[10px] font-semibold text-short">
+                      <span
+                        title="Flagged as rogue: silenced in consensus"
+                        aria-label="Flagged as rogue: silenced in consensus"
+                        className="rounded border border-short/50 px-1.5 text-[10px] font-semibold text-short"
+                      >
                         ROGUE
                       </span>
                     )}
@@ -70,7 +76,11 @@ function LeaderboardRows({ agents }: { agents: AgentRow[] }) {
               </div>
 
               <div className="flex items-center gap-3">
-                <div className="h-2 w-28 overflow-hidden rounded-full bg-ink sm:w-44">
+                <div
+                  role="img"
+                  aria-label={`Consensus vote weight ${pct}%${a.isRogue ? ', rogue agent' : ''}`}
+                  className="h-2 w-28 overflow-hidden rounded-full bg-ink sm:w-44"
+                >
                   <motion.div
                     className="h-full rounded-full"
                     style={{ background: barColor, boxShadow: `0 0 12px ${barColor}` }}
@@ -156,7 +166,11 @@ export function Leaderboard({ agents, markets }: { agents: AgentRow[]; markets?:
             ▾
           </span>
         </div>
-        {loading && <span className="font-mono text-xs text-muted">loading…</span>}
+        {loading && (
+          <span role="status" aria-live="polite" className="font-mono text-xs text-muted">
+            loading…
+          </span>
+        )}
       </div>
 
       {display.length > 0 ? (

@@ -95,6 +95,8 @@ export default async function MarketsPage() {
                       </div>
                     </div>
                     <span
+                      title={m.active ? 'Market is live' : 'Market is idle'}
+                      aria-label={m.active ? 'Market status: live' : 'Market status: idle'}
                       className={`shrink-0 rounded-full border px-2 py-0.5 font-mono text-[10px] font-semibold uppercase tracking-widest ${
                         m.active
                           ? 'border-long/50 bg-long/10 text-long'
@@ -136,11 +138,8 @@ export default async function MarketsPage() {
             </div>
             <h2 className="mt-4 font-display text-xl font-semibold">No markets yet</h2>
             <p className="mx-auto mt-2 max-w-md text-muted">
-              Seed the protocol to spin up a market and watch agents start voting.
+              Markets appear here once agents start voting and a reputation-weighted consensus forms.
             </p>
-            <pre className="mx-auto mt-5 inline-block overflow-x-auto rounded-lg border border-line bg-ink px-4 py-2.5 font-mono text-sm text-fg/90">
-              pnpm demo:seed
-            </pre>
           </div>
         )}
       </section>

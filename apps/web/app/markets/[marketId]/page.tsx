@@ -55,7 +55,11 @@ export default async function MarketPage({ params }: { params: Promise<{ marketI
     <div className="mx-auto max-w-6xl px-5 pb-24">
       {/* Hero */}
       <header className="relative pt-8 pb-8">
-        <Link href="/markets" className="font-mono text-xs text-muted transition-colors hover:text-brand">
+        <Link
+          href="/markets"
+          aria-label="Back to all markets"
+          className="font-mono text-xs text-muted transition-colors hover:text-brand"
+        >
           ← all markets
         </Link>
         <div className="mt-4 flex flex-wrap items-center gap-3">
@@ -63,6 +67,8 @@ export default async function MarketPage({ params }: { params: Promise<{ marketI
             {market?.name ?? id}
           </h1>
           <span
+            title={market?.active ? 'Market is live' : 'Market is idle'}
+            aria-label={market?.active ? 'Market status: live' : 'Market status: idle'}
             className={`rounded-full border px-2.5 py-1 font-mono text-[11px] font-semibold uppercase tracking-widest ${
               market?.active
                 ? 'border-long/50 bg-long/10 text-long'

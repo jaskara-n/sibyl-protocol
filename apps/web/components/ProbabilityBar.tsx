@@ -34,6 +34,12 @@ export function ProbabilityBar({
       </div>
 
       <div
+        role="img"
+        aria-label={
+          known
+            ? `Implied probability: YES ${yes.toFixed(1)}%, NO ${no.toFixed(1)}%`
+            : 'Implied probability unknown'
+        }
         className={`flex w-full overflow-hidden rounded-full bg-ink ${compact ? 'h-2' : 'h-3'}`}
       >
         <motion.div

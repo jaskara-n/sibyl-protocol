@@ -69,7 +69,11 @@ export function AgentProfileView({
   return (
     <div className="mx-auto max-w-6xl px-5 pb-24">
       <div className="pt-6">
-        <Link href="/agents" className="font-mono text-xs text-muted transition-colors hover:text-fg">
+        <Link
+          href="/agents"
+          aria-label="Back to agents"
+          className="font-mono text-xs text-muted transition-colors hover:text-fg"
+        >
           ← agents
         </Link>
       </div>
@@ -83,13 +87,19 @@ export function AgentProfileView({
               <div className="flex items-center gap-3">
                 <h1 className="truncate font-display text-3xl font-bold tracking-tight">{profile.agentId}</h1>
                 <span
+                  title={`Reputation tier ${t.label}`}
+                  aria-label={`Reputation tier ${t.label}`}
                   className="grid h-7 min-w-7 place-items-center rounded-md px-2 font-mono text-sm font-bold text-ink"
                   style={{ background: t.color, boxShadow: `0 0 16px -2px ${t.color}` }}
                 >
                   {t.label}
                 </span>
                 {isRogue && (
-                  <span className="rounded border border-short/50 px-2 py-0.5 text-[11px] font-semibold text-short">
+                  <span
+                    title="Flagged as rogue: silenced in consensus"
+                    aria-label="Flagged as rogue: silenced in consensus"
+                    className="rounded border border-short/50 px-2 py-0.5 text-[11px] font-semibold text-short"
+                  >
                     ROGUE
                   </span>
                 )}
@@ -117,15 +127,20 @@ export function AgentProfileView({
       </header>
 
       {/* Market tabs */}
-      <nav className="mt-5 flex flex-wrap items-center gap-2">
+      <div
+        role="tablist"
+        aria-label="Filter agent profile by market"
+        className="mt-5 flex flex-wrap items-center gap-2"
+      >
         {tabs.map((tab) => {
           const active = tab.marketId === selected;
           return (
             <button
               key={tab.marketId}
               type="button"
+              role="tab"
               onClick={() => setSelected(tab.marketId)}
-              aria-pressed={active}
+              aria-selected={active}
               className={`rounded-full border px-3.5 py-1.5 font-mono text-xs transition-all ${
                 active
                   ? 'border-brand/60 bg-brand/15 text-brand shadow-[0_0_18px_-8px_rgba(139,92,246,0.8)]'
@@ -136,8 +151,12 @@ export function AgentProfileView({
             </button>
           );
         })}
-        {loading && <span className="font-mono text-xs text-muted">loading…</span>}
-      </nav>
+        {loading && (
+          <span role="status" aria-live="polite" className="font-mono text-xs text-muted">
+            loading…
+          </span>
+        )}
+      </div>
 
       {/* Reputation curve */}
       <section className="mt-6">

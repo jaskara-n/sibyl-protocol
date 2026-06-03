@@ -43,6 +43,7 @@ export function DecisionRow({
       {/* Timeline rail + node */}
       <div className="relative flex flex-col items-center">
         <span
+          aria-hidden="true"
           className={isNewest ? 'live-dot relative z-10 mt-5 h-3 w-3 rounded-full' : 'relative z-10 mt-5 h-3 w-3 rounded-full'}
           style={{ background: dotColor, boxShadow: `0 0 12px ${dotColor}` }}
         />
@@ -65,6 +66,8 @@ export function DecisionRow({
         <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
           {/* Direction badge */}
           <span
+            title={`Direction: ${dir}`}
+            aria-label={`Direction: ${dir}`}
             className={`grid h-7 place-items-center rounded-lg px-2.5 font-display text-sm font-bold text-ink ${tok.bg}`}
             style={{ boxShadow: `0 0 14px ${dotColor}55` }}
           >
