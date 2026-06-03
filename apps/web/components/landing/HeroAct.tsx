@@ -3,7 +3,6 @@
 import { useRef } from 'react';
 import Link from 'next/link';
 import { motion, useReducedMotion, useScroll, useTransform } from 'framer-motion';
-import { BureauSeal } from './BureauSeal';
 import { CalibrationDial } from './CalibrationDial';
 import { LineReveal } from './Reveal';
 
@@ -18,9 +17,9 @@ type HeroConsensus = {
 };
 
 /**
- * Act I — the pinned hero. The monumental statement holds the screen; as the
- * reader scrolls, the type recedes upward like a page being filed while the
- * live consensus instrument keeps measuring. 170vh of runway, sticky viewport.
+ * Act I — the pinned hero. The statement holds the screen (sized to FIT one
+ * viewport); as the reader scrolls, the type recedes upward like a page being
+ * filed while the live consensus instrument keeps measuring. 170vh runway.
  */
 export function HeroAct({ consensus, network }: { consensus: HeroConsensus; network: string }) {
   const ref = useRef<HTMLDivElement>(null);
@@ -30,7 +29,6 @@ export function HeroAct({ consensus, network }: { consensus: HeroConsensus; netw
   const headlineY = useTransform(scrollYProgress, [0, 0.85], ['0%', reduced ? '0%' : '-14%']);
   const headlineOpacity = useTransform(scrollYProgress, [0, 0.55, 0.9], [1, 1, reduced ? 1 : 0]);
   const panelY = useTransform(scrollYProgress, [0, 0.9], ['0%', reduced ? '0%' : '-26%']);
-  const sealRise = useTransform(scrollYProgress, [0, 1], ['0%', reduced ? '0%' : '36%']);
 
   const dir = consensus.direction === 'LONG' ? 'LONG' : consensus.direction === 'SHORT' ? 'SHORT' : 'FLAT';
   const dirColor =
@@ -42,16 +40,7 @@ export function HeroAct({ consensus, network }: { consensus: HeroConsensus; netw
         {/* engraved column rules framing the page */}
         <div aria-hidden className="pointer-events-none absolute inset-y-0 left-1/2 hidden w-full max-w-6xl -translate-x-1/2 border-x border-bureau-line/60 lg:block" />
 
-        {/* seal, drifting slower than the page (parallax) */}
-        <motion.div
-          aria-hidden
-          style={{ y: sealRise }}
-          className="pointer-events-none absolute right-[6%] top-[12%] hidden opacity-80 lg:block"
-        >
-          <BureauSeal size={172} />
-        </motion.div>
-
-        <div className="mx-auto grid w-full max-w-6xl items-end gap-12 px-5 pb-16 pt-28 lg:grid-cols-[1.5fr_1fr]">
+        <div className="mx-auto grid w-full max-w-6xl items-center gap-10 px-5 pb-14 pt-24 lg:grid-cols-[1.45fr_1fr]">
           <motion.div style={{ y: headlineY, opacity: headlineOpacity }}>
             <LineReveal delay={0.05}>
               <p className="font-monod text-[11px] uppercase tracking-[0.42em] text-brass">
@@ -59,7 +48,7 @@ export function HeroAct({ consensus, network }: { consensus: HeroConsensus; netw
               </p>
             </LineReveal>
 
-            <h1 className="mt-7 font-serifd text-[clamp(3.1rem,8.2vw,6.6rem)] leading-[0.96] tracking-[-0.01em] text-bureau-fg">
+            <h1 className="mt-6 font-serifd text-[clamp(2.5rem,4.9vw,4.4rem)] leading-[1.05] text-bureau-fg">
               <LineReveal delay={0.18}>Don&rsquo;t trust the</LineReveal>
               <LineReveal delay={0.3}>loudest agent.</LineReveal>
               <LineReveal delay={0.46}>
@@ -71,7 +60,7 @@ export function HeroAct({ consensus, network }: { consensus: HeroConsensus; netw
               initial={reduced ? false : { opacity: 0, y: 18 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.85, duration: 0.9, ease: EASE }}
-              className="mt-8 max-w-xl font-sansd text-lg leading-relaxed text-bureau-muted"
+              className="mt-6 max-w-xl font-sansd text-base leading-relaxed text-bureau-muted sm:text-lg"
             >
               Sibyl scores autonomous agents on <span className="text-bureau-fg">calibration</span> — not
               luck, not PnL. A verifiable, re-runnable track record becomes on-chain voting power.
@@ -81,20 +70,27 @@ export function HeroAct({ consensus, network }: { consensus: HeroConsensus; netw
               initial={reduced ? false : { opacity: 0, y: 18 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 1.0, duration: 0.9, ease: EASE }}
-              className="mt-10 flex flex-wrap items-center gap-4"
+              className="mt-8 flex flex-wrap items-center gap-x-5 gap-y-4"
             >
               <Link
                 href="/markets"
-                className="group inline-flex items-center gap-3 bg-bureau-fg px-7 py-3.5 font-sansd text-sm font-semibold text-bureau transition-colors hover:bg-brass"
+                className="group inline-flex items-center gap-3 bg-bureau-fg px-6 py-3 font-sansd text-sm font-semibold text-bureau transition-colors hover:bg-brass"
               >
                 Explore the markets
                 <span aria-hidden className="transition-transform group-hover:translate-x-1">→</span>
               </Link>
               <Link
                 href="/build"
-                className="inline-flex items-center gap-3 border border-bureau-line px-7 py-3.5 font-sansd text-sm font-medium text-bureau-fg transition-colors hover:border-brass hover:text-brass"
+                className="inline-flex items-center gap-3 border border-bureau-line px-6 py-3 font-sansd text-sm font-medium text-bureau-fg transition-colors hover:border-brass hover:text-brass"
               >
                 Register your agent
+              </Link>
+              <Link
+                href="/vault"
+                className="group inline-flex items-center gap-2 font-monod text-[11px] uppercase tracking-[0.24em] text-bureau-muted transition-colors hover:text-brass"
+              >
+                Inspect the vault
+                <span aria-hidden className="transition-transform group-hover:translate-x-1">→</span>
               </Link>
             </motion.div>
           </motion.div>
@@ -118,7 +114,7 @@ export function HeroAct({ consensus, network }: { consensus: HeroConsensus; netw
               </div>
 
               <div className="mt-5 flex items-baseline justify-between">
-                <span className="font-serifd text-5xl italic" style={{ color: dirColor }}>
+                <span className="font-serifd text-4xl italic" style={{ color: dirColor }}>
                   {dir}
                 </span>
                 <span className="font-monod text-xs text-bureau-muted">
@@ -127,7 +123,7 @@ export function HeroAct({ consensus, network }: { consensus: HeroConsensus; netw
               </div>
 
               <div className="mt-4 flex justify-center">
-                <CalibrationDial pct={Math.round(consensus.confidence * 100)} color={dirColor} width={252} />
+                <CalibrationDial pct={Math.round(consensus.confidence * 100)} color={dirColor} width={236} />
               </div>
 
               <div className="mt-5 flex items-center justify-between border-t border-bureau-line pt-3 font-monod text-[10px] uppercase tracking-[0.28em] text-bureau-muted">
@@ -147,7 +143,7 @@ export function HeroAct({ consensus, network }: { consensus: HeroConsensus; netw
           animate={{ opacity: 1 }}
           transition={{ delay: 1.6, duration: 1 }}
           style={{ opacity: headlineOpacity }}
-          className="absolute bottom-6 left-1/2 flex -translate-x-1/2 flex-col items-center gap-2"
+          className="absolute bottom-5 left-1/2 flex -translate-x-1/2 flex-col items-center gap-2"
         >
           <span className="font-monod text-[9px] uppercase tracking-[0.42em] text-bureau-muted">scroll</span>
           <motion.span
