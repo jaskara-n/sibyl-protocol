@@ -15,14 +15,20 @@
       "maxAgentWeightPpm": 900000
     },
     "SibylVault": {
-      "_comment": "ERC-4626 vault, LIVE on Mantle Sepolia. Base asset sUSD; executes real swaps via Agni Finance. Full round-trip verified (deposit -> Agni swap -> spot-priced NAV -> close -> withdraw). Supersedes 0xc129... (fixed positionValue spot-pricing + proportional close).",
-      "address": "0x88DF879F8AA796F0e2859BDfb255A143d5b2EffF",
+      "_comment": "ERC-4626 vault, LIVE on Mantle Sepolia. Base asset sUSD; routes through MetaVenue so it trades BOTH the Agni spot market (MNT-USD) and prediction markets (YES/NO via FPMM). Supersedes 0x88DF... (rewired from the Agni venue directly to the MetaVenue router).",
+      "address": "0x62c494cca2df8fF04960d2A73CB723D862554916",
       "asset": "0x6f5BdBe611aE3c84153BD9d2216ce076C2FBba18",
-      "venue": "0x09dc432D56616A204B79ABAd351D84aD78153d5D",
+      "venue": "0x787E51491F5cC4b2B99BC3F931a9f2199F072E1E",
       "takeRateBps": 200,
-      "superseded": "0xc1291707f5Af0aBEaC2bf483053330BF1798189d"
+      "marketCapBps": { "MNT-USD": 3000, "MNT-ABOVE-1.5-2026Q3": 2000 },
+      "superseded": ["0xc1291707f5Af0aBEaC2bf483053330BF1798189d", "0x88DF879F8AA796F0e2859BDfb255A143d5b2EffF"]
     },
-    "AgniExecutionVenue": { "address": "0x09dc432D56616A204B79ABAd351D84aD78153d5D", "superseded": "0x1e3cF40A002dd9B68B9a5f9D5bb7d396de9CB62D" },
+    "MetaVenue": {
+      "_comment": "IExecutionVenue router the vault points at; dispatches per market to a sub-venue. MNT-USD -> AgniExecutionVenue (spot), MNT-ABOVE-1.5-2026Q3 -> PredictionVenue (YES/NO).",
+      "address": "0x787E51491F5cC4b2B99BC3F931a9f2199F072E1E"
+    },
+    "AgniExecutionVenue": { "_comment": "Spot sub-venue (MNT-USD) behind the MetaVenue.", "address": "0x09dc432D56616A204B79ABAd351D84aD78153d5D", "superseded": "0x1e3cF40A002dd9B68B9a5f9D5bb7d396de9CB62D" },
+    "PredictionVenue": { "_comment": "Prediction sub-venue behind the MetaVenue; buys/sells YES|NO via the FPMM, values positions at AMM/redemption price.", "address": "0x8e00aB2AAf2b77E4D5249A16ed532E3622196c57" },
     "RewardDistributor": { "address": "0x141eA5d5536d81123B4F34Fc3F3aEbd9603aa1AB" },
     "TestUSD": { "address": "0x6f5BdBe611aE3c84153BD9d2216ce076C2FBba18", "symbol": "sUSD", "decimals": 18, "_comment": "real testnet base asset" }
   },
@@ -60,6 +66,23 @@
       "_comment": "3 agents (momentum, onchain_oi, news) with lower reputation -> lower conviction; demonstrates conviction-ranked markets"
     }
   ],
+  "predictionMarkets": {
+    "_comment": "Vertical #2 — Gnosis CTF + FPMM binary prediction markets, LIVE. Permissionless creation; complete-set mint/redeem; resolver-gated resolution; FPMM where YES price = implied probability. The vault trades these via PredictionVenue behind the MetaVenue.",
+    "SibylPredictionMarket": "0x23960EE69b04e9DC87AE3D5E1e7799c6028edc16",
+    "markets": [
+      {
+        "marketId": "MNT-ABOVE-1.5-2026Q3",
+        "marketIdHex": "0x25f3d389d2f25bd0aed5c07be0e79acf37adf0ab566b57ed9b1f57db6915e73c",
+        "question": "Will MNT trade above $1.50 (USD) at 2026-09-01 00:00 UTC?",
+        "resolveTime": 1788220800,
+        "resolver": "0x12B2434a1022d5787bf06056F2885Fe35De62Bf8",
+        "fpmm": "0xF7b95Abe45fa313ac76F572C5C6563BAFd6C2287",
+        "fpmmSeed": "2000 sUSD (balanced 50/50 -> priceYES = 0.50)",
+        "collateral": "0x6f5BdBe611aE3c84153BD9d2216ce076C2FBba18",
+        "registeredOnLedger": true
+      }
+    ]
+  },
   "latestReplay": {
     "_comment": "Per-(agent,market) Brier scores committed on-chain. Same agent has independent reputation per market (e.g. momentum_v1: MNT 153565 vs ETH 201210 ppm). datasetHash is the SHA-256 of the deterministic 2-market frozen dataset.",
     "datasetHash": "0xc433aaa9dd68b65da3b2c659dd3881f9c2cbeb82781c801ae58c350be628b796",
