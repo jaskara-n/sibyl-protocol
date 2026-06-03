@@ -51,6 +51,13 @@
       "registerTx": "0x657d8ee720947c0013fbcd8ce7d066e9ad38e7ba6aa325e92ccabb695ef1177f",
       "active": true,
       "convictionIndex": { "totalWeight": "3742273", "activeAgentCount": 5 }
+    },
+    {
+      "marketId": "BTC-USD",
+      "marketIdHex": "0xb39c402b9bd8428ba7a4cc2d1aca1432756cddeb60941a9175541a819095269e",
+      "active": true,
+      "convictionIndex": { "totalWeight": "1950003", "activeAgentCount": 3 },
+      "_comment": "3 agents (momentum, onchain_oi, news) with lower reputation -> lower conviction; demonstrates conviction-ranked markets"
     }
   ],
   "latestReplay": {

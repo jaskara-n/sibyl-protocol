@@ -89,6 +89,40 @@ export async function readLedgerState(ledgerAddress: Address) {
   };
 }
 
+/// Read the registered market id hashes (bytes32) from the ledger's getMarkets() view.
+export async function getMarkets(ledgerAddress: Address): Promise<readonly Hex[]> {
+  return mantleClient.readContract({
+    address: ledgerAddress,
+    abi: SIBYL_LEDGER_ABI,
+    functionName: 'getMarkets'
+  });
+}
+
+/// Whether a given market id hash is currently active on the ledger.
+export async function isMarketActive(ledgerAddress: Address, marketId: Hex): Promise<boolean> {
+  return mantleClient.readContract({
+    address: ledgerAddress,
+    abi: SIBYL_LEDGER_ABI,
+    functionName: 'isMarketActive',
+    args: [marketId]
+  });
+}
+
+/// The on-chain reputation-weighted conviction index for a market: summed capped agent
+/// weight (ppm) + active agent count. Reads convictionIndex(marketId) from the ledger.
+export async function readConvictionIndex(
+  ledgerAddress: Address,
+  marketId: Hex
+): Promise<{ totalWeight: bigint; activeAgentCount: number }> {
+  const [totalWeight, activeAgentCount] = await mantleClient.readContract({
+    address: ledgerAddress,
+    abi: SIBYL_LEDGER_ABI,
+    functionName: 'convictionIndex',
+    args: [marketId]
+  });
+  return { totalWeight, activeAgentCount: Number(activeAgentCount) };
+}
+
 export async function simulateCommitReplay(ledgerAddress: Address, payload: CommitReplayPayload, caller?: Address) {
   const from = caller ?? getAddress('0x0000000000000000000000000000000000000001');
 

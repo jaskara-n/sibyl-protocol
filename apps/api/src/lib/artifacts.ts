@@ -194,6 +194,32 @@ export function readDeployedVault(): DeployedVault | null {
   };
 }
 
+export type DeployedMarket = {
+  marketId: string;
+  marketIdHex: `0x${string}`;
+  active?: boolean;
+};
+
+/// The known-symbols list for mapping on-chain market id hashes back to readable symbols.
+/// Source of truth: deployments/mantle-sepolia.json markets[] — adding a json entry is all a
+/// new market needs to be labelled. keccak256(toBytes(symbol)) === marketIdHex.
+export function readDeployedMarkets(): DeployedMarket[] {
+  const path = resolve(process.cwd(), '../../deployments/mantle-sepolia.json');
+  if (!existsSync(path)) return [];
+  const d = JSON.parse(readFileSync(path, 'utf8')) as {
+    markets?: Array<{ marketId?: string; marketIdHex?: string; active?: boolean }>;
+  };
+  return (d.markets ?? [])
+    .filter((m): m is { marketId: string; marketIdHex: string; active?: boolean } =>
+      typeof m.marketId === 'string' && typeof m.marketIdHex === 'string'
+    )
+    .map((m) => ({
+      marketId: m.marketId,
+      marketIdHex: m.marketIdHex as `0x${string}`,
+      active: m.active
+    }));
+}
+
 /// Canonical on-chain deployment record (single source of truth: deployments/mantle-sepolia.json).
 export function readDeployedLedger(): DeployedLedger | null {
   const path = resolve(process.cwd(), '../../deployments/mantle-sepolia.json');

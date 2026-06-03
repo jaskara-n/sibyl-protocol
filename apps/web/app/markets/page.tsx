@@ -10,7 +10,13 @@ function num(v: unknown): number {
 }
 
 export default async function MarketsPage() {
-  const markets = await api<Market[]>('/markets', []);
+  const fetched = await api<Market[]>('/markets', []);
+
+  // The API already returns markets ranked by Conviction Index (totalWeight) DESC.
+  // Re-sort here only as a robustness safety net so the leaderboard order is always correct.
+  const markets = [...fetched].sort(
+    (a, b) => num(b.conviction?.totalWeight) - num(a.conviction?.totalWeight)
+  );
 
   const consensuses = await Promise.all(
     markets.map((m) =>
@@ -36,6 +42,9 @@ export default async function MarketsPage() {
           Markets, ranked by <span className="text-gradient">conviction</span>.
         </h1>
         <p className="mt-4 max-w-2xl text-lg text-muted">
+          Markets ranked by conviction — where the most reputed agents are actively positioned.
+        </p>
+        <p className="mt-3 max-w-2xl text-sm text-muted/80">
           Each market runs its own reputation-weighted consensus. The Conviction Index combines the total
           reputation weight backing a market with how many agents are actively voting — the louder and
           better-calibrated the crowd, the higher the conviction.
@@ -57,14 +66,33 @@ export default async function MarketsPage() {
                 <Link
                   key={m.marketId}
                   href={`/markets/${encodeURIComponent(m.marketId)}`}
-                  className="group glass flex flex-col gap-4 rounded-2xl p-5 transition-all hover:border-brand/40 hover:shadow-[0_0_36px_-14px_rgba(139,92,246,0.7)]"
+                  className={`group glass relative flex flex-col gap-4 rounded-2xl p-5 transition-all hover:border-brand/40 hover:shadow-[0_0_36px_-14px_rgba(139,92,246,0.7)] ${
+                    i === 0 ? 'border-brand/40 shadow-[0_0_36px_-16px_rgba(139,92,246,0.7)]' : ''
+                  }`}
                 >
+                  {i === 0 && (
+                    <span className="absolute -top-2.5 left-4 rounded-full border border-brand/50 bg-brand/15 px-2.5 py-0.5 font-mono text-[10px] font-semibold uppercase tracking-widest text-brand glow-brand">
+                      🔥 Most active
+                    </span>
+                  )}
                   <div className="flex items-start justify-between gap-3">
-                    <div className="min-w-0">
-                      <div className="truncate font-display text-lg font-semibold text-fg transition-colors group-hover:text-brand">
-                        {m.name ?? m.marketId}
+                    <div className="flex min-w-0 items-start gap-3">
+                      <span
+                        className={`grid h-8 w-8 shrink-0 place-items-center rounded-lg border font-display text-sm font-bold ${
+                          i === 0
+                            ? 'border-brand/50 bg-brand/15 text-brand'
+                            : 'border-line bg-card/60 text-muted'
+                        }`}
+                        title={`Conviction rank #${i + 1}`}
+                      >
+                        {i + 1}
+                      </span>
+                      <div className="min-w-0">
+                        <div className="truncate font-display text-lg font-semibold text-fg transition-colors group-hover:text-brand">
+                          {m.name ?? m.marketId}
+                        </div>
+                        <div className="mt-0.5 truncate font-mono text-[11px] text-muted">{m.marketId}</div>
                       </div>
-                      <div className="mt-0.5 truncate font-mono text-[11px] text-muted">{m.marketId}</div>
                     </div>
                     <span
                       className={`shrink-0 rounded-full border px-2 py-0.5 font-mono text-[10px] font-semibold uppercase tracking-widest ${
