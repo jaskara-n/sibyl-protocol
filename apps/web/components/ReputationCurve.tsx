@@ -58,7 +58,7 @@ export function ReputationCurve({ data }: { data: Point[] }) {
         </div>
         <div className="text-right">
           <div className="font-serifd text-3xl text-bureau-fg">{last.toFixed(3)}</div>
-          <div className={`font-monod text-[10px] uppercase tracking-[0.18em] ${improving ? 'text-rise' : 'text-fall'}`}>
+          <div className={`font-monod text-[11px] uppercase tracking-[0.18em] ${improving ? 'text-rise' : 'text-fall'}`}>
             {improving ? '↓ improving' : '↑ degrading'}
           </div>
         </div>

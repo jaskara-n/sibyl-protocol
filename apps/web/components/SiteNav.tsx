@@ -32,7 +32,7 @@ export function SiteNav() {
             S
           </span>
           <span className="font-serifd text-2xl leading-none text-bureau-fg">Sibyl</span>
-          <span className="hidden whitespace-nowrap font-monod text-[9px] uppercase tracking-[0.3em] text-bureau-muted xl:inline">
+          <span className="hidden whitespace-nowrap font-monod text-[10px] uppercase tracking-[0.3em] text-bureau-muted xl:inline">
             protocol · credit bureau for AI agents
           </span>
         </Link>
@@ -48,7 +48,7 @@ export function SiteNav() {
                 href={l.href}
                 aria-current={active ? 'page' : undefined}
                 className={cn(
-                  'border-b pb-0.5 font-monod text-[10px] uppercase tracking-[0.22em] transition-colors',
+                  'border-b pb-0.5 font-monod text-[11px] uppercase tracking-[0.22em] transition-colors',
                   active
                     ? 'border-brass text-brass'
                     : 'border-transparent text-bureau-muted hover:text-bureau-fg'
@@ -82,7 +82,7 @@ export function SiteNav() {
                   <button
                     onClick={openChainModal}
                     type="button"
-                    className="border border-fall/60 px-4 py-2 font-monod text-[10px] uppercase tracking-[0.18em] text-fall transition-colors hover:border-fall"
+                    className="border border-fall/60 px-4 py-2 font-monod text-[11px] uppercase tracking-[0.18em] text-fall transition-colors hover:border-fall"
                   >
                     Wrong network · switch
                   </button>

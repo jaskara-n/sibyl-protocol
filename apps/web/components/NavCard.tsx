@@ -24,10 +24,10 @@ export function NavCard({
       <div className="bureau-grain" aria-hidden />
 
       <div className="flex items-baseline justify-between border-b border-bureau-line pb-3">
-        <span className="font-monod text-[10px] uppercase tracking-[0.32em] text-bureau-muted">
+        <span className="font-monod text-[11px] uppercase tracking-[0.32em] text-bureau-muted">
           Net asset value
         </span>
-        <span className="border border-bureau-line px-2 py-0.5 font-monod text-[10px] uppercase tracking-[0.18em] text-brass">
+        <span className="border border-bureau-line px-2 py-0.5 font-monod text-[11px] uppercase tracking-[0.18em] text-brass">
           ERC-4626
         </span>
       </div>
@@ -52,7 +52,7 @@ export function NavCard({
 
       {/* Cash vs deployed split — thin brass gauge */}
       <div className="mt-6">
-        <div className="mb-2 flex items-baseline justify-between font-monod text-[10px] uppercase tracking-[0.24em] text-bureau-muted">
+        <div className="mb-2 flex items-baseline justify-between font-monod text-[11px] uppercase tracking-[0.24em] text-bureau-muted">
           <span>Capital deployed</span>
           <span className="text-bureau-fg">{deployedPct}%</span>
         </div>
@@ -71,7 +71,7 @@ export function NavCard({
 function Figure({ label, value, accent }: { label: string; value: ReactNode; accent?: string }) {
   return (
     <div className="flex items-baseline justify-between gap-6 border-b border-bureau-line/60 py-3">
-      <dt className="font-monod text-[10px] uppercase tracking-[0.28em] text-bureau-muted">{label}</dt>
+      <dt className="font-monod text-[11px] uppercase tracking-[0.28em] text-bureau-muted">{label}</dt>
       <dd className={`font-serifd text-2xl leading-none ${accent ?? 'text-bureau-fg'}`}>{value}</dd>
     </div>
   );

@@ -53,7 +53,7 @@ export function InstrumentAct({ consensus, network }: { consensus: HeroConsensus
 
   // the object: full-screen center → parks right and BECOMES the live
   // consensus readout (needle = real confidence, color = direction)
-  const objX = useTransform(sp, [0.46, 0.78], ['0%', '27%']);
+  const objX = useTransform(sp, [0.46, 0.78], ['0%', '24%']);
   const objScale = useTransform(sp, [0.46, 0.78], [1, 0.72]);
   const objOpacity = useTransform(sp, [0.46, 0.78], [1, 0.92]);
 
@@ -77,7 +77,7 @@ export function InstrumentAct({ consensus, network }: { consensus: HeroConsensus
   const dirColor =
     dir === 'LONG' ? 'var(--color-rise)' : dir === 'SHORT' ? 'var(--color-fall)' : 'var(--color-bureau-muted)';
   // real hex for the WebGL needle (three.js cannot resolve CSS variables)
-  const dirHex = dir === 'LONG' ? '#5fbd8c' : dir === 'SHORT' ? '#d4604f' : '#aaa395';
+  const dirHex = dir === 'LONG' ? '#0ecb81' : dir === 'SHORT' ? '#f6465d' : '#aaa395';
   const confPct = Math.round(consensus.confidence * 100);
 
   const still = reduced ?? false;
@@ -159,43 +159,56 @@ export function InstrumentAct({ consensus, network }: { consensus: HeroConsensus
                   href="/vault"
                   className="group inline-flex items-center gap-2 font-monod text-[11px] uppercase tracking-[0.24em] text-bureau-muted transition-colors hover:text-brass"
                 >
-                  Inspect the vault
+                  The Sibyl Vault
                   <span aria-hidden className="transition-transform group-hover:translate-x-1">→</span>
                 </Link>
               </div>
             </motion.div>
 
-            {/* floating instrument annotations — the 3D object behind these IS the gauge */}
+            {/* instrument annotations — framing the object, never covering it:
+                a label at its shoulder, the live verdict beneath its rings */}
             <motion.div
               style={still ? undefined : { opacity: pnOpacity, y: pnY, pointerEvents: pnEvents }}
-              className="relative hidden flex-col items-start gap-5 pl-6 lg:flex"
+              className="relative hidden h-[54vh] flex-col items-end justify-between text-right lg:flex"
             >
-              <div className="flex items-center gap-3 font-monod text-[10px] uppercase tracking-[0.32em] text-bureau-muted">
-                <span className="h-px w-10 bg-brass/60" aria-hidden />
-                Live consensus · <span className="text-brass">{consensus.marketId ?? 'reputation-weighted'}</span>
+              <div className="flex items-center gap-3 font-monod text-[10px] uppercase tracking-[0.3em] text-bureau-muted">
+                Live consensus · <span className="text-brass">{consensus.marketId ?? 'all markets'}</span>
+                <span className="h-px w-12 bg-brass/60" aria-hidden />
               </div>
 
-              <div className="font-serifd text-7xl italic leading-none" style={{ color: dirColor }}>
-                {dir}
-              </div>
-
-              <div className="flex items-baseline gap-3">
-                <span className="font-monod text-4xl text-bureau-fg">{confPct}</span>
-                <span className="font-monod text-[11px] uppercase tracking-[0.28em] text-bureau-muted">
-                  % confidence — the needle reads it
-                </span>
-              </div>
-
-              <div className="flex flex-col gap-1.5 font-monod text-[11px] uppercase tracking-[0.24em] text-bureau-muted">
-                <span>
-                  size <span className="text-bureau-fg">{consensus.sizeBps}</span> bps ·{' '}
-                  <span className="text-bureau-fg">{consensus.contributors}</span> agents contributing
-                </span>
-                <span>{network}</span>
+              <div className="flex flex-col items-end gap-2.5">
+                <div className="flex items-baseline gap-4">
+                  <span className="font-serifd text-6xl leading-none" style={{ color: dirColor }}>
+                    {dir}
+                  </span>
+                  <span className="font-serifd text-6xl leading-none text-bureau-fg">{confPct}%</span>
+                </div>
+                <div className="font-monod text-[10px] uppercase tracking-[0.24em] text-bureau-muted">
+                  {consensus.sizeBps} bps · {consensus.contributors} agents · the needle reads it live
+                </div>
               </div>
             </motion.div>
           </div>
         </div>
+
+        {/* whisper readout — tucked bottom-right, beneath the instrument */}
+        <motion.div
+          style={still ? undefined : { opacity: pnOpacity, y: pnY, pointerEvents: pnEvents }}
+          className="absolute bottom-[8vh] right-6 z-20 hidden flex-col items-end gap-2.5 text-right lg:flex xl:right-10"
+        >
+          <div className="font-monod text-[11px] uppercase tracking-[0.3em] text-bureau-muted">
+            Live consensus · <span className="text-brass">{consensus.marketId ?? 'all markets'}</span>
+          </div>
+          <div className="flex items-baseline gap-3">
+            <span className="font-serifd text-5xl leading-none" style={{ color: dirColor }}>
+              {dir}
+            </span>
+            <span className="font-serifd text-5xl leading-none text-bureau-fg">{confPct}%</span>
+          </div>
+          <div className="font-monod text-[11px] uppercase tracking-[0.24em] text-bureau-muted">
+            {consensus.sizeBps} bps · {consensus.contributors} agents
+          </div>
+        </motion.div>
 
         {/* scroll cue */}
         <motion.div
@@ -203,7 +216,7 @@ export function InstrumentAct({ consensus, network }: { consensus: HeroConsensus
           style={{ opacity: still ? 0 : cueOpacity }}
           className="absolute bottom-5 left-1/2 z-20 flex -translate-x-1/2 flex-col items-center gap-2"
         >
-          <span className="font-monod text-[9px] uppercase tracking-[0.42em] text-bureau-muted">
+          <span className="font-monod text-[10px] uppercase tracking-[0.42em] text-bureau-muted">
             scroll to calibrate
           </span>
           <motion.span

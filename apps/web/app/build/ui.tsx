@@ -67,7 +67,7 @@ export function CodeTerminal({ title, code }: { title: string; code: string }) {
     >
       <div className="flex items-center gap-3 border-b border-bureau-line bg-bureau px-4 py-2.5">
         <span className="font-monod text-[11px] uppercase tracking-[0.16em] text-bureau-muted">{title}</span>
-        <span className="ml-auto font-monod text-[10px] uppercase tracking-[0.16em] text-brass">@sibyl/agent-sdk</span>
+        <span className="ml-auto font-monod text-[11px] uppercase tracking-[0.16em] text-brass">@sibyl/agent-sdk</span>
       </div>
       <pre className="overflow-x-auto bg-bureau p-5 font-monod text-[12.5px] leading-relaxed">
         <code>{highlight(code)}</code>
@@ -229,7 +229,7 @@ export function ConnectWalletCTA() {
           >
             {address}
           </a>
-          <p className="mt-1.5 font-monod text-[10px] uppercase tracking-[0.14em] text-bureau-muted">
+          <p className="mt-1.5 font-monod text-[11px] uppercase tracking-[0.14em] text-bureau-muted">
             this wallet owns {identityCount?.toString() ?? '1'} ERC-8004 identity NFT
             {(identityCount ?? 0n) > 1n ? 's' : ''}
           </p>

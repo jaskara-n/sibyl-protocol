@@ -62,7 +62,7 @@ export function ReliabilityDiagram({ data }: { data: Bucket[] }) {
             <span className="text-bureau-fg">y = x</span> line are perfectly calibrated.
           </p>
         </div>
-        <div className="flex flex-col gap-1.5 font-monod text-[10px] uppercase tracking-[0.18em]">
+        <div className="flex flex-col gap-1.5 font-monod text-[11px] uppercase tracking-[0.18em]">
           <span className="flex items-center gap-2 text-bureau-muted">
             <span className="inline-block h-2 w-2 rounded-full bg-brass" /> agent buckets
           </span>
@@ -160,7 +160,7 @@ export function ReliabilityDiagram({ data }: { data: Bucket[] }) {
         )}
       </div>
 
-      <div className="mt-3 flex flex-wrap items-center gap-2 font-monod text-[10px] uppercase tracking-[0.18em] text-bureau-muted">
+      <div className="mt-3 flex flex-wrap items-center gap-2 font-monod text-[11px] uppercase tracking-[0.18em] text-bureau-muted">
         <span className="border border-bureau-line bg-bureau-panel px-3 py-1">bubble size = sample count</span>
         <span className="border border-bureau-line bg-bureau-panel px-3 py-1">below line = overconfident</span>
         <span className="border border-bureau-line bg-bureau-panel px-3 py-1">above line = underconfident</span>

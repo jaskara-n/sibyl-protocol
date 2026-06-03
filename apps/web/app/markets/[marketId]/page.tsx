@@ -104,14 +104,14 @@ export default async function MarketPage({ params }: { params: Promise<{ marketI
             <span
               title={market?.active ? 'Market is live' : 'Market is idle'}
               aria-label={market?.active ? 'Market status: live' : 'Market status: idle'}
-              className={`border px-2.5 py-1 font-monod text-[10px] uppercase tracking-[0.18em] ${
+              className={`border px-2.5 py-1 font-monod text-[11px] uppercase tracking-[0.18em] ${
                 market?.active ? 'border-rise text-rise' : 'border-bureau-line text-bureau-muted'
               }`}
             >
               {market?.active ? 'live' : 'idle'}
             </span>
           </div>
-          <div className="mt-2 font-monod text-[10px] uppercase tracking-[0.2em] text-bureau-muted">{id}</div>
+          <div className="mt-2 font-monod text-[11px] uppercase tracking-[0.2em] text-bureau-muted">{id}</div>
           <div className="mt-6 flex flex-wrap items-center gap-2">
             <Stamp>{agents.length} agents</Stamp>
             <Stamp>{activeAgentCount} active</Stamp>
@@ -161,14 +161,14 @@ export default async function MarketPage({ params }: { params: Promise<{ marketI
             <h2 className="font-serifd text-[clamp(1.4rem,2.6vw,2rem)] leading-[1.05]">
               Market leaderboard
             </h2>
-            <span className="font-monod text-[10px] uppercase tracking-[0.3em] text-bureau-muted">
+            <span className="font-monod text-[11px] uppercase tracking-[0.3em] text-bureau-muted">
               ranked by consensus weight
             </span>
           </div>
           {agents.length > 0 ? (
             <div className="bureau-frame overflow-hidden">
               <div className="bureau-grain" aria-hidden />
-              <div className="grid grid-cols-[2.4rem_1fr_5rem] items-baseline gap-4 border-b border-bureau-line px-5 py-3 font-monod text-[10px] uppercase tracking-[0.3em] text-bureau-muted sm:grid-cols-[2.4rem_1fr_5.5rem_6rem_minmax(8rem,12rem)_3.5rem]">
+              <div className="grid grid-cols-[2.4rem_1fr_5rem] items-baseline gap-4 border-b border-bureau-line px-5 py-3 font-monod text-[11px] uppercase tracking-[0.3em] text-bureau-muted sm:grid-cols-[2.4rem_1fr_5.5rem_6rem_minmax(8rem,12rem)_3.5rem]">
                 <span>Nº</span>
                 <span>Agent</span>
                 <span className="hidden text-center sm:block">Rating</span>
@@ -195,7 +195,7 @@ export default async function MarketPage({ params }: { params: Promise<{ marketI
                         <span className="block truncate font-sansd font-semibold text-bureau-fg transition-colors group-hover:text-brass">
                           {a.agentId}
                         </span>
-                        <span className="font-monod text-[10px] uppercase tracking-[0.2em] text-bureau-muted">
+                        <span className="font-monod text-[11px] uppercase tracking-[0.2em] text-bureau-muted">
                           {a.erc8004AgentId ? `identity Nº ${a.erc8004AgentId}` : 'unregistered'}
                           {a.isRogue && <span className="ml-2 text-fall">· silenced</span>}
                         </span>
@@ -262,7 +262,7 @@ export default async function MarketPage({ params }: { params: Promise<{ marketI
             <h2 className="font-serifd text-[clamp(1.4rem,2.6vw,2rem)] leading-[1.05]">
               Decision history
             </h2>
-            <span className="font-monod text-[10px] uppercase tracking-[0.3em] text-bureau-muted">
+            <span className="font-monod text-[11px] uppercase tracking-[0.3em] text-bureau-muted">
               {sorted.length} rounds
             </span>
           </div>
@@ -297,11 +297,11 @@ export default async function MarketPage({ params }: { params: Promise<{ marketI
                         <span className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
                           <span className="font-sansd font-semibold text-bureau-fg">{d.symbol}</span>
                           {isNewest && (
-                            <span className="border border-brass px-1.5 py-0.5 font-monod text-[9px] uppercase tracking-[0.18em] text-brass">
+                            <span className="border border-brass px-1.5 py-0.5 font-monod text-[10px] uppercase tracking-[0.18em] text-brass">
                               latest
                             </span>
                           )}
-                          <span className="font-monod text-[10px] uppercase tracking-[0.2em] text-bureau-muted">
+                          <span className="font-monod text-[11px] uppercase tracking-[0.2em] text-bureau-muted">
                             {relTime(d.timestamp)}
                           </span>
                         </span>
@@ -342,7 +342,7 @@ export default async function MarketPage({ params }: { params: Promise<{ marketI
           )}
         </section>
 
-        <footer className="mt-16 border-t border-bureau-line pt-6 text-center font-monod text-[10px] uppercase tracking-[0.3em] text-bureau-muted">
+        <footer className="mt-16 border-t border-bureau-line pt-6 text-center font-monod text-[11px] uppercase tracking-[0.3em] text-bureau-muted">
           per-market reputation-weighted consensus · decisions emitted on-chain to Mantle
         </footer>
       </div>
@@ -353,7 +353,7 @@ export default async function MarketPage({ params }: { params: Promise<{ marketI
 function Stamp({ children, className }: { children: ReactNode; className?: string }) {
   return (
     <span
-      className={`border border-bureau-line px-2.5 py-1 font-monod text-[10px] uppercase tracking-[0.18em] text-bureau-muted ${
+      className={`border border-bureau-line px-2.5 py-1 font-monod text-[11px] uppercase tracking-[0.18em] text-bureau-muted ${
         className ?? ''
       }`}
     >

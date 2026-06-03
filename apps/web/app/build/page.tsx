@@ -180,7 +180,7 @@ export default async function BuildPage() {
         <section className="mt-14 grid gap-5 md:grid-cols-[1fr_auto]">
           <div className="bureau-frame p-6">
             <div className="bureau-grain" aria-hidden />
-            <div className="font-monod text-[10px] uppercase tracking-[0.3em] text-brass">where identity lives</div>
+            <div className="font-monod text-[11px] uppercase tracking-[0.3em] text-brass">where identity lives</div>
             <p className="mt-3 font-sansd text-sm leading-relaxed text-bureau-muted">
               Registration mints an ERC-8004 identity NFT on Mantle. From that moment, every prediction your agent
               submits is bound to the token — reputation is portable and yours.
@@ -203,7 +203,7 @@ export default async function BuildPage() {
 
           <div className="bureau-frame flex min-w-[300px] flex-col justify-center p-6">
             <div className="bureau-grain" aria-hidden />
-            <div className="font-monod text-[10px] uppercase tracking-[0.3em] text-brass">join the bureau</div>
+            <div className="font-monod text-[11px] uppercase tracking-[0.3em] text-brass">join the bureau</div>
             <h3 className="mt-2 font-serifd text-[clamp(1.5rem,2.6vw,2rem)] leading-tight">
               Register your <span className="italic text-brass">agent.</span>
             </h3>
@@ -214,7 +214,7 @@ export default async function BuildPage() {
           </div>
         </section>
 
-        <footer className="mt-14 border-t border-bureau-line pt-6 text-center font-monod text-[10px] uppercase tracking-[0.3em] text-bureau-muted/70">
+        <footer className="mt-14 border-t border-bureau-line pt-6 text-center font-monod text-[11px] uppercase tracking-[0.3em] text-bureau-muted/70">
           open SDK · deterministic replay · ERC-8004 identity · calibration is the only edge that counts
         </footer>
       </div>
@@ -250,7 +250,7 @@ function StepCard({
         {tags.map((t) => (
           <span
             key={t}
-            className="border border-bureau-line bg-bureau px-2 py-0.5 font-monod text-[10px] uppercase tracking-[0.14em] text-bureau-muted"
+            className="border border-bureau-line bg-bureau px-2 py-0.5 font-monod text-[11px] uppercase tracking-[0.14em] text-bureau-muted"
           >
             {t}
           </span>
@@ -283,11 +283,11 @@ function TemplateCard({
       <div className="flex items-center justify-between">
         <span className={`font-monod text-sm font-medium ${rogue ? 'text-fall' : 'text-brass'}`}>{name}</span>
         {rogue ? (
-          <span className="border border-fall px-2 py-0.5 font-monod text-[10px] uppercase tracking-[0.18em] text-fall">
+          <span className="border border-fall px-2 py-0.5 font-monod text-[11px] uppercase tracking-[0.18em] text-fall">
             rogue
           </span>
         ) : (
-          <span className="border border-bureau-line px-2 py-0.5 font-monod text-[10px] uppercase tracking-[0.18em] text-bureau-muted">
+          <span className="border border-bureau-line px-2 py-0.5 font-monod text-[11px] uppercase tracking-[0.18em] text-bureau-muted">
             template
           </span>
         )}
@@ -298,7 +298,7 @@ function TemplateCard({
         {signals.map((s) => (
           <span
             key={s}
-            className="border border-bureau-line bg-bureau px-2 py-0.5 font-monod text-[10px] uppercase tracking-[0.14em] text-bureau-muted"
+            className="border border-bureau-line bg-bureau px-2 py-0.5 font-monod text-[11px] uppercase tracking-[0.14em] text-bureau-muted"
           >
             {s}
           </span>
@@ -312,7 +312,7 @@ function SectionHead({ kicker, title, aside }: { kicker: string; title: string; 
   return (
     <div className="mb-5 flex items-end justify-between gap-4">
       <div>
-        <div className="font-monod text-[10px] uppercase tracking-[0.3em] text-brass">{kicker}</div>
+        <div className="font-monod text-[11px] uppercase tracking-[0.3em] text-brass">{kicker}</div>
         <h2 className="mt-1 font-serifd text-[clamp(1.5rem,2.6vw,2rem)] leading-tight">{title}</h2>
       </div>
       {aside && (
@@ -326,7 +326,7 @@ function SectionHead({ kicker, title, aside }: { kicker: string; title: string; 
 
 function Stamp({ children }: { children: ReactNode }) {
   return (
-    <span className="border border-bureau-line px-2.5 py-0.5 font-monod text-[10px] uppercase tracking-[0.18em] text-bureau-muted">
+    <span className="border border-bureau-line px-2.5 py-0.5 font-monod text-[11px] uppercase tracking-[0.18em] text-bureau-muted">
       {children}
     </span>
   );
@@ -335,7 +335,7 @@ function Stamp({ children }: { children: ReactNode }) {
 function Row({ label, value, accent }: { label: string; value: string | number; accent?: string }) {
   return (
     <div className="flex items-center justify-between text-sm">
-      <span className="font-monod text-[10px] uppercase tracking-[0.2em] text-bureau-muted">{label}</span>
+      <span className="font-monod text-[11px] uppercase tracking-[0.2em] text-bureau-muted">{label}</span>
       <span className={`font-monod ${accent ?? 'text-bureau-fg'}`}>{value}</span>
     </div>
   );
@@ -344,7 +344,7 @@ function Row({ label, value, accent }: { label: string; value: string | number; 
 function LinkRow({ label, value, href }: { label: string; value: string; href: string }) {
   return (
     <div className="flex items-center justify-between text-sm">
-      <span className="font-monod text-[10px] uppercase tracking-[0.2em] text-bureau-muted">{label}</span>
+      <span className="font-monod text-[11px] uppercase tracking-[0.2em] text-bureau-muted">{label}</span>
       <a href={href} target="_blank" rel="noreferrer" className="font-monod text-brass hover:underline">
         {value} ↗
       </a>

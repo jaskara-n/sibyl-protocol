@@ -65,7 +65,7 @@ export function VerifyClient({
         <section className="mt-10 grid gap-5 md:grid-cols-2">
           <motion.div {...fadeUp} className="bureau-frame p-6">
             <div className="bureau-grain" aria-hidden />
-            <div className="font-monod text-[10px] uppercase tracking-[0.3em] text-brass">01 · deterministic replay</div>
+            <div className="font-monod text-[11px] uppercase tracking-[0.3em] text-brass">01 · deterministic replay</div>
             <h2 className="mt-2 font-serifd text-[clamp(1.5rem,2.6vw,2rem)] leading-tight">
               The track record is reproducible.
             </h2>
@@ -84,7 +84,7 @@ export function VerifyClient({
 
           <motion.div {...fadeUp} className="bureau-frame p-6">
             <div className="bureau-grain" aria-hidden />
-            <div className="font-monod text-[10px] uppercase tracking-[0.3em] text-brass">02 · committed datasetHash</div>
+            <div className="font-monod text-[11px] uppercase tracking-[0.3em] text-brass">02 · committed datasetHash</div>
             <h2 className="mt-2 font-serifd text-[clamp(1.5rem,2.6vw,2rem)] leading-tight">Anchored on Mantle.</h2>
             <p className="mt-3 font-sansd text-sm leading-relaxed text-bureau-muted">
               The SHA-256 of the frozen dataset is written on-chain. If a single byte of the track record changed, the
@@ -94,7 +94,7 @@ export function VerifyClient({
               <HashRow label="on-chain" value={onchainHash} accent="text-brass" />
               <HashRow label="local replay" value={localHash} accent={synced ? 'text-rise' : 'text-fall'} />
               <div className="flex items-center justify-between border-t border-bureau-line pt-3 text-sm">
-                <span className="font-monod text-[10px] uppercase tracking-[0.2em] text-bureau-muted">parity</span>
+                <span className="font-monod text-[11px] uppercase tracking-[0.2em] text-bureau-muted">parity</span>
                 <span className={cn('font-monod font-medium', synced ? 'text-rise' : 'text-fall')}>
                   {synced ? 'hash == on-chain ✓' : 'awaiting sync'}
                 </span>
@@ -107,7 +107,7 @@ export function VerifyClient({
         <section className="mt-14">
           <motion.div {...fadeUp} className="mb-5 flex items-end justify-between gap-4">
             <div>
-              <div className="font-monod text-[10px] uppercase tracking-[0.3em] text-brass">verify it yourself</div>
+              <div className="font-monod text-[11px] uppercase tracking-[0.3em] text-brass">verify it yourself</div>
               <h2 className="mt-1 font-serifd text-[clamp(1.5rem,2.6vw,2rem)] leading-tight">Four steps, no keys.</h2>
             </div>
             <span className="hidden shrink-0 font-monod text-[11px] uppercase tracking-[0.18em] text-bureau-muted sm:block">
@@ -156,7 +156,7 @@ export function VerifyClient({
 
           <motion.div {...fadeUp} className="mt-4 bureau-frame p-6">
             <div className="bureau-grain" aria-hidden />
-            <div className="font-monod text-[10px] uppercase tracking-[0.3em] text-brass">the one-liner</div>
+            <div className="font-monod text-[11px] uppercase tracking-[0.3em] text-brass">the one-liner</div>
             <p className="mt-2 font-sansd text-sm leading-relaxed text-bureau-muted">
               If the hash matches, the on-chain reputation is provably the same one this app shows. No trust required.
             </p>
@@ -171,10 +171,10 @@ export function VerifyClient({
           <div className="bureau-frame p-7">
             <div className="bureau-grain" aria-hidden />
             <div className="flex items-baseline justify-between border-b border-bureau-line pb-3">
-              <span className="font-monod text-[10px] uppercase tracking-[0.32em] text-bureau-muted">
+              <span className="font-monod text-[11px] uppercase tracking-[0.32em] text-bureau-muted">
                 On/off-chain parity
               </span>
-              <span className="font-monod text-[10px] uppercase tracking-[0.32em] text-brass">
+              <span className="font-monod text-[11px] uppercase tracking-[0.32em] text-brass">
                 {chain.network ?? 'mantle-sepolia'}
               </span>
             </div>
@@ -202,7 +202,7 @@ export function VerifyClient({
         <section className="mt-14">
           <motion.div {...fadeUp} className="mb-5 flex items-end justify-between gap-4">
             <div>
-              <div className="font-monod text-[10px] uppercase tracking-[0.3em] text-brass">on-chain links</div>
+              <div className="font-monod text-[11px] uppercase tracking-[0.3em] text-brass">on-chain links</div>
               <h2 className="mt-1 font-serifd text-[clamp(1.5rem,2.6vw,2rem)] leading-tight">The record on Mantle.</h2>
             </div>
             <span className="hidden shrink-0 font-monod text-[11px] uppercase tracking-[0.18em] text-bureau-muted sm:block">
@@ -230,7 +230,7 @@ export function VerifyClient({
               {chain.owner && <Row label="Owner" value={short(chain.owner, 8, 6)} />}
               {chain.epoch !== undefined && <Row label="Epoch" value={chain.epoch} />}
               <div className="flex items-center justify-between border-t border-bureau-line pt-3 text-sm">
-                <span className="font-monod text-[10px] uppercase tracking-[0.2em] text-bureau-muted">Chain sync</span>
+                <span className="font-monod text-[11px] uppercase tracking-[0.2em] text-bureau-muted">Chain sync</span>
                 <span className={cn('font-monod font-medium', synced ? 'text-rise' : 'text-brass')}>
                   {synced ? 'synced ✓' : chain.status === 'ready' ? 'ready' : chain.status}
                 </span>
@@ -239,7 +239,7 @@ export function VerifyClient({
           </motion.div>
         </section>
 
-        <footer className="mt-14 border-t border-bureau-line pt-6 text-center font-monod text-[10px] uppercase tracking-[0.3em] text-bureau-muted/70">
+        <footer className="mt-14 border-t border-bureau-line pt-6 text-center font-monod text-[11px] uppercase tracking-[0.3em] text-bureau-muted/70">
           deterministic replay · committed datasetHash · on/off-chain parity · verifiable by anyone, anytime
         </footer>
       </div>
@@ -253,7 +253,7 @@ function SyncChip({ synced, status }: { synced: boolean; status: string }) {
   return (
     <span
       className={cn(
-        'inline-flex items-center gap-2 border px-2.5 py-0.5 font-monod text-[10px] uppercase tracking-[0.18em]',
+        'inline-flex items-center gap-2 border px-2.5 py-0.5 font-monod text-[11px] uppercase tracking-[0.18em]',
         synced ? 'border-rise text-rise' : 'border-brass text-brass'
       )}
     >
@@ -318,7 +318,7 @@ function CodeBlock({ text, className }: { text: string; className?: string }) {
       <button
         onClick={copy}
         className={cn(
-          'absolute right-2 top-2 border px-2 py-1 font-monod text-[10px] uppercase tracking-[0.14em] transition-colors',
+          'absolute right-2 top-2 border px-2 py-1 font-monod text-[11px] uppercase tracking-[0.14em] transition-colors',
           copied ? 'border-rise text-rise' : 'border-bureau-line text-bureau-muted hover:border-brass hover:text-brass'
         )}
       >
@@ -353,7 +353,7 @@ function HashRow({
 }) {
   return (
     <div className="flex items-center justify-between gap-3 text-sm">
-      <span className="shrink-0 font-monod text-[10px] uppercase tracking-[0.2em] text-bureau-muted">{label}</span>
+      <span className="shrink-0 font-monod text-[11px] uppercase tracking-[0.2em] text-bureau-muted">{label}</span>
       <span className={cn('truncate font-monod', small ? 'text-[11px]' : 'text-xs', accent ?? 'text-bureau-fg')} title={value ?? undefined}>
         {value ? short(value, small ? 8 : 12, 8) : '—'}
       </span>
@@ -376,7 +376,7 @@ function ParityCard({ title, body }: { title: string; body: string }) {
 function Stat({ label, value, accent }: { label: string; value: string | number; accent?: string }) {
   return (
     <div className="border border-bureau-line bg-bureau-panel px-3 py-2.5">
-      <div className="font-monod text-[10px] uppercase tracking-[0.2em] text-bureau-muted">{label}</div>
+      <div className="font-monod text-[11px] uppercase tracking-[0.2em] text-bureau-muted">{label}</div>
       <div className={cn('mt-0.5 font-serifd text-lg', accent ?? 'text-bureau-fg')}>{value}</div>
     </div>
   );
@@ -388,7 +388,7 @@ function Tag({ children, color }: { children: ReactNode; color: string }) {
 
 function Stamp({ children }: { children: ReactNode }) {
   return (
-    <span className="border border-bureau-line px-2.5 py-0.5 font-monod text-[10px] uppercase tracking-[0.18em] text-bureau-muted">
+    <span className="border border-bureau-line px-2.5 py-0.5 font-monod text-[11px] uppercase tracking-[0.18em] text-bureau-muted">
       {children}
     </span>
   );
@@ -397,7 +397,7 @@ function Stamp({ children }: { children: ReactNode }) {
 function Row({ label, value, accent }: { label: string; value: string | number; accent?: string }) {
   return (
     <div className="flex items-center justify-between text-sm">
-      <span className="font-monod text-[10px] uppercase tracking-[0.2em] text-bureau-muted">{label}</span>
+      <span className="font-monod text-[11px] uppercase tracking-[0.2em] text-bureau-muted">{label}</span>
       <span className={cn('font-monod', accent ?? 'text-bureau-fg')}>{value}</span>
     </div>
   );
@@ -406,7 +406,7 @@ function Row({ label, value, accent }: { label: string; value: string | number; 
 function LinkRow({ label, value, href }: { label: string; value: string; href: string }) {
   return (
     <div className="flex items-center justify-between text-sm">
-      <span className="font-monod text-[10px] uppercase tracking-[0.2em] text-bureau-muted">{label}</span>
+      <span className="font-monod text-[11px] uppercase tracking-[0.2em] text-bureau-muted">{label}</span>
       <a href={href} target="_blank" rel="noreferrer" className="font-monod text-brass hover:underline">
         {value} ↗
       </a>

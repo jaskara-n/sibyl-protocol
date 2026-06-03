@@ -47,10 +47,10 @@ export function ConsensusGauge({
     <div ref={ref} className="bureau-frame flex flex-col items-center justify-center p-6">
       <div className="bureau-grain" aria-hidden />
       <div className="flex w-full items-baseline justify-between border-b border-bureau-line pb-3">
-        <span className="font-monod text-[10px] uppercase tracking-[0.32em] text-bureau-muted">
+        <span className="font-monod text-[11px] uppercase tracking-[0.32em] text-bureau-muted">
           Consensus · live
         </span>
-        <span className="font-monod text-[10px] uppercase tracking-[0.32em] text-brass">
+        <span className="font-monod text-[11px] uppercase tracking-[0.32em] text-brass">
           50% = no edge
         </span>
       </div>
@@ -130,7 +130,7 @@ export function ConsensusGauge({
         <div className="mt-2 font-monod text-sm text-bureau-fg">
           {pct}% confidence · {sizeBps} bps
         </div>
-        <div className="mt-0.5 font-monod text-[10px] uppercase tracking-[0.2em] text-bureau-muted">
+        <div className="mt-0.5 font-monod text-[11px] uppercase tracking-[0.2em] text-bureau-muted">
           {contributors} agents contributing
         </div>
       </div>

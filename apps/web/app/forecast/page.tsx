@@ -94,7 +94,7 @@ export default async function ForecastPage() {
                         <span
                           title={`Status: ${st.label}`}
                           aria-label={`Market status: ${st.label}`}
-                          className={`shrink-0 border px-2 py-0.5 font-monod text-[10px] uppercase tracking-[0.18em] ${st.cls}`}
+                          className={`shrink-0 border px-2 py-0.5 font-monod text-[11px] uppercase tracking-[0.18em] ${st.cls}`}
                         >
                           {st.label}
                         </span>
@@ -133,7 +133,7 @@ export default async function ForecastPage() {
           )}
         </section>
 
-        <footer className="mt-16 border-t border-bureau-line pt-6 text-center font-monod text-[10px] uppercase tracking-[0.3em] text-bureau-muted/70">
+        <footer className="mt-16 border-t border-bureau-line pt-6 text-center font-monod text-[11px] uppercase tracking-[0.3em] text-bureau-muted/70">
           FPMM price = implied probability · complete-set mint/redeem · resolver-gated resolution on Mantle
         </footer>
       </div>
@@ -152,7 +152,7 @@ function Stamp({ children, className }: { children: React.ReactNode; className?:
 function Stat({ label, value, accent }: { label: string; value: string; accent?: string }) {
   return (
     <div className="border border-bureau-line bg-bureau p-3">
-      <div className="font-monod text-[10px] uppercase tracking-[0.18em] text-bureau-muted">{label}</div>
+      <div className="font-monod text-[11px] uppercase tracking-[0.18em] text-bureau-muted">{label}</div>
       <div className={`mt-1 font-monod text-sm font-semibold ${accent ?? 'text-bureau-fg'}`}>{value}</div>
     </div>
   );

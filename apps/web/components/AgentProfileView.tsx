@@ -113,13 +113,13 @@ export function AgentProfileView({
                     <span
                       title="Flagged as rogue: silenced in consensus"
                       aria-label="Flagged as rogue: silenced in consensus"
-                      className="border border-fall px-2 py-0.5 font-monod text-[10px] uppercase tracking-[0.18em] text-fall"
+                      className="border border-fall px-2 py-0.5 font-monod text-[11px] uppercase tracking-[0.18em] text-fall"
                     >
                       Rogue
                     </span>
                   )}
                 </div>
-                <div className="mt-2 flex flex-wrap items-center gap-3 font-monod text-[10px] uppercase tracking-[0.2em] text-bureau-muted">
+                <div className="mt-2 flex flex-wrap items-center gap-3 font-monod text-[11px] uppercase tracking-[0.2em] text-bureau-muted">
                   {erc ? (
                     <span className="text-brass">identity Nº {erc}</span>
                   ) : (
@@ -167,7 +167,7 @@ export function AgentProfileView({
             );
           })}
           {loading && (
-            <span role="status" aria-live="polite" className="font-monod text-[10px] uppercase tracking-[0.3em] text-bureau-muted">
+            <span role="status" aria-live="polite" className="font-monod text-[11px] uppercase tracking-[0.3em] text-bureau-muted">
               loading…
             </span>
           )}
@@ -187,7 +187,7 @@ export function AgentProfileView({
         <section className="mt-8">
           <div className="mb-4 flex items-end justify-between">
             <h3 className="font-serifd text-xl text-bureau-fg">Recent signals</h3>
-            <span className="font-monod text-[10px] uppercase tracking-[0.3em] text-bureau-muted">
+            <span className="font-monod text-[11px] uppercase tracking-[0.3em] text-bureau-muted">
               predicted probability · realized outcome
             </span>
           </div>
@@ -202,14 +202,14 @@ export function AgentProfileView({
                     className="flex min-w-[112px] flex-col gap-1.5 border border-bureau-line bg-bureau-panel p-3"
                     style={{ borderColor: hit ? 'color-mix(in oklab, var(--color-rise) 35%, transparent)' : 'color-mix(in oklab, var(--color-fall) 35%, transparent)' }}
                   >
-                    <div className="font-monod text-[10px] uppercase tracking-[0.18em] text-bureau-muted">{fmtTs(s.ts)}</div>
+                    <div className="font-monod text-[11px] uppercase tracking-[0.18em] text-bureau-muted">{fmtTs(s.ts)}</div>
                     <div className="font-monod text-lg font-bold" style={{ color: c }}>
                       {(s.prob * 100).toFixed(0)}%
                     </div>
                     <div className="h-1.5 w-full overflow-hidden bg-bureau-line/60">
                       <div className="h-full" style={{ width: `${Math.round(s.prob * 100)}%`, background: c }} />
                     </div>
-                    <div className="font-monod text-[10px] uppercase tracking-[0.18em] text-bureau-muted">
+                    <div className="font-monod text-[11px] uppercase tracking-[0.18em] text-bureau-muted">
                       outcome <span style={{ color: c }}>{s.outcome >= 0.5 ? 'up' : 'down'}</span>
                     </div>
                   </div>
@@ -231,9 +231,9 @@ export function AgentProfileView({
 function Stat({ label, value, hint }: { label: string; value: string; hint?: string }) {
   return (
     <div className="bg-bureau-panel px-4 py-3 text-center">
-      <div className="font-monod text-[9px] uppercase tracking-[0.24em] text-bureau-muted">{label}</div>
+      <div className="font-monod text-[10px] uppercase tracking-[0.24em] text-bureau-muted">{label}</div>
       <div className="mt-1 font-serifd text-2xl leading-none text-bureau-fg">{value}</div>
-      {hint && <div className="mt-1 font-monod text-[9px] uppercase tracking-[0.18em] text-bureau-muted/60">{hint}</div>}
+      {hint && <div className="mt-1 font-monod text-[10px] uppercase tracking-[0.18em] text-bureau-muted/60">{hint}</div>}
     </div>
   );
 }

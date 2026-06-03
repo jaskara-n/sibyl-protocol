@@ -61,7 +61,7 @@ export default async function AgentsPage() {
         <section className="mt-12">
           <div className="mb-5 flex items-end justify-between">
             <h2 className="font-serifd text-2xl text-bureau-fg">Reputation leaderboard</h2>
-            <span className="font-monod text-[10px] uppercase tracking-[0.3em] text-bureau-muted">
+            <span className="font-monod text-[11px] uppercase tracking-[0.3em] text-bureau-muted">
               ranked by consensus weight
             </span>
           </div>
@@ -115,7 +115,7 @@ export default async function AgentsPage() {
                 />
               </div>
 
-              <div className="mt-6 flex flex-wrap gap-2 font-monod text-[10px]">
+              <div className="mt-6 flex flex-wrap gap-2 font-monod text-[11px]">
                 <Pill>inverse-Brier weighting</Pill>
                 <Pill>per-agent cap (anti-domination)</Pill>
                 <Pill>S→D reputation tiers</Pill>
@@ -157,8 +157,8 @@ function LedgerStat({
         >
           {value}
         </div>
-        <div className="mt-3 font-monod text-[10px] uppercase tracking-[0.3em] text-bureau-muted">{label}</div>
-        {hint && <div className="mt-1 font-monod text-[10px] text-bureau-muted/70">{hint}</div>}
+        <div className="mt-3 font-monod text-[11px] uppercase tracking-[0.3em] text-bureau-muted">{label}</div>
+        {hint && <div className="mt-1 font-monod text-[11px] text-bureau-muted/70">{hint}</div>}
       </div>
     </Reveal>
   );

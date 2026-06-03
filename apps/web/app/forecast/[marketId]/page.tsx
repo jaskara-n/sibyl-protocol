@@ -107,7 +107,7 @@ export default async function ForecastDetailPage({
             <span
               title={`Status: ${st.label}`}
               aria-label={`Market status: ${st.label}`}
-              className={`shrink-0 border px-2.5 py-1 font-monod text-[10px] uppercase tracking-[0.18em] ${st.cls}`}
+              className={`shrink-0 border px-2.5 py-1 font-monod text-[11px] uppercase tracking-[0.18em] ${st.cls}`}
             >
               {st.label}
             </span>
@@ -149,7 +149,7 @@ export default async function ForecastDetailPage({
                   <span className="font-monod text-[11px] uppercase tracking-[0.32em] text-brass">
                     market facts
                   </span>
-                  <span className="font-monod text-[10px] uppercase tracking-[0.28em] text-bureau-muted">
+                  <span className="font-monod text-[11px] uppercase tracking-[0.28em] text-bureau-muted">
                     {market.source === 'chain' ? 'live on-chain' : 'fallback · cached'}
                   </span>
                 </div>
@@ -176,7 +176,7 @@ export default async function ForecastDetailPage({
           />
         </div>
 
-        <footer className="mt-16 border-t border-bureau-line pt-6 text-center font-monod text-[10px] uppercase tracking-[0.3em] text-bureau-muted/70">
+        <footer className="mt-16 border-t border-bureau-line pt-6 text-center font-monod text-[11px] uppercase tracking-[0.3em] text-bureau-muted/70">
           binary prediction market · FPMM price = implied probability · settled on Mantle
         </footer>
       </div>
@@ -201,7 +201,7 @@ function FactRow({ label, value, last }: { label: string; value: ReactNode; last
     <div
       className={`flex items-baseline justify-between gap-6 pb-3.5 ${last ? '' : 'border-b border-bureau-line/60'}`}
     >
-      <dt className="font-monod text-[10px] uppercase tracking-[0.28em] text-bureau-muted">{label}</dt>
+      <dt className="font-monod text-[11px] uppercase tracking-[0.28em] text-bureau-muted">{label}</dt>
       <dd className="text-right font-monod text-sm text-bureau-fg">{value}</dd>
     </div>
   );
@@ -212,7 +212,7 @@ function FactLink({ label, value, last }: { label: string; value: string | null;
     <div
       className={`flex items-baseline justify-between gap-6 pb-3.5 ${last ? '' : 'border-b border-bureau-line/60'}`}
     >
-      <dt className="font-monod text-[10px] uppercase tracking-[0.28em] text-bureau-muted">{label}</dt>
+      <dt className="font-monod text-[11px] uppercase tracking-[0.28em] text-bureau-muted">{label}</dt>
       <dd className="text-right">
         {value ? (
           <a

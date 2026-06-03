@@ -34,7 +34,7 @@ export function PositionTable({ positions }: { positions: VaultPosition[] }) {
     <div className="bureau-frame overflow-x-auto">
       <div className="bureau-grain" aria-hidden />
 
-      <div className="grid min-w-[320px] grid-cols-[1fr_auto_64px] gap-3 border-b border-bureau-line px-5 py-3 font-monod text-[10px] uppercase tracking-[0.3em] text-bureau-muted">
+      <div className="grid min-w-[320px] grid-cols-[1fr_auto_64px] gap-3 border-b border-bureau-line px-5 py-3 font-monod text-[11px] uppercase tracking-[0.3em] text-bureau-muted">
         <span>Market</span>
         <span className="text-right">Value</span>
         <span className="text-right">Share</span>

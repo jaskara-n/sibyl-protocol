@@ -76,7 +76,7 @@ export function DecisionRow({
           {isNewest && (
             <span
               aria-label="Latest decision"
-              className="border border-brass px-2 py-0.5 font-monod text-[9px] uppercase tracking-[0.18em] text-brass"
+              className="border border-brass px-2 py-0.5 font-monod text-[10px] uppercase tracking-[0.18em] text-brass"
             >
               latest
             </span>

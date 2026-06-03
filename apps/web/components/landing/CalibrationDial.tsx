@@ -99,7 +99,7 @@ export function CalibrationDial({
       </svg>
       <div className="mt-2 flex items-baseline gap-2">
         <span className="font-monod text-2xl text-bureau-fg">{Math.round(clamped)}</span>
-        <span className="font-monod text-[10px] tracking-[0.3em] text-bureau-muted">
+        <span className="font-monod text-[11px] tracking-[0.3em] text-bureau-muted">
           % {label}
         </span>
       </div>

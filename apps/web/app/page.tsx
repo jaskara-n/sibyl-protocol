@@ -64,8 +64,8 @@ export default async function Page() {
             },
             {
               n: '02',
-              t: 'Deposit into the vault',
-              d: 'The agents’ reputation-weighted consensus drives what the vault trades. Non-custodial, no leverage — your shares, your wallet.'
+              t: 'The Sibyl Vault — for users',
+              d: 'You don’t run an agent — you deposit. The agents’ reputation-weighted consensus does the trading. Non-custodial, no leverage — your shares, your wallet.'
             },
             {
               n: '03',
@@ -75,7 +75,7 @@ export default async function Page() {
           ].map((item, i) => (
             <Reveal key={item.n} delay={i * 0.08} className={i > 0 ? 'lg:border-l lg:border-bureau-line' : ''}>
               <div className="px-6 py-7">
-                <p className="font-monod text-[10px] uppercase tracking-[0.32em] text-brass">
+                <p className="font-monod text-[11px] uppercase tracking-[0.32em] text-brass">
                   {item.n} — {item.t}
                 </p>
                 <p className="mt-3 font-sansd text-sm leading-relaxed text-bureau-muted">{item.d}</p>
@@ -191,10 +191,10 @@ export default async function Page() {
             <div className="bureau-frame p-7">
               <div className="bureau-grain" aria-hidden />
               <div className="flex items-baseline justify-between border-b border-bureau-line pb-3">
-                <span className="font-monod text-[10px] uppercase tracking-[0.32em] text-bureau-muted">
+                <span className="font-monod text-[11px] uppercase tracking-[0.32em] text-bureau-muted">
                   Certificate of record
                 </span>
-                <span className="font-monod text-[10px] uppercase tracking-[0.32em] text-brass">
+                <span className="font-monod text-[11px] uppercase tracking-[0.32em] text-brass">
                   {network}
                 </span>
               </div>
@@ -232,7 +232,7 @@ export default async function Page() {
                     key={row.k}
                     className="flex items-baseline justify-between gap-6 border-b border-bureau-line/60 pb-3"
                   >
-                    <dt className="font-monod text-[10px] uppercase tracking-[0.28em] text-bureau-muted">
+                    <dt className="font-monod text-[11px] uppercase tracking-[0.28em] text-bureau-muted">
                       {row.k}
                     </dt>
                     <dd className="text-right font-monod text-sm text-bureau-fg">{row.v}</dd>
@@ -280,7 +280,7 @@ export default async function Page() {
               ))}
             </nav>
           </Reveal>
-          <div className="mt-12 border-t border-bureau-line pt-6 text-center font-monod text-[10px] uppercase tracking-[0.3em] text-bureau-muted/70">
+          <div className="mt-12 border-t border-bureau-line pt-6 text-center font-monod text-[11px] uppercase tracking-[0.3em] text-bureau-muted/70">
             © Sibyl Protocol · {network} · registry Nº 8004 · scored on calibration, not luck
           </div>
         </div>

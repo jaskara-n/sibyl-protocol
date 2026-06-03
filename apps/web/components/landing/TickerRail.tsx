@@ -24,7 +24,7 @@ export function TickerRail({ network, epoch }: { network: string; epoch?: number
 
   return (
     <div className="border-y border-bureau-line bg-bureau/95">
-      <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-x-6 gap-y-1 px-5 py-2 font-monod text-[10px] uppercase tracking-[0.28em] text-bureau-muted">
+      <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-x-6 gap-y-1 px-5 py-2 font-monod text-[11px] uppercase tracking-[0.28em] text-bureau-muted">
         <span className="flex items-center gap-2.5">
           <span className="relative flex h-1.5 w-1.5" aria-hidden>
             <span className="live-dot absolute inline-flex h-1.5 w-1.5 rounded-full bg-rise" />

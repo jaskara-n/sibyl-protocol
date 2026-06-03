@@ -25,11 +25,11 @@
   --color-bureau-panel: #14120e;
   --color-bureau-line: #29251c; /* hairline */
   --color-bureau-fg: #ece8df; /* paper white */
-  --color-bureau-muted: #aaa395; /* lifted for label legibility */
+  --color-bureau-muted: #b5ae9f; /* lifted twice — labels must read */
   --color-brass: #cff04e; /* VOLT — electric chartreuse, the live-signal signature */
   --color-brass-deep: #8da832;
-  --color-rise: #5fbd8c; /* LONG / positive — phosphor */
-  --color-fall: #d4604f; /* SHORT / negative — vermilion */
+  --color-rise: #0ecb81; /* LONG / positive — phosphor */
+  --color-fall: #f6465d; /* SHORT / negative — vermilion */
 
   /* true serif — italic accent words + the seal only */
   --font-serifd: 'Instrument Serif', Georgia, 'Times New Roman', serif;
@@ -136,15 +136,17 @@
   font-weight: 600;
   letter-spacing: -0.025em;
 }
+/* accent words: same clean Geist, volt color only — no italic, no serif */
 .font-serifd .italic,
 .font-serifd.italic {
-  font-family: var(--font-serifd);
-  font-weight: 400;
-  letter-spacing: -0.005em;
+  font-family: 'Geist', ui-sans-serif, system-ui, sans-serif;
+  font-style: normal;
+  font-weight: 600;
+  letter-spacing: -0.025em;
 }
 .font-sansd { font-family: var(--font-sansd); }
-/* medium weight — thin mono caps were washing out at small sizes */
-.font-monod { font-family: var(--font-monod); font-variant-numeric: tabular-nums; font-weight: 500; }
+/* semibold — micro mono-caps must read crisp, never faint */
+.font-monod { font-family: var(--font-monod); font-variant-numeric: tabular-nums; font-weight: 600; }
 
 /* engraved print grain — drop inside any positioned container */
 .bureau-grain {

@@ -354,7 +354,7 @@ export function ForecastTradePanel({
       <div className="bureau-grain" aria-hidden />
       <div className="flex items-center justify-between">
         <div className="font-monod text-[11px] uppercase tracking-[0.32em] text-brass">trade · positions</div>
-        <span className="border border-rise px-2 py-0.5 font-monod text-[10px] uppercase tracking-[0.18em] text-rise">
+        <span className="border border-rise px-2 py-0.5 font-monod text-[11px] uppercase tracking-[0.18em] text-rise">
           live · mantle sepolia
         </span>
       </div>
@@ -771,7 +771,7 @@ function PreviewRow({
     <div className="flex items-center justify-between text-sm">
       <span className="font-monod text-bureau-muted">
         {label}
-        {hint && <span className="ml-1.5 font-monod text-[10px] text-bureau-muted/60">{hint}()</span>}
+        {hint && <span className="ml-1.5 font-monod text-[11px] text-bureau-muted/60">{hint}()</span>}
       </span>
       <span className={`font-monod ${accent ?? 'text-bureau-fg'}`}>{value}</span>
     </div>
@@ -781,7 +781,7 @@ function PreviewRow({
 function Stat({ label, value, accent }: { label: string; value: string; accent?: string }) {
   return (
     <div className="border border-bureau-line bg-bureau p-3">
-      <div className="font-monod text-[10px] uppercase tracking-[0.18em] text-bureau-muted">{label}</div>
+      <div className="font-monod text-[11px] uppercase tracking-[0.18em] text-bureau-muted">{label}</div>
       <div className={`mt-1 font-monod text-sm font-semibold ${accent ?? 'text-bureau-fg'}`}>{value}</div>
     </div>
   );

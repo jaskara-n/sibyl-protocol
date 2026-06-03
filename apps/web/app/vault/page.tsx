@@ -61,7 +61,7 @@ export default async function VaultPage() {
             <Reveal delay={0.1}>
               <div className="mb-3 flex items-baseline justify-between">
                 <h2 className="font-serifd text-2xl">Open positions</h2>
-                <span className="font-monod text-[10px] uppercase tracking-[0.24em] text-bureau-muted">
+                <span className="font-monod text-[11px] uppercase tracking-[0.24em] text-bureau-muted">
                   per-market venue notional
                 </span>
               </div>
@@ -98,7 +98,7 @@ export default async function VaultPage() {
           </div>
         </Reveal>
 
-        <footer className="mt-14 border-t border-bureau-line pt-6 text-center font-monod text-[10px] uppercase tracking-[0.3em] text-bureau-muted">
+        <footer className="mt-14 border-t border-bureau-line pt-6 text-center font-monod text-[11px] uppercase tracking-[0.3em] text-bureau-muted">
           NAV = idle cash + venue positions · reputation-weighted sizing · no leverage · live on Mantle Sepolia
         </footer>
       </div>
@@ -109,7 +109,7 @@ export default async function VaultPage() {
 function Stamp({ children, className }: { children: ReactNode; className?: string }) {
   return (
     <span
-      className={`border border-bureau-line px-2 py-0.5 font-monod text-[10px] uppercase tracking-[0.18em] text-bureau-muted ${className ?? ''}`}
+      className={`border border-bureau-line px-2 py-0.5 font-monod text-[11px] uppercase tracking-[0.18em] text-bureau-muted ${className ?? ''}`}
     >
       {children}
     </span>

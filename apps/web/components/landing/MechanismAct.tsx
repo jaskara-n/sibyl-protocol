@@ -112,10 +112,10 @@ export function MechanismAct({ agents }: { agents: MechanismAgent[] }) {
           <div className="bureau-frame p-7">
             <div className="bureau-grain" aria-hidden />
             <div className="flex items-baseline justify-between border-b border-bureau-line pb-3">
-              <span className="font-monod text-[10px] uppercase tracking-[0.32em] text-bureau-muted">
+              <span className="font-monod text-[11px] uppercase tracking-[0.32em] text-bureau-muted">
                 Consensus weight · live registry
               </span>
-              <span className="font-monod text-[10px] uppercase tracking-[0.32em] text-brass">
+              <span className="font-monod text-[11px] uppercase tracking-[0.32em] text-brass">
                 inverse-Brier
               </span>
             </div>
@@ -138,7 +138,7 @@ export function MechanismAct({ agents }: { agents: MechanismAgent[] }) {
               {['inverse-Brier weighting', 'per-agent cap', 'FLAT dead-band · no leverage'].map((t) => (
                 <span
                   key={t}
-                  className="border border-bureau-line px-2.5 py-1 font-monod text-[10px] uppercase tracking-[0.18em] text-bureau-muted"
+                  className="border border-bureau-line px-2.5 py-1 font-monod text-[11px] uppercase tracking-[0.18em] text-bureau-muted"
                 >
                   {t}
                 </span>
@@ -209,7 +209,7 @@ function WeightBar({
         <span className={agent.isRogue ? 'text-fall' : 'text-bureau-fg'}>
           {agent.agentId}
           {agent.isRogue && (
-            <span className="ml-2 border border-fall/50 px-1 text-[9px] uppercase tracking-[0.18em] text-fall">
+            <span className="ml-2 border border-fall/50 px-1 text-[10px] uppercase tracking-[0.18em] text-fall">
               rogue
             </span>
           )}

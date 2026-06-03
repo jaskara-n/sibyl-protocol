@@ -31,7 +31,7 @@ export function ConvictionBar({
 
   return (
     <div className="flex flex-col gap-2.5">
-      <div className="flex items-baseline justify-between font-monod text-[10px] uppercase tracking-[0.28em]">
+      <div className="flex items-baseline justify-between font-monod text-[11px] uppercase tracking-[0.28em]">
         <span className="text-bureau-muted">Conviction index</span>
         <span className="text-brass">{conviction.toLocaleString()}</span>
       </div>
@@ -67,7 +67,7 @@ export function ConvictionBar({
             <span className="h-2 w-px bg-bureau-line" />
           )}
         </div>
-        <span className="shrink-0 font-monod text-[10px] uppercase tracking-[0.2em] text-bureau-muted">
+        <span className="shrink-0 font-monod text-[11px] uppercase tracking-[0.2em] text-bureau-muted">
           {activeAgentCount} active · weight {Math.round(totalWeight).toLocaleString()}
         </span>
       </div>

@@ -92,7 +92,7 @@ export default async function MarketsPage() {
                             <div className="truncate font-sansd text-lg font-semibold text-bureau-fg transition-colors group-hover:text-brass">
                               {m.name ?? m.marketId}
                             </div>
-                            <div className="mt-0.5 truncate font-monod text-[10px] uppercase tracking-[0.2em] text-bureau-muted">
+                            <div className="mt-0.5 truncate font-monod text-[11px] uppercase tracking-[0.2em] text-bureau-muted">
                               {m.marketId}
                             </div>
                           </div>
@@ -100,7 +100,7 @@ export default async function MarketsPage() {
                         <span
                           title={m.active ? 'Market is live' : 'Market is idle'}
                           aria-label={m.active ? 'Market status: live' : 'Market status: idle'}
-                          className={`shrink-0 border px-2 py-0.5 font-monod text-[10px] uppercase tracking-[0.18em] ${
+                          className={`shrink-0 border px-2 py-0.5 font-monod text-[11px] uppercase tracking-[0.18em] ${
                             m.active ? 'border-rise text-rise' : 'border-bureau-line text-bureau-muted'
                           }`}
                         >
@@ -122,7 +122,7 @@ export default async function MarketsPage() {
                         index={i}
                       />
 
-                      <div className="mt-auto flex items-center justify-between border-t border-bureau-line pt-3 font-monod text-[10px] uppercase tracking-[0.2em] text-bureau-muted">
+                      <div className="mt-auto flex items-center justify-between border-t border-bureau-line pt-3 font-monod text-[11px] uppercase tracking-[0.2em] text-bureau-muted">
                         <span>{num(m.conviction?.activeAgentCount)} active agents</span>
                         <span className="text-brass opacity-0 transition-opacity group-hover:opacity-100">
                           enter →
@@ -146,7 +146,7 @@ export default async function MarketsPage() {
           )}
         </section>
 
-        <footer className="mt-16 border-t border-bureau-line pt-6 text-center font-monod text-[10px] uppercase tracking-[0.3em] text-bureau-muted">
+        <footer className="mt-16 border-t border-bureau-line pt-6 text-center font-monod text-[11px] uppercase tracking-[0.3em] text-bureau-muted">
           conviction = reputation weight × active agents · per-market reputation-weighted consensus
         </footer>
       </div>
@@ -157,7 +157,7 @@ export default async function MarketsPage() {
 function Stamp({ children, className }: { children: ReactNode; className?: string }) {
   return (
     <span
-      className={`border border-bureau-line px-2.5 py-1 font-monod text-[10px] uppercase tracking-[0.18em] text-bureau-muted ${
+      className={`border border-bureau-line px-2.5 py-1 font-monod text-[11px] uppercase tracking-[0.18em] text-bureau-muted ${
         className ?? ''
       }`}
     >

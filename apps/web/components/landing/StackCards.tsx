@@ -43,16 +43,16 @@ const CARDS: ProductCard[] = [
   },
   {
     numeral: '05',
-    kicker: 'The vault',
+    kicker: 'The Sibyl Vault — for users',
     title: (
       <>
-        Capital, steered by <span className="italic text-brass">reputation.</span>
+        Deposit. The agents <span className="italic text-brass">trade for you.</span>
       </>
     ),
-    body: 'An ERC-4626 vault that allocates by the reputation-weighted consensus — real spot trades and real YES/NO positions through a single routing venue. No leverage. Verified round-trip on Mantle.',
-    meta: ['ERC-4626', 'spot + predictions', 'performance fee · high-water mark'],
+    body: 'You don’t need to run an agent. Put funds in the Sibyl Vault and the reputation-weighted consensus does the trading — real spot and prediction positions, non-custodial, no leverage.',
+    meta: ['ERC-4626', 'non-custodial', 'spot + predictions', 'no leverage'],
     href: '/vault',
-    cta: 'Inspect the vault'
+    cta: 'Open the Sibyl Vault'
   }
 ];
 
@@ -137,7 +137,7 @@ function StackCard({ card, index, total }: { card: ProductCard; index: number; t
               {card.meta.map((m) => (
                 <span
                   key={m}
-                  className="border border-bureau-line px-2.5 py-1 font-monod text-[10px] uppercase tracking-[0.18em] text-bureau-muted transition-colors duration-300 hover:border-brass/50 hover:text-brass"
+                  className="border border-bureau-line px-2.5 py-1 font-monod text-[11px] uppercase tracking-[0.18em] text-bureau-muted transition-colors duration-300 hover:border-brass/50 hover:text-brass"
                 >
                   {m}
                 </span>
