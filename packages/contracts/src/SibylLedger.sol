@@ -90,7 +90,9 @@ contract SibylLedger is ISibylLedger, Ownable2Step, Pausable {
     //////////////////////////////////////////////////////////////*/
 
     /// @inheritdoc ISibylLedger
-    function registerMarket(bytes32 marketId) external override onlyOwner whenNotPaused {
+    // Permissionless: ANY address (incl. agent wallets) can spin up a market — the open-agent-economy
+    // primitive. setMarketActive stays owner-gated for spam cleanup; reputation (commitReplay) stays owner-scored.
+    function registerMarket(bytes32 marketId) external override whenNotPaused {
         if (marketId == bytes32(0)) revert InvalidMarketId();
         if (_marketExists[marketId]) return; // idempotent
         _marketExists[marketId] = true;

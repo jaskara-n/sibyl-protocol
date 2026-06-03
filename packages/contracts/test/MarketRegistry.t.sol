@@ -77,10 +77,11 @@ contract MarketRegistryTest is Test {
         ledger.registerMarket(bytes32(0));
     }
 
-    function test_RevertWhen_RegisterNotOwner() public {
+    function test_AnyoneCanRegisterMarket() public {
+        // Permissionless: a non-owner (e.g. an agent wallet) can spin up a market.
         vm.prank(STRANGER);
-        vm.expectRevert(Ownable2Step.NotOwner.selector);
         ledger.registerMarket(MKT_A);
+        assertTrue(ledger.isMarketActive(MKT_A));
     }
 
     function test_RevertWhen_RegisterPaused() public {
