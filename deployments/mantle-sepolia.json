@@ -53,8 +53,9 @@
     }
   },
   "latestConsensus": {
-    "_comment": "Per-market consensus is live and computable on-chain via computeConsensus(marketId, signals) against the committed reputations; convictionIndex(marketId) is live (see markets[]). A recorded ConsensusReached event per market via emitConsensus is an optional next step.",
-    "status": "computable-on-chain"
+    "_comment": "Recorded ConsensusReached events, one per market (computeConsensus is also a live on-chain view). Different consensus per market from independent reputations + signals.",
+    "MNT-USD": { "tx": "0xc8165df8445b6fa56eb3487d09096fb428acab4d61b9b04dc35738ea1fc93c25", "direction": "SHORT", "sizeBps": 26, "confidencePct": 49.3, "contributorCount": 5 },
+    "ETH-USD": { "tx": "0x8bd3799350a5157405d0b9e4434d83e1bc32aa92df88c7af6314a890e187353b", "direction": "SHORT", "sizeBps": 131, "confidencePct": 46.7, "contributorCount": 5 }
   },
   "erc8004": {
     "identityRegistry": "0x8004A818BFB912233c491871b3d84c89A494BD9e",
