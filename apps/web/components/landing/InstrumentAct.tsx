@@ -1,7 +1,6 @@
 'use client';
 
-import { useRef } from 'react';
-import dynamic from 'next/dynamic';
+import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import {
   motion,
@@ -13,21 +12,7 @@ import {
 } from 'framer-motion';
 import { CalibrationDial } from './CalibrationDial';
 
-// WebGL only on the client; the page never blocks on it. (.js extension per
-// the repo's nodenext module resolution — resolves to the .tsx at build time.)
-type Instrument3DProps = {
-  progressRef: import('react').MutableRefObject<number>;
-  active?: boolean;
-};
-const Instrument3D = dynamic<Instrument3DProps>(
-  () =>
-    // TS's nodenext CJS-detection mis-models the bundler's ESM reality here;
-    // at runtime webpack resolves m.default to the component.
-    import('./Instrument3D.js').then(
-      (m) => m.default as unknown as import('react').ComponentType<Instrument3DProps>
-    ),
-  { ssr: false }
-);
+import Instrument3D from './Instrument3D';
 
 type HeroConsensus = {
   direction: string;
@@ -51,6 +36,10 @@ export function InstrumentAct({ consensus, network }: { consensus: HeroConsensus
   const ref = useRef<HTMLDivElement>(null);
   const reduced = useReducedMotion();
   const progressRef = useRef(reduced ? 1 : 0);
+  // WebGL mounts client-side only (Canvas has no SSR story) — same effect as
+  // dynamic({ ssr: false }) without webpack/nodenext resolution drama.
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
   // GPU gate: the render loop only runs while the hero is actually on screen.
   const inView = useInView(ref, { margin: '20% 0px 20% 0px' });
 
@@ -99,7 +88,7 @@ export function InstrumentAct({ consensus, network }: { consensus: HeroConsensus
           style={still ? { opacity: 0.55, x: '24%', scale: 0.7 } : { x: objX, scale: objScale, opacity: objOpacity }}
           className="absolute inset-0"
         >
-          <Instrument3D progressRef={progressRef} active={inView && !still} />
+          {mounted && <Instrument3D progressRef={progressRef} active={inView && !still} />}
         </motion.div>
 
         {/* intro overline */}
