@@ -21,8 +21,10 @@ type Instrument3DProps = {
 };
 const Instrument3D = dynamic<Instrument3DProps>(
   () =>
+    // TS's nodenext CJS-detection mis-models the bundler's ESM reality here;
+    // at runtime webpack resolves m.default to the component.
     import('./Instrument3D.js').then(
-      (m) => m.default as import('react').ComponentType<Instrument3DProps>
+      (m) => m.default as unknown as import('react').ComponentType<Instrument3DProps>
     ),
   { ssr: false }
 );
