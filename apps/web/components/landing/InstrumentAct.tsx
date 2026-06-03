@@ -11,7 +11,6 @@ import {
   useSpring,
   useTransform
 } from 'framer-motion';
-import { CalibrationDial } from './CalibrationDial';
 
 import Instrument3D from './Instrument3D';
 
@@ -52,11 +51,11 @@ export function InstrumentAct({ consensus, network }: { consensus: HeroConsensus
   // spring-smoothed progress: every DOM transform glides instead of snapping
   const sp = useSpring(scrollYProgress, { stiffness: 64, damping: 19, mass: 0.45 });
 
-  // the object: full-screen center → recedes far right, shrinks, fades to a
-  // quiet backdrop so it never tangles with the statement or the panel
-  const objX = useTransform(sp, [0.46, 0.78], ['0%', '30%']);
-  const objScale = useTransform(sp, [0.46, 0.78], [1, 0.58]);
-  const objOpacity = useTransform(sp, [0.46, 0.78], [1, 0.22]);
+  // the object: full-screen center → parks right and BECOMES the live
+  // consensus readout (needle = real confidence, color = direction)
+  const objX = useTransform(sp, [0.46, 0.78], ['0%', '27%']);
+  const objScale = useTransform(sp, [0.46, 0.78], [1, 0.72]);
+  const objOpacity = useTransform(sp, [0.46, 0.78], [1, 0.92]);
 
   // intro overline — present early, files away before the statement
   const introOpacity = useTransform(sp, [0, 0.05, 0.3, 0.4], [0, 1, 1, 0]);
@@ -77,6 +76,9 @@ export function InstrumentAct({ consensus, network }: { consensus: HeroConsensus
   const dir = consensus.direction === 'LONG' ? 'LONG' : consensus.direction === 'SHORT' ? 'SHORT' : 'FLAT';
   const dirColor =
     dir === 'LONG' ? 'var(--color-rise)' : dir === 'SHORT' ? 'var(--color-fall)' : 'var(--color-bureau-muted)';
+  // real hex for the WebGL needle (three.js cannot resolve CSS variables)
+  const dirHex = dir === 'LONG' ? '#5fbd8c' : dir === 'SHORT' ? '#d4604f' : '#aaa395';
+  const confPct = Math.round(consensus.confidence * 100);
 
   const still = reduced ?? false;
 
@@ -110,7 +112,14 @@ export function InstrumentAct({ consensus, network }: { consensus: HeroConsensus
           style={still ? { opacity: 0.55, x: '24%', scale: 0.7 } : { x: objX, scale: objScale, opacity: objOpacity }}
           className="absolute inset-0 z-10"
         >
-          {mounted && <Instrument3D progressRef={progressRef} active={inView && !still} />}
+          {mounted && (
+            <Instrument3D
+              progressRef={progressRef}
+              active={inView && !still}
+              confidence={confPct}
+              accent={dirHex}
+            />
+          )}
         </motion.div>
 
         {/* end-state: the statement + the live instrument panel */}
@@ -156,40 +165,33 @@ export function InstrumentAct({ consensus, network }: { consensus: HeroConsensus
               </div>
             </motion.div>
 
+            {/* floating instrument annotations — the 3D object behind these IS the gauge */}
             <motion.div
               style={still ? undefined : { opacity: pnOpacity, y: pnY, pointerEvents: pnEvents }}
-              className="relative hidden lg:block"
+              className="relative hidden flex-col items-start gap-5 pl-6 lg:flex"
             >
-              <div className="bureau-frame p-6">
-                <div className="bureau-grain" aria-hidden />
-                <div className="flex items-baseline justify-between border-b border-bureau-line pb-3">
-                  <span className="font-monod text-[10px] uppercase tracking-[0.32em] text-bureau-muted">
-                    Live consensus
-                  </span>
-                  <span className="font-monod text-[10px] uppercase tracking-[0.32em] text-brass">
-                    {consensus.marketId ?? 'reputation-weighted'}
-                  </span>
-                </div>
+              <div className="flex items-center gap-3 font-monod text-[10px] uppercase tracking-[0.32em] text-bureau-muted">
+                <span className="h-px w-10 bg-brass/60" aria-hidden />
+                Live consensus · <span className="text-brass">{consensus.marketId ?? 'reputation-weighted'}</span>
+              </div>
 
-                <div className="mt-5 flex items-baseline justify-between">
-                  <span className="font-serifd text-4xl italic" style={{ color: dirColor }}>
-                    {dir}
-                  </span>
-                  <span className="font-monod text-xs text-bureau-muted">
-                    size <span className="text-bureau-fg">{consensus.sizeBps}</span> bps
-                  </span>
-                </div>
+              <div className="font-serifd text-7xl italic leading-none" style={{ color: dirColor }}>
+                {dir}
+              </div>
 
-                <div className="mt-4 flex justify-center">
-                  <CalibrationDial pct={Math.round(consensus.confidence * 100)} color={dirColor} width={236} />
-                </div>
+              <div className="flex items-baseline gap-3">
+                <span className="font-monod text-4xl text-bureau-fg">{confPct}</span>
+                <span className="font-monod text-[11px] uppercase tracking-[0.28em] text-bureau-muted">
+                  % confidence — the needle reads it
+                </span>
+              </div>
 
-                <div className="mt-5 flex items-center justify-between border-t border-bureau-line pt-3 font-monod text-[10px] uppercase tracking-[0.28em] text-bureau-muted">
-                  <span>
-                    <span className="text-bureau-fg">{consensus.contributors}</span> agents contributing
-                  </span>
-                  <span>{network}</span>
-                </div>
+              <div className="flex flex-col gap-1.5 font-monod text-[11px] uppercase tracking-[0.24em] text-bureau-muted">
+                <span>
+                  size <span className="text-bureau-fg">{consensus.sizeBps}</span> bps ·{' '}
+                  <span className="text-bureau-fg">{consensus.contributors}</span> agents contributing
+                </span>
+                <span>{network}</span>
               </div>
             </motion.div>
           </div>

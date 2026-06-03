@@ -84,50 +84,77 @@ function StackCard({ card, index, total }: { card: ProductCard; index: number; t
   const scale = useTransform(scrollYProgress, [0, 1], [1, isLast || reduced ? 1 : 0.94]);
   const dim = useTransform(scrollYProgress, [0, 1], [0, isLast || reduced ? 0 : 0.55]);
 
+  // content cascade as the card arrives
+  const EASE = [0.22, 1, 0.36, 1] as const;
+  const containerV = {
+    hidden: {},
+    show: { transition: { staggerChildren: 0.09, delayChildren: 0.06 } }
+  };
+  const itemV = {
+    hidden: reduced ? {} : { opacity: 0, y: 30 },
+    show: reduced ? {} : { opacity: 1, y: 0, transition: { duration: 0.75, ease: EASE } }
+  };
+
   return (
     <div ref={ref} className={isLast ? 'pb-[12vh]' : 'pb-[36vh]'}>
       <motion.div
         style={{ scale, top: `calc(9vh + ${index * 22}px)` }}
-        className="bureau-frame sticky origin-top overflow-hidden"
+        className="group/card bureau-frame sticky origin-top overflow-hidden transition-colors duration-500 hover:border-brass/40"
       >
         <div className="bureau-grain" aria-hidden />
         {/* receding dim layer */}
         <motion.div aria-hidden style={{ opacity: dim }} className="absolute inset-0 z-10 bg-bureau" />
 
-        <div className="relative grid gap-10 p-8 sm:p-12 lg:grid-cols-[auto_1fr_auto] lg:items-end">
-          <div
+        <motion.div
+          variants={containerV}
+          initial="hidden"
+          whileInView="show"
+          viewport={{ once: true, margin: '-18% 0px' }}
+          className="relative grid gap-10 p-8 sm:p-12 lg:grid-cols-[auto_1fr_auto] lg:items-end"
+        >
+          <motion.div
+            variants={itemV}
             aria-hidden
-            className="select-none font-serifd text-[clamp(4rem,9vw,8rem)] leading-none text-bureau-line"
+            className="select-none font-serifd text-[clamp(4rem,9vw,8rem)] leading-none text-bureau-line transition-colors duration-500 group-hover/card:text-brass/30"
           >
             {card.numeral}
-          </div>
+          </motion.div>
 
           <div>
-            <p className="font-monod text-[11px] uppercase tracking-[0.42em] text-brass">{card.kicker}</p>
-            <h3 className="mt-4 font-serifd text-[clamp(2rem,4.4vw,3.4rem)] leading-[1.02] text-bureau-fg">
+            <motion.p variants={itemV} className="font-monod text-[11px] uppercase tracking-[0.42em] text-brass">
+              {card.kicker}
+            </motion.p>
+            <motion.h3
+              variants={itemV}
+              className="mt-4 font-serifd text-[clamp(2rem,4.4vw,3.4rem)] leading-[1.02] text-bureau-fg"
+            >
               {card.title}
-            </h3>
-            <p className="mt-5 max-w-2xl font-sansd leading-relaxed text-bureau-muted">{card.body}</p>
-            <div className="mt-6 flex flex-wrap gap-2">
+            </motion.h3>
+            <motion.p variants={itemV} className="mt-5 max-w-2xl font-sansd leading-relaxed text-bureau-muted">
+              {card.body}
+            </motion.p>
+            <motion.div variants={itemV} className="mt-6 flex flex-wrap gap-2">
               {card.meta.map((m) => (
                 <span
                   key={m}
-                  className="border border-bureau-line px-2.5 py-1 font-monod text-[10px] uppercase tracking-[0.18em] text-bureau-muted"
+                  className="border border-bureau-line px-2.5 py-1 font-monod text-[10px] uppercase tracking-[0.18em] text-bureau-muted transition-colors duration-300 hover:border-brass/50 hover:text-brass"
                 >
                   {m}
                 </span>
               ))}
-            </div>
+            </motion.div>
           </div>
 
-          <Link
-            href={card.href}
-            className="group inline-flex items-center gap-3 self-end border border-bureau-line px-6 py-3 font-sansd text-sm font-medium text-bureau-fg transition-colors hover:border-brass hover:text-brass"
-          >
-            {card.cta}
-            <span aria-hidden className="transition-transform group-hover:translate-x-1">→</span>
-          </Link>
-        </div>
+          <motion.div variants={itemV} className="self-end">
+            <Link
+              href={card.href}
+              className="group inline-flex items-center gap-3 border border-bureau-line px-6 py-3 font-sansd text-sm font-medium text-bureau-fg transition-colors hover:border-brass hover:text-brass"
+            >
+              {card.cta}
+              <span aria-hidden className="transition-transform group-hover:translate-x-1">→</span>
+            </Link>
+          </motion.div>
+        </motion.div>
 
         <div className="tick-scale" aria-hidden />
       </motion.div>

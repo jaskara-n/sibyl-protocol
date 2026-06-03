@@ -24,7 +24,17 @@ function lerp(a: number, b: number, t: number): number {
   return a + (b - a) * Math.max(0, Math.min(1, t));
 }
 
-function Armillary({ progressRef }: { progressRef: MutableRefObject<number> }) {
+function Armillary({
+  progressRef,
+  confidence = 60,
+  accent = VOLT
+}: {
+  progressRef: MutableRefObject<number>;
+  /** live consensus confidence 0..100 — the needle's final resting angle */
+  confidence?: number;
+  /** direction color for the needle (rise / fall / muted) */
+  accent?: string;
+}) {
   const root = useRef<THREE.Group>(null);
   const ringA = useRef<THREE.Group>(null);
   const ringB = useRef<THREE.Group>(null);
@@ -77,10 +87,11 @@ function Armillary({ progressRef }: { progressRef: MutableRefObject<number> }) {
       ringC.current.rotation.y = lerp(0, Math.PI / 2.2, assembly);
       ringC.current.rotation.z -= delta * 0.17;
     }
-    // the needle sweeps up the dial as the instrument "finds" its reading
+    // the needle sweeps the dial and settles on the LIVE consensus confidence
     if (needle.current) {
       const sweep = Math.max(0, Math.min(1, (p - 0.15) / 0.5));
-      needle.current.rotation.z = lerp(-Math.PI * 0.78, Math.PI * 0.22, sweep);
+      const settled = -Math.PI * 0.78 + Math.PI * (Math.max(0, Math.min(100, confidence)) / 100);
+      needle.current.rotation.z = lerp(-Math.PI * 0.78, settled, sweep);
     }
     if (core.current) {
       core.current.rotation.x += delta * 0.3;
@@ -128,15 +139,15 @@ function Armillary({ progressRef }: { progressRef: MutableRefObject<number> }) {
         </mesh>
       </group>
 
-      {/* the needle */}
+      {/* the needle — colored by the live consensus direction */}
       <group ref={needle}>
         <mesh position={[0.95, 0, 0]} rotation={[0, 0, Math.PI / 2]}>
           <cylinderGeometry args={[0.012, 0.012, 1.9, 12]} />
-          <meshStandardMaterial color={VOLT} emissive={VOLT} emissiveIntensity={1.1} metalness={0.5} roughness={0.3} />
+          <meshStandardMaterial color={accent} emissive={accent} emissiveIntensity={1.1} metalness={0.5} roughness={0.3} />
         </mesh>
         <mesh position={[1.95, 0, 0]} rotation={[0, 0, -Math.PI / 2]}>
           <coneGeometry args={[0.04, 0.14, 12]} />
-          <meshStandardMaterial color={VOLT} emissive={VOLT} emissiveIntensity={1.2} />
+          <meshStandardMaterial color={accent} emissive={accent} emissiveIntensity={1.2} />
         </mesh>
       </group>
 
@@ -155,11 +166,17 @@ function Armillary({ progressRef }: { progressRef: MutableRefObject<number> }) {
 
 export default function Instrument3D({
   progressRef,
-  active = true
+  active = true,
+  confidence = 60,
+  accent = VOLT
 }: {
   progressRef: MutableRefObject<number>;
   /** When false (hero off-screen), the render loop pauses — zero GPU cost. */
   active?: boolean;
+  /** live consensus confidence 0..100 (needle's resting angle) */
+  confidence?: number;
+  /** direction color for the needle */
+  accent?: string;
 }) {
   return (
     <Canvas
@@ -173,7 +190,7 @@ export default function Instrument3D({
       <ambientLight intensity={0.55} />
       <directionalLight position={[4, 5, 6]} intensity={1.3} />
       <pointLight position={[-4, -2, 3]} intensity={6} color={VOLT} distance={12} decay={2} />
-      <Armillary progressRef={progressRef} />
+      <Armillary progressRef={progressRef} confidence={confidence} accent={accent} />
     </Canvas>
   );
 }
