@@ -100,6 +100,30 @@ export type Decision = {
   marketId?: string;
 };
 
+/**
+ * A binary prediction market enriched with LIVE on-chain state. Mirrors the API
+ * `PredictionMarketResponse` shape (apps/api/src/predictions/predictions.controller.ts).
+ * All uint256 values arrive as decimal strings to survive JSON without precision loss.
+ */
+export type Prediction = {
+  source: 'chain' | 'fallback';
+  marketId: string;
+  marketIdHex: `0x${string}`;
+  question: string | null;
+  fpmm: `0x${string}` | null;
+  collateral: `0x${string}` | null;
+  resolver: `0x${string}` | null;
+  resolveTime: number | null;
+  /** On-chain outcome code: 0=UNRESOLVED, 1=YES, 2=NO, 3=INVALID. null when not read. */
+  outcome: number | null;
+  outcomeLabel: string | null;
+  resolved: boolean | null;
+  /** Implied YES probability as a 0..100 percent number. null when not read. */
+  priceYesPct: number | null;
+  reserveYes: string | null;
+  reserveNo: string | null;
+};
+
 export async function api<T>(path: string, fallback: T): Promise<T> {
   try {
     const res = await fetch(`${API_BASE}${path}`, { cache: 'no-store' });
