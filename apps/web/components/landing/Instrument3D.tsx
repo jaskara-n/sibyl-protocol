@@ -50,8 +50,13 @@ function Armillary({ progressRef }: { progressRef: MutableRefObject<number> }) {
     []
   );
 
+  // Damped progress — the instrument glides toward the scroll position instead
+  // of snapping to it. This is what makes the motion feel machined, not janky.
+  const smooth = useRef(0);
+
   useFrame((_state, delta) => {
-    const p = progressRef.current;
+    smooth.current += (progressRef.current - smooth.current) * Math.min(1, delta * 4.5);
+    const p = smooth.current;
     const assembly = Math.min(1, p / 0.35); // 0..1 over the first act
 
     if (root.current) {
@@ -158,7 +163,7 @@ export default function Instrument3D({
 }) {
   return (
     <Canvas
-      camera={{ position: [0, 0, 6.4], fov: 42 }}
+      camera={{ position: [0, 0, 7.7], fov: 42 }}
       dpr={[1, 1.5]}
       frameloop={active ? 'always' : 'never'}
       gl={{ alpha: true, antialias: true, powerPreference: 'low-power' }}

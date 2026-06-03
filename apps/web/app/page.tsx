@@ -95,11 +95,12 @@ export default async function Page() {
             { label: 'Network', value: null as number | null, text: 'Mantle Sepolia' }
           ].map((s, i) => (
             <Reveal key={s.label} delay={i * 0.08} className={i > 0 ? 'lg:border-l lg:border-bureau-line' : ''}>
-              <div className="px-6 py-8">
-                <div className="font-serifd text-4xl text-bureau-fg sm:text-5xl">
+              <div className="group cursor-default px-6 py-8 transition-all duration-300 hover:-translate-y-0.5 hover:bg-bureau-fg/[0.04]">
+                <div className="font-serifd text-4xl text-bureau-fg transition-colors duration-300 group-hover:text-brass sm:text-5xl">
                   {s.value !== null ? <CountUp value={s.value} /> : <span>{s.text}</span>}
                 </div>
-                <div className="mt-2 font-monod text-[10px] uppercase tracking-[0.3em] text-bureau-muted">
+                <div className="mt-2 flex items-center gap-2 font-monod text-[11px] uppercase tracking-[0.24em] text-bureau-muted">
+                  <span className="h-px w-0 bg-brass transition-all duration-300 group-hover:w-5" aria-hidden />
                   {s.label}
                 </div>
               </div>

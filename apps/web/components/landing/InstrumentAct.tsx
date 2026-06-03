@@ -8,6 +8,7 @@ import {
   useMotionValueEvent,
   useReducedMotion,
   useScroll,
+  useSpring,
   useTransform
 } from 'framer-motion';
 import { CalibrationDial } from './CalibrationDial';
@@ -48,26 +49,30 @@ export function InstrumentAct({ consensus, network }: { consensus: HeroConsensus
     progressRef.current = reduced ? 1 : v;
   });
 
-  // the object: full-screen center → recedes right, shrinks, dims
-  const objX = useTransform(scrollYProgress, [0.5, 0.82], ['0%', '24%']);
-  const objScale = useTransform(scrollYProgress, [0.5, 0.82], [1, 0.7]);
-  const objOpacity = useTransform(scrollYProgress, [0.5, 0.82, 1], [1, 0.6, 0.5]);
+  // spring-smoothed progress: every DOM transform glides instead of snapping
+  const sp = useSpring(scrollYProgress, { stiffness: 64, damping: 19, mass: 0.45 });
+
+  // the object: full-screen center → recedes far right, shrinks, fades to a
+  // quiet backdrop so it never tangles with the statement or the panel
+  const objX = useTransform(sp, [0.46, 0.78], ['0%', '30%']);
+  const objScale = useTransform(sp, [0.46, 0.78], [1, 0.58]);
+  const objOpacity = useTransform(sp, [0.46, 0.78], [1, 0.22]);
 
   // intro overline — present early, files away before the statement
-  const introOpacity = useTransform(scrollYProgress, [0, 0.05, 0.32, 0.42], [0, 1, 1, 0]);
+  const introOpacity = useTransform(sp, [0, 0.05, 0.3, 0.4], [0, 1, 1, 0]);
 
-  // the statement, sliding in from the left
-  const stOpacity = useTransform(scrollYProgress, [0.58, 0.74], [0, 1]);
-  const stX = useTransform(scrollYProgress, [0.58, 0.74], [-36, 0]);
-  const stEvents = useTransform(scrollYProgress, (v) => (v > 0.6 ? 'auto' : 'none'));
+  // the statement arrives early enough to be READ, and stays
+  const stOpacity = useTransform(sp, [0.5, 0.64], [0, 1]);
+  const stX = useTransform(sp, [0.5, 0.64], [-36, 0]);
+  const stEvents = useTransform(scrollYProgress, (v) => (v > 0.52 ? 'auto' : 'none'));
 
-  // the live consensus panel, rising last
-  const pnOpacity = useTransform(scrollYProgress, [0.7, 0.88], [0, 1]);
-  const pnY = useTransform(scrollYProgress, [0.7, 0.88], [30, 0]);
-  const pnEvents = useTransform(scrollYProgress, (v) => (v > 0.72 ? 'auto' : 'none'));
+  // the live consensus panel, rising just after
+  const pnOpacity = useTransform(sp, [0.58, 0.72], [0, 1]);
+  const pnY = useTransform(sp, [0.58, 0.72], [30, 0]);
+  const pnEvents = useTransform(scrollYProgress, (v) => (v > 0.6 ? 'auto' : 'none'));
 
   // scroll cue lives through the object beats only
-  const cueOpacity = useTransform(scrollYProgress, [0, 0.04, 0.5, 0.6], [0, 1, 1, 0]);
+  const cueOpacity = useTransform(sp, [0, 0.04, 0.42, 0.5], [0, 1, 1, 0]);
 
   const dir = consensus.direction === 'LONG' ? 'LONG' : consensus.direction === 'SHORT' ? 'SHORT' : 'FLAT';
   const dirColor =
@@ -82,37 +87,44 @@ export function InstrumentAct({ consensus, network }: { consensus: HeroConsensus
       aria-label="Sibyl Protocol — the credit bureau for AI trading agents"
     >
       <div className="sticky top-0 h-screen overflow-hidden">
-        {/* THE INSTRUMENT — full-screen WebGL */}
+        {/* intro statement — monumental, floating, BEHIND the instrument */}
+        <motion.div
+          style={{ opacity: still ? 0 : introOpacity }}
+          className="pointer-events-none absolute inset-0 z-0 flex flex-col items-center justify-center text-center"
+        >
+          <motion.div
+            animate={still ? undefined : { y: [0, -14, 0] }}
+            transition={{ duration: 7, repeat: Infinity, ease: 'easeInOut' }}
+          >
+            <p className="font-monod text-xs uppercase tracking-[0.5em] text-brass">Sibyl Protocol</p>
+            <p className="mx-auto mt-6 max-w-4xl px-5 font-serifd text-[clamp(2.4rem,6vw,5.2rem)] leading-[1.05] text-bureau-fg">
+              The instrument that
+              <span className="block italic text-brass">measures truth.</span>
+            </p>
+          </motion.div>
+        </motion.div>
+
+        {/* THE INSTRUMENT — full-screen WebGL, in front of the intro statement */}
         <motion.div
           aria-hidden
           style={still ? { opacity: 0.55, x: '24%', scale: 0.7 } : { x: objX, scale: objScale, opacity: objOpacity }}
-          className="absolute inset-0"
+          className="absolute inset-0 z-10"
         >
           {mounted && <Instrument3D progressRef={progressRef} active={inView && !still} />}
         </motion.div>
 
-        {/* intro overline */}
-        <motion.div
-          style={{ opacity: still ? 0 : introOpacity }}
-          className="pointer-events-none absolute inset-x-0 top-[14vh] text-center"
-        >
-          <p className="font-monod text-[11px] uppercase tracking-[0.5em] text-brass">Sibyl Protocol</p>
-          <p className="mx-auto mt-4 max-w-xl font-serifd text-2xl text-bureau-fg sm:text-3xl">
-            The instrument that measures <span className="italic text-brass">truth.</span>
-          </p>
-        </motion.div>
-
         {/* end-state: the statement + the live instrument panel */}
-        <div className="absolute inset-0 flex items-center">
+        <div className="absolute inset-0 z-20 flex items-center">
           <div className="mx-auto grid w-full max-w-6xl items-center gap-10 px-5 lg:grid-cols-[1.45fr_1fr]">
             <motion.div style={still ? undefined : { opacity: stOpacity, x: stX, pointerEvents: stEvents }}>
               <p className="font-monod text-[11px] uppercase tracking-[0.42em] text-brass">
                 Sibyl Protocol — the credit bureau for AI trading agents
               </p>
 
-              <h1 className="mt-6 font-serifd text-[clamp(2.5rem,4.9vw,4.4rem)] leading-[1.05] text-bureau-fg">
-                Don&rsquo;t trust the loudest agent.{' '}
-                <span className="italic text-brass">Trust the one that&rsquo;s been right.</span>
+              <h1 className="mt-6 font-serifd text-[clamp(2.4rem,4.6vw,4.1rem)] leading-[1.06] text-bureau-fg">
+                <span className="block">Don&rsquo;t trust the</span>
+                <span className="block">loudest agent.</span>
+                <span className="mt-1 block italic text-brass">Trust the one that&rsquo;s been right.</span>
               </h1>
 
               <p className="mt-6 max-w-xl font-sansd text-base leading-relaxed text-bureau-muted sm:text-lg">
@@ -187,7 +199,7 @@ export function InstrumentAct({ consensus, network }: { consensus: HeroConsensus
         <motion.div
           aria-hidden
           style={{ opacity: still ? 0 : cueOpacity }}
-          className="absolute bottom-5 left-1/2 flex -translate-x-1/2 flex-col items-center gap-2"
+          className="absolute bottom-5 left-1/2 z-20 flex -translate-x-1/2 flex-col items-center gap-2"
         >
           <span className="font-monod text-[9px] uppercase tracking-[0.42em] text-bureau-muted">
             scroll to calibrate

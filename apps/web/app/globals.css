@@ -25,7 +25,7 @@
   --color-bureau-panel: #14120e;
   --color-bureau-line: #29251c; /* hairline */
   --color-bureau-fg: #ece8df; /* paper white */
-  --color-bureau-muted: #9b9485;
+  --color-bureau-muted: #aaa395; /* lifted for label legibility */
   --color-brass: #cff04e; /* VOLT — electric chartreuse, the live-signal signature */
   --color-brass-deep: #8da832;
   --color-rise: #5fbd8c; /* LONG / positive — phosphor */
@@ -143,7 +143,8 @@
   letter-spacing: -0.005em;
 }
 .font-sansd { font-family: var(--font-sansd); }
-.font-monod { font-family: var(--font-monod); font-variant-numeric: tabular-nums; }
+/* medium weight — thin mono caps were washing out at small sizes */
+.font-monod { font-family: var(--font-monod); font-variant-numeric: tabular-nums; font-weight: 500; }
 
 /* engraved print grain — drop inside any positioned container */
 .bureau-grain {
@@ -195,7 +196,7 @@
   --color-bureau-panel: #f0ead9;
   --color-bureau-line: #c6bb9f;
   --color-bureau-fg: #1a160f;
-  --color-bureau-muted: #6f6553;
+  --color-bureau-muted: #57503f; /* ink-dark for label legibility on paper */
   --color-brass: #55611f; /* volt as olive ink on paper */
   --color-brass-deep: #55611f;
   --color-rise: #1e7a52;
