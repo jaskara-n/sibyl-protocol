@@ -7,43 +7,59 @@
   "explorer": "https://explorer.sepolia.mantle.xyz",
   "contracts": {
     "SibylLedger": {
-      "address": "0x847a6c5a32F5Ed69c43a82f46a84Df75f9B9Bd2A",
+      "_comment": "Multi-market ledger (per-(agent,market) reputation, market registry, convictionIndex). Superseded the single-market ledger 0x847a6c5a32F5Ed69c43a82f46a84Df75f9B9Bd2A (storage layout changed, so it was redeployed, not migrated).",
+      "address": "0x1C4cCc2c917EDF45aD1C3C9675cF130b47Db8c11",
       "deployer": "0x12B2434a1022d5787bf06056F2885Fe35De62Bf8",
-      "deployTx": "0x3a36074d4ac90463a300cc295ab4263f6a9cdae5ba0a4d4936fe2a3960bdb9d4",
-      "deployBlock": 39389411,
+      "deployTx": "0x27db1ddc7e84692679fa50c48aa200f2a6e9d4e107302fb145d42fd3f2423355",
+      "deployBlock": 39468654,
       "maxAgentWeightPpm": 900000
     },
     "SibylVault": {
-      "_comment": "Optional ERC-4626 strategy vault (test/local only). Leave address null until a vault is deployed; the API /vault endpoints fall back to an artifact/snapshot-derived shape when absent.",
+      "_comment": "ERC-4626 strategy vault — built + tested (148 forge tests) but NOT deployed (Option A scope = ledger + markets + reputation only). The API /vault endpoints fall back to an artifact/snapshot shape while address is null.",
       "address": null,
       "asset": null,
       "venue": null
     }
   },
+  "markets": [
+    {
+      "marketId": "MNT-USD",
+      "marketIdHex": "0x05bb2caf75994158129d1f9bcaa0d16138a95ce556beee8a922ab4094b485286",
+      "registerTx": "0x735d87f145c83e7465b2f45b685a10799e70de821304195acd8417878a0edb5e",
+      "active": true,
+      "convictionIndex": { "totalWeight": "3715185", "activeAgentCount": 5 }
+    },
+    {
+      "marketId": "ETH-USD",
+      "marketIdHex": "0x2430f68ea2e8d4151992bb7fc3a4c472087a6149bf7e0232704396162ab7c1f7",
+      "registerTx": "0x657d8ee720947c0013fbcd8ce7d066e9ad38e7ba6aa325e92ccabb695ef1177f",
+      "active": true,
+      "convictionIndex": { "totalWeight": "3742273", "activeAgentCount": 5 }
+    }
+  ],
   "latestReplay": {
-    "commitTx": "0x97b138e84e382590b868b5b51ea5203313f88bdf349c5157434a8769228ec096",
-    "datasetHash": "0x0828da8831ebe4f150c01a3ba6e5c12f282cfdcd155d79fb1c62a3ccf09049aa",
+    "_comment": "Per-(agent,market) Brier scores committed on-chain. Same agent has independent reputation per market (e.g. momentum_v1: MNT 153565 vs ETH 201210 ppm). datasetHash is the SHA-256 of the deterministic 2-market frozen dataset.",
+    "datasetHash": "0xc433aaa9dd68b65da3b2c659dd3881f9c2cbeb82781c801ae58c350be628b796",
     "scoringVersion": 1,
-    "epoch": 1,
-    "scoreCount": 5,
-    "agentsBrierPpm": {
-      "momentum_v1": 154970,
-      "onchain_oi_v1": 196001,
-      "news_v1": 215944,
-      "funding_v1": 236695,
-      "rogue_10x_v1": 479500
+    "commits": {
+      "MNT-USD": {
+        "tx": "0x6f6a4447de203bd5522754cf5209a762f42cbdae55536b43fad7b339870e7294",
+        "agentsBrierPpm": { "momentum_v1": 153565, "onchain_oi_v1": 187857, "funding_v1": 256898, "news_v1": 207000, "rogue_10x_v1": 479500 }
+      },
+      "ETH-USD": {
+        "tx": "0x587f394d8628dbed584727d927a6aa28a4eda5ee915adce8c38ffcc9189f15cf",
+        "agentsBrierPpm": { "momentum_v1": 201210, "onchain_oi_v1": 181089, "funding_v1": 236361, "news_v1": 204572, "rogue_10x_v1": 434500 }
+      }
     }
   },
   "latestConsensus": {
-    "tx": "0xb87a4b0462a5d72fa6fe3b359e47b34cf383e38edfa1e141f3f01ca32b463e25",
-    "direction": "LONG",
-    "sizeBps": 430,
-    "note": "Sample live ConsensusReached emitted on-chain from Bybit-sourced signals (defining feature: decisions recorded on Mantle)."
+    "_comment": "Per-market consensus is live and computable on-chain via computeConsensus(marketId, signals) against the committed reputations; convictionIndex(marketId) is live (see markets[]). A recorded ConsensusReached event per market via emitConsensus is an optional next step.",
+    "status": "computable-on-chain"
   },
   "erc8004": {
     "identityRegistry": "0x8004A818BFB912233c491871b3d84c89A494BD9e",
     "reputationRegistry": "0x8004B663056A597Dffe9eCcC1965A193B7388713",
-    "note": "Each Sibyl agent minted an ERC-8004 identity NFT (agentURI links the NFT to its SibylLedger agentId). Full records in deployments/agent-identities.json.",
+    "note": "Each Sibyl agent minted an ERC-8004 identity NFT (reused across the ledger redeploy; the NFTs persist). Full records in deployments/agent-identities.json.",
     "agentIds": {
       "news_v1": 98,
       "funding_v1": 99,
