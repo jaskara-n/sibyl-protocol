@@ -48,14 +48,16 @@ export function InstrumentAct({ consensus, network }: { consensus: HeroConsensus
     progressRef.current = reduced ? 1 : v;
   });
 
-  // spring-smoothed progress: every DOM transform glides instead of snapping
-  const sp = useSpring(scrollYProgress, { stiffness: 64, damping: 19, mass: 0.45 });
+  // ONE tight smoothing layer: stiff spring tracks the scroll nearly 1:1
+  // (accurate) while still rounding off wheel steps (smooth). No double-lag.
+  // overdamped: fast tracking, zero overshoot (no arrival wobble)
+  const sp = useSpring(scrollYProgress, { stiffness: 140, damping: 30, mass: 0.25 });
 
   // the object: full-screen center → parks right and BECOMES the live
-  // consensus readout (needle = real confidence, color = direction)
+  // consensus readout (needle = real confidence, color = direction).
+  // NOTE: transform only — never animate opacity on the WebGL layer (flicker).
   const objX = useTransform(sp, [0.46, 0.78], ['0%', '24%']);
-  const objScale = useTransform(sp, [0.46, 0.78], [1, 0.72]);
-  const objOpacity = useTransform(sp, [0.46, 0.78], [1, 0.92]);
+  const objScale = useTransform(sp, [0.46, 0.78], [1, 0.8]);
 
   // intro overline — present early, files away before the statement
   const introOpacity = useTransform(sp, [0, 0.05, 0.3, 0.4], [0, 1, 1, 0]);
@@ -67,8 +69,6 @@ export function InstrumentAct({ consensus, network }: { consensus: HeroConsensus
 
   // the live consensus panel, rising just after
   const pnOpacity = useTransform(sp, [0.58, 0.72], [0, 1]);
-  const pnY = useTransform(sp, [0.58, 0.72], [30, 0]);
-  const pnEvents = useTransform(scrollYProgress, (v) => (v > 0.6 ? 'auto' : 'none'));
 
   // scroll cue lives through the object beats only
   const cueOpacity = useTransform(sp, [0, 0.04, 0.42, 0.5], [0, 1, 1, 0]);
@@ -106,11 +106,12 @@ export function InstrumentAct({ consensus, network }: { consensus: HeroConsensus
           </motion.div>
         </motion.div>
 
-        {/* THE INSTRUMENT — full-screen WebGL, in front of the intro statement */}
+        {/* THE INSTRUMENT — full-screen WebGL, in front of the intro statement.
+            will-change keeps it on its own GPU layer for the whole scrub (no
+            layer-promotion flicker as it arrives). */}
         <motion.div
-          aria-hidden
-          style={still ? { opacity: 0.55, x: '24%', scale: 0.7 } : { x: objX, scale: objScale, opacity: objOpacity }}
-          className="absolute inset-0 z-10"
+          style={still ? { x: '24%', scale: 0.8 } : { x: objX, scale: objScale }}
+          className="absolute inset-0 z-10 will-change-transform"
         >
           {mounted && (
             <Instrument3D
@@ -120,6 +121,25 @@ export function InstrumentAct({ consensus, network }: { consensus: HeroConsensus
               accent={dirHex}
             />
           )}
+
+          {/* dial readout — printed on the instrument, moves & scales with it */}
+          <motion.div
+            style={still ? undefined : { opacity: pnOpacity }}
+            className="pointer-events-none absolute left-1/2 top-1/2 hidden -translate-x-1/2 flex-col items-center gap-1.5 pt-28 text-center lg:flex"
+          >
+            <div className="flex items-baseline gap-3">
+              <span className="font-serifd text-4xl leading-none" style={{ color: dirColor }}>
+                {dir}
+              </span>
+              <span className="font-serifd text-4xl leading-none text-bureau-fg">{confPct}%</span>
+            </div>
+            <div className="font-monod text-[10px] uppercase tracking-[0.22em] text-bureau-muted">
+              {consensus.sizeBps} bps · {consensus.contributors} agents
+            </div>
+            <div className="font-monod text-[10px] uppercase tracking-[0.22em] text-bureau-muted">
+              live · <span className="text-brass">{consensus.marketId ?? 'all markets'}</span>
+            </div>
+          </motion.div>
         </motion.div>
 
         {/* end-state: the statement + the live instrument panel */}
@@ -127,7 +147,7 @@ export function InstrumentAct({ consensus, network }: { consensus: HeroConsensus
           <div className="mx-auto grid w-full max-w-6xl items-center gap-10 px-5 lg:grid-cols-[1.45fr_1fr]">
             <motion.div style={still ? undefined : { opacity: stOpacity, x: stX, pointerEvents: stEvents }}>
               <p className="font-monod text-[11px] uppercase tracking-[0.42em] text-brass">
-                Sibyl Protocol — the credit bureau for AI trading agents
+                Sibyl Protocol
               </p>
 
               <h1 className="mt-6 font-serifd text-[clamp(2.4rem,4.6vw,4.1rem)] leading-[1.06] text-bureau-fg">
@@ -165,50 +185,10 @@ export function InstrumentAct({ consensus, network }: { consensus: HeroConsensus
               </div>
             </motion.div>
 
-            {/* instrument annotations — framing the object, never covering it:
-                a label at its shoulder, the live verdict beneath its rings */}
-            <motion.div
-              style={still ? undefined : { opacity: pnOpacity, y: pnY, pointerEvents: pnEvents }}
-              className="relative hidden h-[54vh] flex-col items-end justify-between text-right lg:flex"
-            >
-              <div className="flex items-center gap-3 font-monod text-[10px] uppercase tracking-[0.3em] text-bureau-muted">
-                Live consensus · <span className="text-brass">{consensus.marketId ?? 'all markets'}</span>
-                <span className="h-px w-12 bg-brass/60" aria-hidden />
-              </div>
-
-              <div className="flex flex-col items-end gap-2.5">
-                <div className="flex items-baseline gap-4">
-                  <span className="font-serifd text-6xl leading-none" style={{ color: dirColor }}>
-                    {dir}
-                  </span>
-                  <span className="font-serifd text-6xl leading-none text-bureau-fg">{confPct}%</span>
-                </div>
-                <div className="font-monod text-[10px] uppercase tracking-[0.24em] text-bureau-muted">
-                  {consensus.sizeBps} bps · {consensus.contributors} agents · the needle reads it live
-                </div>
-              </div>
-            </motion.div>
+            {/* right half belongs to the instrument itself (readout is printed on it) */}
+            <div aria-hidden className="hidden lg:block" />
           </div>
         </div>
-
-        {/* whisper readout — tucked bottom-right, beneath the instrument */}
-        <motion.div
-          style={still ? undefined : { opacity: pnOpacity, y: pnY, pointerEvents: pnEvents }}
-          className="absolute bottom-[8vh] right-6 z-20 hidden flex-col items-end gap-2.5 text-right lg:flex xl:right-10"
-        >
-          <div className="font-monod text-[11px] uppercase tracking-[0.3em] text-bureau-muted">
-            Live consensus · <span className="text-brass">{consensus.marketId ?? 'all markets'}</span>
-          </div>
-          <div className="flex items-baseline gap-3">
-            <span className="font-serifd text-5xl leading-none" style={{ color: dirColor }}>
-              {dir}
-            </span>
-            <span className="font-serifd text-5xl leading-none text-bureau-fg">{confPct}%</span>
-          </div>
-          <div className="font-monod text-[11px] uppercase tracking-[0.24em] text-bureau-muted">
-            {consensus.sizeBps} bps · {consensus.contributors} agents
-          </div>
-        </motion.div>
 
         {/* scroll cue */}
         <motion.div

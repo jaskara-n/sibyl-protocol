@@ -65,7 +65,8 @@ function Armillary({
   const smooth = useRef(0);
 
   useFrame((_state, delta) => {
-    smooth.current += (progressRef.current - smooth.current) * Math.min(1, delta * 4.5);
+    // fast damp: hugs the scroll position (accurate), kills frame jitter only
+    smooth.current += (progressRef.current - smooth.current) * Math.min(1, delta * 10);
     const p = smooth.current;
     const assembly = Math.min(1, p / 0.35); // 0..1 over the first act
 
