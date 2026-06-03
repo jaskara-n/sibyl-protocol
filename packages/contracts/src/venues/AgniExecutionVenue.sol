@@ -71,6 +71,7 @@ contract AgniExecutionVenue is IExecutionVenue, Ownable2Step, ReentrancyGuard {
     //////////////////////////////////////////////////////////////*/
 
     error ZeroAddress();
+    error NoPool();
     error MarketNotConfigured(bytes32 marketId);
     error NotSpotLong();
     error ZeroAmount();
@@ -108,11 +109,17 @@ contract AgniExecutionVenue is IExecutionVenue, Ownable2Step, ReentrancyGuard {
     //////////////////////////////////////////////////////////////*/
 
     /// @notice Configure (or reconfigure) routing for a market.
+    /// @dev PERMISSIONLESS: any address (including agent wallets) may wire a
+    ///      trading market, mirroring the permissionless prediction-market
+    ///      creation. To prevent wiring unbacked markets, the (baseAsset,
+    ///      marketToken, feeTier) Agni pool MUST already exist on the factory;
+    ///      otherwise the call reverts with {NoPool}.
     /// @param marketId The market identifier.
     /// @param marketToken The ERC20 traded against {baseAsset}.
     /// @param feeTier The Agni pool fee tier (e.g. 500, 3000, 10000).
-    function setMarket(bytes32 marketId, address marketToken, uint24 feeTier) external onlyOwner {
+    function setMarket(bytes32 marketId, address marketToken, uint24 feeTier) external {
         if (marketToken == address(0)) revert ZeroAddress();
+        if (factory.getPool(baseAsset, marketToken, feeTier) == address(0)) revert NoPool();
         markets[marketId] = Market({marketToken: marketToken, feeTier: feeTier, configured: true});
         emit MarketConfigured(marketId, marketToken, feeTier);
     }

@@ -91,10 +91,23 @@ contract AgniExecutionVenueTest is Test {
                                 setMarket
     //////////////////////////////////////////////////////////////*/
 
-    function test_SetMarket_OwnerOnly() public {
+    function test_SetMarket_Permissionless() public {
+        // setMarket is now permissionless: any address may wire a market that has
+        // a real pool. (Factory returns a non-zero pool in setUp.)
+        bytes32 m2 = keccak256("PERMISSIONLESS");
         vm.prank(vault);
-        vm.expectRevert();
-        venue.setMarket(MARKET, address(mkt), FEE);
+        venue.setMarket(m2, address(mkt), FEE);
+        (address t,, bool configured) = venue.markets(m2);
+        assertEq(t, address(mkt));
+        assertTrue(configured);
+    }
+
+    function test_SetMarket_RevertsNoPool() public {
+        // No pool for this (base, marketToken, fee) triple -> NoPool.
+        factory.setPool(address(0));
+        vm.prank(vault);
+        vm.expectRevert(AgniExecutionVenue.NoPool.selector);
+        venue.setMarket(keccak256("NOPOOL"), address(mkt), FEE);
     }
 
     function test_SetMarket_RevertsZeroToken() public {
