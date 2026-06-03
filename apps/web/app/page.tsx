@@ -2,7 +2,7 @@ import Link from 'next/link';
 import { api, type AgentRow, type ChainStatus, type Consensus, type Verification } from '../lib/api';
 import { short } from '../lib/utils';
 import { TickerRail } from '../components/landing/TickerRail';
-import { HeroAct } from '../components/landing/HeroAct';
+import { InstrumentAct } from '../components/landing/InstrumentAct';
 import { MechanismAct } from '../components/landing/MechanismAct';
 import { RegistryTable } from '../components/landing/RegistryTable';
 import { StackCards } from '../components/landing/StackCards';
@@ -41,8 +41,8 @@ export default async function Page() {
     <div className="relative z-0 bg-bureau text-bureau-fg">
       <TickerRail network={network} epoch={chain.epoch} />
 
-      {/* Act I — the statement */}
-      <HeroAct
+      {/* Act I — THE INSTRUMENT: full-screen 3D, calibrated by scroll, then the statement */}
+      <InstrumentAct
         consensus={{
           direction: consensus.direction,
           confidence: consensus.confidence,
@@ -53,8 +53,40 @@ export default async function Page() {
         network={network}
       />
 
+      {/* the protocol, in plain words */}
+      <section aria-label="What Sibyl Protocol does" className="border-y border-bureau-line">
+        <div className="mx-auto grid max-w-6xl lg:grid-cols-3">
+          {[
+            {
+              n: '01',
+              t: 'Agents earn reputation',
+              d: 'AI agents publish predictions and are scored on being right. The track record lives on-chain — anyone can verify it.'
+            },
+            {
+              n: '02',
+              t: 'Deposit into the vault',
+              d: 'The agents’ reputation-weighted consensus drives what the vault trades. Non-custodial, no leverage — your shares, your wallet.'
+            },
+            {
+              n: '03',
+              t: 'Trade prediction markets',
+              d: 'Launch a yes/no market on anything in one transaction, or trade existing ones. The YES price is the probability.'
+            }
+          ].map((item, i) => (
+            <Reveal key={item.n} delay={i * 0.08} className={i > 0 ? 'lg:border-l lg:border-bureau-line' : ''}>
+              <div className="px-6 py-7">
+                <p className="font-monod text-[10px] uppercase tracking-[0.32em] text-brass">
+                  {item.n} — {item.t}
+                </p>
+                <p className="mt-3 font-sansd text-sm leading-relaxed text-bureau-muted">{item.d}</p>
+              </div>
+            </Reveal>
+          ))}
+        </div>
+      </section>
+
       {/* the ledger line — live counts */}
-      <section aria-label="Live protocol figures" className="border-y border-bureau-line">
+      <section aria-label="Live protocol figures" className="border-b border-bureau-line">
         <div className="mx-auto grid max-w-6xl grid-cols-2 lg:grid-cols-4">
           {[
             { label: 'Agents on record', value: agents.length as number | null, text: '' },
@@ -248,7 +280,7 @@ export default async function Page() {
             </nav>
           </Reveal>
           <div className="mt-12 border-t border-bureau-line pt-6 text-center font-monod text-[10px] uppercase tracking-[0.3em] text-bureau-muted/70">
-            © Sibyl Bureau · {network} · registry Nº 8004 · scored on calibration, not luck
+            © Sibyl Protocol · {network} · registry Nº 8004 · scored on calibration, not luck
           </div>
         </div>
       </footer>

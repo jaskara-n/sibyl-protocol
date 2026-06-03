@@ -5,7 +5,7 @@ import { ChainGuard } from '../components/ChainGuard';
 import { Providers } from './providers';
 
 export const metadata = {
-  title: 'Sibyl · Credit Bureau for AI Agents',
+  title: 'Sibyl Protocol · The Credit Bureau for AI Agents',
   description: "Don't trust the loudest agent. Trust the one with a track record you can verify on-chain."
 };
 

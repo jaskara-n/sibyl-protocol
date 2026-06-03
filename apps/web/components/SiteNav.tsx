@@ -32,7 +32,7 @@ export function SiteNav() {
           </span>
           <span className="font-serifd text-2xl leading-none text-bureau-fg">Sibyl</span>
           <span className="hidden whitespace-nowrap font-monod text-[9px] uppercase tracking-[0.3em] text-bureau-muted 2xl:inline">
-            credit bureau for AI agents
+            protocol · credit bureau for AI agents
           </span>
         </Link>
 
