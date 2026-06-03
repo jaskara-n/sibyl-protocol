@@ -69,6 +69,8 @@
   "predictionMarkets": {
     "_comment": "Vertical #2 — Gnosis CTF + FPMM binary prediction markets, LIVE. Permissionless creation; complete-set mint/redeem; resolver-gated resolution; FPMM where YES price = implied probability. The vault trades these via PredictionVenue behind the MetaVenue.",
     "SibylPredictionMarket": "0x23960EE69b04e9DC87AE3D5E1e7799c6028edc16",
+    "PredictionFactory": "0xfCf5180c83E1A753eaFf489508154430354A7682",
+    "_factoryComment": "Permissionless one-tx create+seed: createAndSeed(marketId, collateral, questionHash, resolveTime, resolver, seedCollateral) -> deploys+seeds an FPMM, LP shares to the creator; fpmmOf(marketId) + allMarketIds() registry.",
     "markets": [
       {
         "marketId": "MNT-ABOVE-1.5-2026Q3",
