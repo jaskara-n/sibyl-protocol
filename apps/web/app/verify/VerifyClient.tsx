@@ -38,7 +38,7 @@ export function VerifyClient({
         <header className="relative pt-12 pb-10">
           <motion.div {...fadeUp}>
             <div className="flex flex-wrap items-center gap-3">
-              <p className="font-monod text-[11px] uppercase tracking-[0.42em] text-brass">Proof</p>
+              <p className="font-monod text-[11px] uppercase tracking-[0.2em] text-brass">Proof</p>
               <SyncChip synced={synced} status={chain.status} />
             </div>
             <h1 className="mt-4 max-w-3xl font-serifd text-[clamp(2.2rem,4.6vw,3.6rem)] leading-[1.02]">
@@ -65,7 +65,7 @@ export function VerifyClient({
         <section className="mt-10 grid gap-5 md:grid-cols-2">
           <motion.div {...fadeUp} className="bureau-frame p-6">
             <div className="bureau-grain" aria-hidden />
-            <div className="font-monod text-[11px] uppercase tracking-[0.3em] text-brass">01 · deterministic replay</div>
+            <div className="font-monod text-[11px] uppercase tracking-[0.2em] text-brass">01 · deterministic replay</div>
             <h2 className="mt-2 font-serifd text-[clamp(1.5rem,2.6vw,2rem)] leading-tight">
               The track record is reproducible.
             </h2>
@@ -84,7 +84,7 @@ export function VerifyClient({
 
           <motion.div {...fadeUp} className="bureau-frame p-6">
             <div className="bureau-grain" aria-hidden />
-            <div className="font-monod text-[11px] uppercase tracking-[0.3em] text-brass">02 · committed datasetHash</div>
+            <div className="font-monod text-[11px] uppercase tracking-[0.2em] text-brass">02 · committed datasetHash</div>
             <h2 className="mt-2 font-serifd text-[clamp(1.5rem,2.6vw,2rem)] leading-tight">Anchored on Mantle.</h2>
             <p className="mt-3 font-sansd text-sm leading-relaxed text-bureau-muted">
               The SHA-256 of the frozen dataset is written on-chain. If a single byte of the track record changed, the
@@ -107,7 +107,7 @@ export function VerifyClient({
         <section className="mt-14">
           <motion.div {...fadeUp} className="mb-5 flex items-end justify-between gap-4">
             <div>
-              <div className="font-monod text-[11px] uppercase tracking-[0.3em] text-brass">verify it yourself</div>
+              <div className="font-monod text-[11px] uppercase tracking-[0.2em] text-brass">verify it yourself</div>
               <h2 className="mt-1 font-serifd text-[clamp(1.5rem,2.6vw,2rem)] leading-tight">Four steps, no keys.</h2>
             </div>
             <span className="hidden shrink-0 font-monod text-[11px] uppercase tracking-[0.18em] text-bureau-muted sm:block">
@@ -156,7 +156,7 @@ export function VerifyClient({
 
           <motion.div {...fadeUp} className="mt-4 bureau-frame p-6">
             <div className="bureau-grain" aria-hidden />
-            <div className="font-monod text-[11px] uppercase tracking-[0.3em] text-brass">the one-liner</div>
+            <div className="font-monod text-[11px] uppercase tracking-[0.2em] text-brass">the one-liner</div>
             <p className="mt-2 font-sansd text-sm leading-relaxed text-bureau-muted">
               If the hash matches, the on-chain reputation is provably the same one this app shows. No trust required.
             </p>
@@ -171,10 +171,10 @@ export function VerifyClient({
           <div className="bureau-frame p-7">
             <div className="bureau-grain" aria-hidden />
             <div className="flex items-baseline justify-between border-b border-bureau-line pb-3">
-              <span className="font-monod text-[11px] uppercase tracking-[0.32em] text-bureau-muted">
+              <span className="font-monod text-[11px] uppercase tracking-[0.2em] text-bureau-muted">
                 On/off-chain parity
               </span>
-              <span className="font-monod text-[11px] uppercase tracking-[0.32em] text-brass">
+              <span className="font-monod text-[11px] uppercase tracking-[0.2em] text-brass">
                 {chain.network ?? 'mantle-sepolia'}
               </span>
             </div>
@@ -202,7 +202,7 @@ export function VerifyClient({
         <section className="mt-14">
           <motion.div {...fadeUp} className="mb-5 flex items-end justify-between gap-4">
             <div>
-              <div className="font-monod text-[11px] uppercase tracking-[0.3em] text-brass">on-chain links</div>
+              <div className="font-monod text-[11px] uppercase tracking-[0.2em] text-brass">on-chain links</div>
               <h2 className="mt-1 font-serifd text-[clamp(1.5rem,2.6vw,2rem)] leading-tight">The record on Mantle.</h2>
             </div>
             <span className="hidden shrink-0 font-monod text-[11px] uppercase tracking-[0.18em] text-bureau-muted sm:block">
@@ -239,7 +239,7 @@ export function VerifyClient({
           </motion.div>
         </section>
 
-        <footer className="mt-14 border-t border-bureau-line pt-6 text-center font-monod text-[11px] uppercase tracking-[0.3em] text-bureau-muted/70">
+        <footer className="mt-14 border-t border-bureau-line pt-6 text-center font-monod text-[11px] uppercase tracking-[0.2em] text-bureau-muted/70">
           deterministic replay · committed datasetHash · on/off-chain parity · verifiable by anyone, anytime
         </footer>
       </div>

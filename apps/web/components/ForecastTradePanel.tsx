@@ -353,7 +353,7 @@ export function ForecastTradePanel({
     <div className="bureau-frame relative w-full shrink-0 p-6 lg:w-[420px]">
       <div className="bureau-grain" aria-hidden />
       <div className="flex items-center justify-between">
-        <div className="font-monod text-[11px] uppercase tracking-[0.32em] text-brass">trade · positions</div>
+        <div className="font-monod text-[11px] uppercase tracking-[0.2em] text-brass">trade · positions</div>
         <span className="border border-rise px-2 py-0.5 font-monod text-[11px] uppercase tracking-[0.18em] text-rise">
           live · mantle sepolia
         </span>

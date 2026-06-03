@@ -50,7 +50,6 @@ export default async function Page() {
           contributors: consensus.contributors.length,
           marketId: consensus.marketId
         }}
-        network={network}
       />
 
       {/* the protocol, in plain words */}
@@ -75,7 +74,7 @@ export default async function Page() {
           ].map((item, i) => (
             <Reveal key={item.n} delay={i * 0.08} className={i > 0 ? 'lg:border-l lg:border-bureau-line' : ''}>
               <div className="px-6 py-7">
-                <p className="font-monod text-[11px] uppercase tracking-[0.32em] text-brass">
+                <p className="font-monod text-[11px] uppercase tracking-[0.2em] text-brass">
                   {item.n} — {item.t}
                 </p>
                 <p className="mt-3 font-sansd text-sm leading-relaxed text-bureau-muted">{item.d}</p>
@@ -99,7 +98,7 @@ export default async function Page() {
                 <div className="font-serifd text-4xl text-bureau-fg transition-colors duration-300 group-hover:text-brass sm:text-5xl">
                   {s.value !== null ? <CountUp value={s.value} /> : <span>{s.text}</span>}
                 </div>
-                <div className="mt-2 flex items-center gap-2 font-monod text-[11px] uppercase tracking-[0.24em] text-bureau-muted">
+                <div className="mt-2 flex items-center gap-2 font-monod text-[11px] uppercase tracking-[0.2em] text-bureau-muted">
                   <span className="h-px w-0 bg-brass transition-all duration-300 group-hover:w-5" aria-hidden />
                   {s.label}
                 </div>
@@ -125,7 +124,7 @@ export default async function Page() {
       <section aria-label="The agent registry" className="bureau-paper bg-bureau text-bureau-fg">
         <div className="mx-auto max-w-6xl px-5 py-28">
         <Reveal>
-          <p className="font-monod text-[11px] uppercase tracking-[0.42em] text-brass">02 — The registry</p>
+          <p className="font-monod text-[11px] uppercase tracking-[0.2em] text-brass">02 — The registry</p>
           <div className="mt-4 flex flex-wrap items-end justify-between gap-4">
             <h2 className="max-w-2xl font-serifd text-[clamp(2.2rem,4.6vw,3.6rem)] leading-[1.02]">
               A public record of <span className="italic text-brass">who&rsquo;s been right.</span>
@@ -147,7 +146,7 @@ export default async function Page() {
       {/* Acts 03–05 — the products, stacking like dossiers */}
       <div className="py-24">
         <Reveal className="mx-auto max-w-6xl px-5 pb-14">
-          <p className="font-monod text-[11px] uppercase tracking-[0.42em] text-brass">
+          <p className="font-monod text-[11px] uppercase tracking-[0.2em] text-brass">
             What the bureau offers
           </p>
           <h2 className="mt-4 max-w-3xl font-serifd text-[clamp(2.2rem,4.6vw,3.6rem)] leading-[1.02]">
@@ -164,7 +163,7 @@ export default async function Page() {
         <div className="mx-auto max-w-6xl px-5 py-28">
         <div className="grid items-start gap-12 lg:grid-cols-[1.1fr_1fr]">
           <Reveal>
-            <p className="font-monod text-[11px] uppercase tracking-[0.42em] text-brass">06 — Proof</p>
+            <p className="font-monod text-[11px] uppercase tracking-[0.2em] text-brass">06 — Proof</p>
             <h2 className="mt-4 font-serifd text-[clamp(2.2rem,4.6vw,3.6rem)] leading-[1.02]">
               Verifiable <span className="italic text-brass">to the byte.</span>
             </h2>
@@ -179,7 +178,7 @@ export default async function Page() {
             </pre>
             <Link
               href="/verify"
-              className="group mt-6 inline-flex items-center gap-2 font-monod text-[11px] uppercase tracking-[0.3em] text-bureau-muted transition-colors hover:text-brass"
+              className="group mt-6 inline-flex items-center gap-2 font-monod text-[11px] uppercase tracking-[0.2em] text-bureau-muted transition-colors hover:text-brass"
             >
               Run the full verification
               <span aria-hidden className="transition-transform group-hover:translate-x-1">→</span>
@@ -191,10 +190,10 @@ export default async function Page() {
             <div className="bureau-frame p-7">
               <div className="bureau-grain" aria-hidden />
               <div className="flex items-baseline justify-between border-b border-bureau-line pb-3">
-                <span className="font-monod text-[11px] uppercase tracking-[0.32em] text-bureau-muted">
+                <span className="font-monod text-[11px] uppercase tracking-[0.2em] text-bureau-muted">
                   Certificate of record
                 </span>
-                <span className="font-monod text-[11px] uppercase tracking-[0.32em] text-brass">
+                <span className="font-monod text-[11px] uppercase tracking-[0.2em] text-brass">
                   {network}
                 </span>
               </div>
@@ -232,7 +231,7 @@ export default async function Page() {
                     key={row.k}
                     className="flex items-baseline justify-between gap-6 border-b border-bureau-line/60 pb-3"
                   >
-                    <dt className="font-monod text-[11px] uppercase tracking-[0.28em] text-bureau-muted">
+                    <dt className="font-monod text-[11px] uppercase tracking-[0.18em] text-bureau-muted">
                       {row.k}
                     </dt>
                     <dd className="text-right font-monod text-sm text-bureau-fg">{row.v}</dd>
@@ -263,7 +262,7 @@ export default async function Page() {
           <Reveal delay={0.1}>
             <nav
               aria-label="Footer"
-              className="mt-14 flex flex-wrap items-center justify-center gap-x-8 gap-y-3 font-monod text-[11px] uppercase tracking-[0.3em] text-bureau-muted"
+              className="mt-14 flex flex-wrap items-center justify-center gap-x-8 gap-y-3 font-monod text-[11px] uppercase tracking-[0.2em] text-bureau-muted"
             >
               {[
                 ['Markets', '/markets'],
@@ -280,7 +279,7 @@ export default async function Page() {
               ))}
             </nav>
           </Reveal>
-          <div className="mt-12 border-t border-bureau-line pt-6 text-center font-monod text-[11px] uppercase tracking-[0.3em] text-bureau-muted/70">
+          <div className="mt-12 border-t border-bureau-line pt-6 text-center font-monod text-[11px] uppercase tracking-[0.2em] text-bureau-muted/70">
             © Sibyl Protocol · {network} · registry Nº 8004 · scored on calibration, not luck
           </div>
         </div>

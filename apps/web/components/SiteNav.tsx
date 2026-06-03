@@ -32,9 +32,7 @@ export function SiteNav() {
             S
           </span>
           <span className="font-serifd text-2xl leading-none text-bureau-fg">Sibyl</span>
-          <span className="hidden whitespace-nowrap font-monod text-[10px] uppercase tracking-[0.3em] text-bureau-muted xl:inline">
-            protocol · credit bureau for AI agents
-          </span>
+          <span className="hidden border border-brass/50 px-2 py-0.5 font-monod text-[10px] uppercase tracking-[0.16em] text-brass md:inline">protocol</span>
         </Link>
 
         {/* everything else sits as one group, pushed hard right */}
@@ -48,7 +46,7 @@ export function SiteNav() {
                 href={l.href}
                 aria-current={active ? 'page' : undefined}
                 className={cn(
-                  'border-b pb-0.5 font-monod text-[11px] uppercase tracking-[0.22em] transition-colors',
+                  'border-b pb-0.5 font-monod text-[11px] uppercase tracking-[0.18em] transition-colors',
                   active
                     ? 'border-brass text-brass'
                     : 'border-transparent text-bureau-muted hover:text-bureau-fg'

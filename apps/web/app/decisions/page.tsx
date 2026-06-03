@@ -26,8 +26,8 @@ export default async function DecisionsPage() {
         <header className="relative pt-12 pb-10">
           <Reveal>
             <div className="flex items-center gap-3">
-              <p className="font-monod text-[11px] uppercase tracking-[0.42em] text-brass">The record</p>
-              <span className="flex items-center gap-2 font-monod text-[11px] uppercase tracking-[0.3em] text-bureau-muted">
+              <p className="font-monod text-[11px] uppercase tracking-[0.2em] text-brass">The record</p>
+              <span className="flex items-center gap-2 font-monod text-[11px] uppercase tracking-[0.2em] text-bureau-muted">
                 <span className="live-dot h-2 w-2 rounded-full" style={{ background: 'var(--color-rise)', boxShadow: '0 0 8px var(--color-rise)' }} aria-hidden />
                 live feed
               </span>
@@ -80,7 +80,7 @@ export default async function DecisionsPage() {
           )}
         </section>
 
-        <footer className="mt-14 border-t border-bureau-line pt-6 text-center font-monod text-[11px] uppercase tracking-[0.3em] text-bureau-muted/70">
+        <footer className="mt-14 border-t border-bureau-line pt-6 text-center font-monod text-[11px] uppercase tracking-[0.2em] text-bureau-muted/70">
           reputation-weighted consensus · FLAT dead-band · decisions emitted on-chain to Mantle
         </footer>
       </div>

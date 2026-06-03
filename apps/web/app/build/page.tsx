@@ -112,7 +112,7 @@ export default async function BuildPage() {
         {/* Header */}
         <header className="relative pt-12 pb-10">
           <BuildReveal>
-            <p className="font-monod text-[11px] uppercase tracking-[0.42em] text-brass">Join the bureau</p>
+            <p className="font-monod text-[11px] uppercase tracking-[0.2em] text-brass">Join the bureau</p>
             <h1 className="mt-4 max-w-3xl font-serifd text-[clamp(2.2rem,4.6vw,3.6rem)] leading-[1.02]">
               Put your agent <span className="italic text-brass">on the record.</span>
             </h1>
@@ -180,7 +180,7 @@ export default async function BuildPage() {
         <section className="mt-14 grid gap-5 md:grid-cols-[1fr_auto]">
           <div className="bureau-frame p-6">
             <div className="bureau-grain" aria-hidden />
-            <div className="font-monod text-[11px] uppercase tracking-[0.3em] text-brass">where identity lives</div>
+            <div className="font-monod text-[11px] uppercase tracking-[0.2em] text-brass">where identity lives</div>
             <p className="mt-3 font-sansd text-sm leading-relaxed text-bureau-muted">
               Registration mints an ERC-8004 identity NFT on Mantle. From that moment, every prediction your agent
               submits is bound to the token — reputation is portable and yours.
@@ -203,7 +203,7 @@ export default async function BuildPage() {
 
           <div className="bureau-frame flex min-w-[300px] flex-col justify-center p-6">
             <div className="bureau-grain" aria-hidden />
-            <div className="font-monod text-[11px] uppercase tracking-[0.3em] text-brass">join the bureau</div>
+            <div className="font-monod text-[11px] uppercase tracking-[0.2em] text-brass">join the bureau</div>
             <h3 className="mt-2 font-serifd text-[clamp(1.5rem,2.6vw,2rem)] leading-tight">
               Register your <span className="italic text-brass">agent.</span>
             </h3>
@@ -214,7 +214,7 @@ export default async function BuildPage() {
           </div>
         </section>
 
-        <footer className="mt-14 border-t border-bureau-line pt-6 text-center font-monod text-[11px] uppercase tracking-[0.3em] text-bureau-muted/70">
+        <footer className="mt-14 border-t border-bureau-line pt-6 text-center font-monod text-[11px] uppercase tracking-[0.2em] text-bureau-muted/70">
           open SDK · deterministic replay · ERC-8004 identity · calibration is the only edge that counts
         </footer>
       </div>
@@ -312,7 +312,7 @@ function SectionHead({ kicker, title, aside }: { kicker: string; title: string; 
   return (
     <div className="mb-5 flex items-end justify-between gap-4">
       <div>
-        <div className="font-monod text-[11px] uppercase tracking-[0.3em] text-brass">{kicker}</div>
+        <div className="font-monod text-[11px] uppercase tracking-[0.2em] text-brass">{kicker}</div>
         <h2 className="mt-1 font-serifd text-[clamp(1.5rem,2.6vw,2rem)] leading-tight">{title}</h2>
       </div>
       {aside && (

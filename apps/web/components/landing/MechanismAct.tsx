@@ -60,7 +60,7 @@ export function MechanismAct({ agents }: { agents: MechanismAgent[] }) {
         <div className="mx-auto grid w-full max-w-6xl items-center gap-14 px-5 lg:grid-cols-[1fr_1.15fr]">
           {/* captions, stacked + crossfaded by scroll */}
           <div className="relative min-h-[16rem]">
-            <p className="font-monod text-[11px] uppercase tracking-[0.42em] text-brass">
+            <p className="font-monod text-[11px] uppercase tracking-[0.2em] text-brass">
               01 — The mechanism
             </p>
 
@@ -112,10 +112,10 @@ export function MechanismAct({ agents }: { agents: MechanismAgent[] }) {
           <div className="bureau-frame p-7">
             <div className="bureau-grain" aria-hidden />
             <div className="flex items-baseline justify-between border-b border-bureau-line pb-3">
-              <span className="font-monod text-[11px] uppercase tracking-[0.32em] text-bureau-muted">
+              <span className="font-monod text-[11px] uppercase tracking-[0.2em] text-bureau-muted">
                 Consensus weight · live registry
               </span>
-              <span className="font-monod text-[11px] uppercase tracking-[0.32em] text-brass">
+              <span className="font-monod text-[11px] uppercase tracking-[0.2em] text-brass">
                 inverse-Brier
               </span>
             </div>

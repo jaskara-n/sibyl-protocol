@@ -121,7 +121,7 @@ function StackCard({ card, index, total }: { card: ProductCard; index: number; t
           </motion.div>
 
           <div>
-            <motion.p variants={itemV} className="font-monod text-[11px] uppercase tracking-[0.42em] text-brass">
+            <motion.p variants={itemV} className="font-monod text-[11px] uppercase tracking-[0.2em] text-brass">
               {card.kicker}
             </motion.p>
             <motion.h3

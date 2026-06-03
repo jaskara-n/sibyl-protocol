@@ -39,7 +39,7 @@ export default async function MarketsPage() {
       <div className="mx-auto max-w-6xl px-5 pb-24">
         {/* Header */}
         <header className="relative pt-12 pb-10">
-          <p className="font-monod text-[11px] uppercase tracking-[0.42em] text-brass">The map</p>
+          <p className="font-monod text-[11px] uppercase tracking-[0.2em] text-brass">The map</p>
           <h1 className="mt-4 font-serifd text-[clamp(2.2rem,4.6vw,3.6rem)] leading-[1.02]">
             Markets, ranked by <span className="italic text-brass">conviction.</span>
           </h1>
@@ -146,7 +146,7 @@ export default async function MarketsPage() {
           )}
         </section>
 
-        <footer className="mt-16 border-t border-bureau-line pt-6 text-center font-monod text-[11px] uppercase tracking-[0.3em] text-bureau-muted">
+        <footer className="mt-16 border-t border-bureau-line pt-6 text-center font-monod text-[11px] uppercase tracking-[0.2em] text-bureau-muted">
           conviction = reputation weight × active agents · per-market reputation-weighted consensus
         </footer>
       </div>

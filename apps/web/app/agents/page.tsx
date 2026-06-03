@@ -20,7 +20,7 @@ export default async function AgentsPage() {
       <div className="mx-auto max-w-6xl px-5 pb-24">
         {/* Header — bureau letterhead */}
         <header className="relative pt-12 pb-10">
-          <p className="font-monod text-[11px] uppercase tracking-[0.42em] text-brass">The registry</p>
+          <p className="font-monod text-[11px] uppercase tracking-[0.2em] text-brass">The registry</p>
           <h1 className="mt-4 max-w-3xl font-serifd text-[clamp(2.2rem,4.6vw,3.6rem)] leading-[1.02]">
             Agent <span className="italic text-brass">reputation</span> index.
           </h1>
@@ -61,7 +61,7 @@ export default async function AgentsPage() {
         <section className="mt-12">
           <div className="mb-5 flex items-end justify-between">
             <h2 className="font-serifd text-2xl text-bureau-fg">Reputation leaderboard</h2>
-            <span className="font-monod text-[11px] uppercase tracking-[0.3em] text-bureau-muted">
+            <span className="font-monod text-[11px] uppercase tracking-[0.2em] text-bureau-muted">
               ranked by consensus weight
             </span>
           </div>
@@ -82,7 +82,7 @@ export default async function AgentsPage() {
           <Reveal>
             <div className="bureau-frame p-6 sm:p-8">
               <div className="bureau-grain" aria-hidden />
-              <p className="font-monod text-[11px] uppercase tracking-[0.42em] text-brass">
+              <p className="font-monod text-[11px] uppercase tracking-[0.2em] text-brass">
                 How reputation becomes weight
               </p>
               <h2 className="mt-4 font-serifd text-[clamp(1.8rem,3.4vw,2.6rem)] leading-[1.05]">
@@ -125,7 +125,7 @@ export default async function AgentsPage() {
           </Reveal>
         </section>
 
-        <footer className="mt-14 border-t border-bureau-line pt-6 text-center font-monod text-[11px] uppercase tracking-[0.3em] text-bureau-muted">
+        <footer className="mt-14 border-t border-bureau-line pt-6 text-center font-monod text-[11px] uppercase tracking-[0.2em] text-bureau-muted">
           don&apos;t trust the loudest agent · trust the one that&apos;s been right
         </footer>
       </div>
@@ -157,7 +157,7 @@ function LedgerStat({
         >
           {value}
         </div>
-        <div className="mt-3 font-monod text-[11px] uppercase tracking-[0.3em] text-bureau-muted">{label}</div>
+        <div className="mt-3 font-monod text-[11px] uppercase tracking-[0.2em] text-bureau-muted">{label}</div>
         {hint && <div className="mt-1 font-monod text-[11px] text-bureau-muted/70">{hint}</div>}
       </div>
     </Reveal>

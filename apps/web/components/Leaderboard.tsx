@@ -34,7 +34,7 @@ function LeaderboardRows({ agents }: { agents: AgentRow[] }) {
     <div className="bureau-frame overflow-hidden">
       <div className="bureau-grain" aria-hidden />
 
-      <div className="grid grid-cols-[2.4rem_1fr_5rem] items-baseline gap-4 border-b border-bureau-line px-5 py-3 font-monod text-[11px] uppercase tracking-[0.3em] text-bureau-muted sm:grid-cols-[2.4rem_1fr_4.5rem_minmax(8rem,12rem)_3.5rem]">
+      <div className="grid grid-cols-[2.4rem_1fr_5rem] items-baseline gap-4 border-b border-bureau-line px-5 py-3 font-monod text-[11px] uppercase tracking-[0.2em] text-bureau-muted sm:grid-cols-[2.4rem_1fr_4.5rem_minmax(8rem,12rem)_3.5rem]">
         <span>Nº</span>
         <span>Agent</span>
         <span className="hidden text-center sm:block">Rating</span>
@@ -173,7 +173,7 @@ export function Leaderboard({ agents, markets }: { agents: AgentRow[]; markets?:
   return (
     <div className="flex flex-col gap-4">
       <div className="flex items-center gap-3">
-        <label htmlFor="lb-market" className="font-monod text-[11px] uppercase tracking-[0.3em] text-bureau-muted">
+        <label htmlFor="lb-market" className="font-monod text-[11px] uppercase tracking-[0.2em] text-bureau-muted">
           market
         </label>
         <div className="relative">
@@ -195,7 +195,7 @@ export function Leaderboard({ agents, markets }: { agents: AgentRow[]; markets?:
           </span>
         </div>
         {loading && (
-          <span role="status" aria-live="polite" className="font-monod text-[11px] uppercase tracking-[0.3em] text-bureau-muted">
+          <span role="status" aria-live="polite" className="font-monod text-[11px] uppercase tracking-[0.2em] text-bureau-muted">
             loading…
           </span>
         )}

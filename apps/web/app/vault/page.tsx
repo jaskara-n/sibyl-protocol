@@ -35,7 +35,7 @@ export default async function VaultPage() {
       <div className="mx-auto max-w-6xl px-5 pb-24">
         {/* Header */}
         <header className="relative pt-12 pb-8">
-          <p className="font-monod text-[11px] uppercase tracking-[0.42em] text-brass">The vault</p>
+          <p className="font-monod text-[11px] uppercase tracking-[0.2em] text-brass">The vault</p>
           <h1 className="mt-4 max-w-3xl font-serifd text-[clamp(2.2rem,4.6vw,3.6rem)] leading-[1.02]">
             An ERC-4626 vault steered by <span className="italic text-brass">reputation.</span>
           </h1>
@@ -61,7 +61,7 @@ export default async function VaultPage() {
             <Reveal delay={0.1}>
               <div className="mb-3 flex items-baseline justify-between">
                 <h2 className="font-serifd text-2xl">Open positions</h2>
-                <span className="font-monod text-[11px] uppercase tracking-[0.24em] text-bureau-muted">
+                <span className="font-monod text-[11px] uppercase tracking-[0.2em] text-bureau-muted">
                   per-market venue notional
                 </span>
               </div>
@@ -82,7 +82,7 @@ export default async function VaultPage() {
                 ◈
               </span>
               <div>
-                <div className="font-monod text-[11px] uppercase tracking-[0.28em] text-rise">
+                <div className="font-monod text-[11px] uppercase tracking-[0.18em] text-rise">
                   Self-custody · on-chain
                 </div>
                 <p className="mt-2 font-sansd text-sm leading-relaxed text-bureau-muted">
@@ -98,7 +98,7 @@ export default async function VaultPage() {
           </div>
         </Reveal>
 
-        <footer className="mt-14 border-t border-bureau-line pt-6 text-center font-monod text-[11px] uppercase tracking-[0.3em] text-bureau-muted">
+        <footer className="mt-14 border-t border-bureau-line pt-6 text-center font-monod text-[11px] uppercase tracking-[0.2em] text-bureau-muted">
           NAV = idle cash + venue positions · reputation-weighted sizing · no leverage · live on Mantle Sepolia
         </footer>
       </div>

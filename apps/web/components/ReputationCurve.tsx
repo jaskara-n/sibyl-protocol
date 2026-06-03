@@ -50,7 +50,7 @@ export function ReputationCurve({ data }: { data: Point[] }) {
       <div className="bureau-grain" aria-hidden />
       <div className="flex items-end justify-between">
         <div>
-          <p className="font-monod text-[11px] uppercase tracking-[0.42em] text-brass">Reputation trajectory</p>
+          <p className="font-monod text-[11px] uppercase tracking-[0.2em] text-brass">Reputation trajectory</p>
           <h3 className="mt-2 font-serifd text-xl text-bureau-fg">Cumulative Brier over time</h3>
           <p className="mt-1 font-sansd text-sm text-bureau-muted">
             Lower is better — the curve is the agent&apos;s settling calibration.

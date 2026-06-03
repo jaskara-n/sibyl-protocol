@@ -43,7 +43,7 @@ export function HeroAct({ consensus, network }: { consensus: HeroConsensus; netw
         <div className="mx-auto grid w-full max-w-6xl items-center gap-10 px-5 pb-14 pt-24 lg:grid-cols-[1.45fr_1fr]">
           <motion.div style={{ y: headlineY, opacity: headlineOpacity }}>
             <LineReveal delay={0.05}>
-              <p className="font-monod text-[11px] uppercase tracking-[0.42em] text-brass">
+              <p className="font-monod text-[11px] uppercase tracking-[0.2em] text-brass">
                 The credit bureau for AI trading agents
               </p>
             </LineReveal>
@@ -87,7 +87,7 @@ export function HeroAct({ consensus, network }: { consensus: HeroConsensus; netw
               </Link>
               <Link
                 href="/vault"
-                className="group inline-flex items-center gap-2 font-monod text-[11px] uppercase tracking-[0.24em] text-bureau-muted transition-colors hover:text-brass"
+                className="group inline-flex items-center gap-2 font-monod text-[11px] uppercase tracking-[0.2em] text-bureau-muted transition-colors hover:text-brass"
               >
                 Inspect the vault
                 <span aria-hidden className="transition-transform group-hover:translate-x-1">→</span>
@@ -105,10 +105,10 @@ export function HeroAct({ consensus, network }: { consensus: HeroConsensus; netw
             >
               <div className="bureau-grain" aria-hidden />
               <div className="flex items-baseline justify-between border-b border-bureau-line pb-3">
-                <span className="font-monod text-[11px] uppercase tracking-[0.32em] text-bureau-muted">
+                <span className="font-monod text-[11px] uppercase tracking-[0.2em] text-bureau-muted">
                   Live consensus
                 </span>
-                <span className="font-monod text-[11px] uppercase tracking-[0.32em] text-brass">
+                <span className="font-monod text-[11px] uppercase tracking-[0.2em] text-brass">
                   {consensus.marketId ?? 'reputation-weighted'}
                 </span>
               </div>
@@ -126,7 +126,7 @@ export function HeroAct({ consensus, network }: { consensus: HeroConsensus; netw
                 <CalibrationDial pct={Math.round(consensus.confidence * 100)} color={dirColor} width={236} />
               </div>
 
-              <div className="mt-5 flex items-center justify-between border-t border-bureau-line pt-3 font-monod text-[11px] uppercase tracking-[0.28em] text-bureau-muted">
+              <div className="mt-5 flex items-center justify-between border-t border-bureau-line pt-3 font-monod text-[11px] uppercase tracking-[0.18em] text-bureau-muted">
                 <span>
                   <span className="text-bureau-fg">{consensus.contributors}</span> agents contributing
                 </span>
@@ -145,7 +145,7 @@ export function HeroAct({ consensus, network }: { consensus: HeroConsensus; netw
           style={{ opacity: headlineOpacity }}
           className="absolute bottom-5 left-1/2 flex -translate-x-1/2 flex-col items-center gap-2"
         >
-          <span className="font-monod text-[10px] uppercase tracking-[0.42em] text-bureau-muted">scroll</span>
+          <span className="font-monod text-[10px] uppercase tracking-[0.2em] text-bureau-muted">scroll</span>
           <motion.span
             className="block h-8 w-px bg-brass/70"
             animate={reduced ? undefined : { scaleY: [0.2, 1, 0.2], originY: 0 }}

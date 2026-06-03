@@ -31,7 +31,7 @@ export function ConvictionBar({
 
   return (
     <div className="flex flex-col gap-2.5">
-      <div className="flex items-baseline justify-between font-monod text-[11px] uppercase tracking-[0.28em]">
+      <div className="flex items-baseline justify-between font-monod text-[11px] uppercase tracking-[0.18em]">
         <span className="text-bureau-muted">Conviction index</span>
         <span className="text-brass">{conviction.toLocaleString()}</span>
       </div>

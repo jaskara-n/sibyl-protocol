@@ -231,7 +231,7 @@ export function VaultForm({ sharePrice }: { sharePrice: number }) {
       <div className="bureau-grain" aria-hidden />
 
       <div className="flex items-baseline justify-between border-b border-bureau-line pb-3">
-        <span className="font-monod text-[11px] uppercase tracking-[0.32em] text-bureau-muted">
+        <span className="font-monod text-[11px] uppercase tracking-[0.2em] text-bureau-muted">
           Deposit / withdraw
         </span>
         <span className="border border-rise/50 px-2 py-0.5 font-monod text-[11px] uppercase tracking-[0.18em] text-rise">
@@ -256,7 +256,7 @@ export function VaultForm({ sharePrice }: { sharePrice: number }) {
               resetWrite();
               setPhase('idle');
             }}
-            className={`px-3 py-2.5 font-monod text-[11px] uppercase tracking-[0.24em] transition-colors first:border-r first:border-bureau-line ${
+            className={`px-3 py-2.5 font-monod text-[11px] uppercase tracking-[0.2em] transition-colors first:border-r first:border-bureau-line ${
               mode === m ? 'bg-bureau-fg text-bureau' : 'text-bureau-muted hover:text-brass'
             }`}
           >
@@ -267,7 +267,7 @@ export function VaultForm({ sharePrice }: { sharePrice: number }) {
 
       {/* Amount */}
       <label className="mt-5 block">
-        <span className="font-monod text-[11px] uppercase tracking-[0.28em] text-bureau-muted">
+        <span className="font-monod text-[11px] uppercase tracking-[0.18em] text-bureau-muted">
           {mode === 'deposit' ? 'sUSD assets to deposit' : 'shares to redeem'}
         </span>
         <input
@@ -400,7 +400,7 @@ function PreviewRow({
 }) {
   return (
     <div className="flex items-baseline justify-between gap-6 py-1.5 text-sm">
-      <span className="font-monod text-[11px] uppercase tracking-[0.24em] text-bureau-muted">
+      <span className="font-monod text-[11px] uppercase tracking-[0.2em] text-bureau-muted">
         {label}
         {hint && <span className="ml-1.5 normal-case tracking-normal text-bureau-muted/60">{hint}()</span>}
       </span>
@@ -412,7 +412,7 @@ function PreviewRow({
 function Stat({ label, value, accent }: { label: string; value: string; accent?: string }) {
   return (
     <div className="border border-bureau-line bg-bureau-panel p-3">
-      <div className="font-monod text-[11px] uppercase tracking-[0.24em] text-bureau-muted">{label}</div>
+      <div className="font-monod text-[11px] uppercase tracking-[0.2em] text-bureau-muted">{label}</div>
       <div className={`mt-1 font-monod text-sm font-medium ${accent ?? 'text-bureau-fg'}`}>{value}</div>
     </div>
   );

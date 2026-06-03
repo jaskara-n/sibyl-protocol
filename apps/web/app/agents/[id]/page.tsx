@@ -32,7 +32,7 @@ export default async function AgentPage({ params }: { params: Promise<{ id: stri
         <div className="mx-auto max-w-6xl px-5 pb-24 pt-16">
           <div className="bureau-frame p-10 text-center">
             <div className="bureau-grain" aria-hidden />
-            <p className="font-monod text-[11px] uppercase tracking-[0.42em] text-brass">No record</p>
+            <p className="font-monod text-[11px] uppercase tracking-[0.2em] text-brass">No record</p>
             <div className="mt-3 font-serifd text-3xl">Agent not found</div>
             <p className="mt-2 font-sansd text-sm text-bureau-muted">
               No reputation record for <span className="font-monod text-bureau-fg">{id}</span>.

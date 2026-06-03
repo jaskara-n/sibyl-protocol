@@ -55,7 +55,7 @@ export function ReliabilityDiagram({ data }: { data: Bucket[] }) {
       <div className="bureau-grain" aria-hidden />
       <div className="flex items-end justify-between">
         <div>
-          <p className="font-monod text-[11px] uppercase tracking-[0.42em] text-brass">Calibration</p>
+          <p className="font-monod text-[11px] uppercase tracking-[0.2em] text-brass">Calibration</p>
           <h3 className="mt-2 font-serifd text-xl text-bureau-fg">Reliability diagram</h3>
           <p className="mt-1 max-w-md font-sansd text-sm text-bureau-muted">
             Predicted probability vs observed frequency. Points on the dashed{' '}

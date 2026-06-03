@@ -92,11 +92,11 @@ export default async function MarketPage({ params }: { params: Promise<{ marketI
           <Link
             href="/markets"
             aria-label="Back to all markets"
-            className="font-monod text-[11px] uppercase tracking-[0.3em] text-bureau-muted transition-colors hover:text-brass"
+            className="font-monod text-[11px] uppercase tracking-[0.2em] text-bureau-muted transition-colors hover:text-brass"
           >
             ← all markets
           </Link>
-          <p className="mt-6 font-monod text-[11px] uppercase tracking-[0.42em] text-brass">The dossier</p>
+          <p className="mt-6 font-monod text-[11px] uppercase tracking-[0.2em] text-brass">The dossier</p>
           <div className="mt-4 flex flex-wrap items-center gap-4">
             <h1 className="font-serifd text-[clamp(2.2rem,4.6vw,3.6rem)] leading-[1.02]">
               {market?.name ?? id}
@@ -134,7 +134,7 @@ export default async function MarketPage({ params }: { params: Promise<{ marketI
             <div className="bureau-grain" aria-hidden />
             <div className="flex flex-col gap-6 sm:flex-row sm:items-center sm:gap-8">
               <div className="flex-1">
-                <p className="font-monod text-[11px] uppercase tracking-[0.42em] text-brass">
+                <p className="font-monod text-[11px] uppercase tracking-[0.2em] text-brass">
                   Market conviction
                 </p>
                 <h2 className="mt-3 font-serifd text-[clamp(1.6rem,3vw,2.2rem)] leading-[1.05]">
@@ -161,14 +161,14 @@ export default async function MarketPage({ params }: { params: Promise<{ marketI
             <h2 className="font-serifd text-[clamp(1.4rem,2.6vw,2rem)] leading-[1.05]">
               Market leaderboard
             </h2>
-            <span className="font-monod text-[11px] uppercase tracking-[0.3em] text-bureau-muted">
+            <span className="font-monod text-[11px] uppercase tracking-[0.2em] text-bureau-muted">
               ranked by consensus weight
             </span>
           </div>
           {agents.length > 0 ? (
             <div className="bureau-frame overflow-hidden">
               <div className="bureau-grain" aria-hidden />
-              <div className="grid grid-cols-[2.4rem_1fr_5rem] items-baseline gap-4 border-b border-bureau-line px-5 py-3 font-monod text-[11px] uppercase tracking-[0.3em] text-bureau-muted sm:grid-cols-[2.4rem_1fr_5.5rem_6rem_minmax(8rem,12rem)_3.5rem]">
+              <div className="grid grid-cols-[2.4rem_1fr_5rem] items-baseline gap-4 border-b border-bureau-line px-5 py-3 font-monod text-[11px] uppercase tracking-[0.2em] text-bureau-muted sm:grid-cols-[2.4rem_1fr_5.5rem_6rem_minmax(8rem,12rem)_3.5rem]">
                 <span>Nº</span>
                 <span>Agent</span>
                 <span className="hidden text-center sm:block">Rating</span>
@@ -262,7 +262,7 @@ export default async function MarketPage({ params }: { params: Promise<{ marketI
             <h2 className="font-serifd text-[clamp(1.4rem,2.6vw,2rem)] leading-[1.05]">
               Decision history
             </h2>
-            <span className="font-monod text-[11px] uppercase tracking-[0.3em] text-bureau-muted">
+            <span className="font-monod text-[11px] uppercase tracking-[0.2em] text-bureau-muted">
               {sorted.length} rounds
             </span>
           </div>
@@ -342,7 +342,7 @@ export default async function MarketPage({ params }: { params: Promise<{ marketI
           )}
         </section>
 
-        <footer className="mt-16 border-t border-bureau-line pt-6 text-center font-monod text-[11px] uppercase tracking-[0.3em] text-bureau-muted">
+        <footer className="mt-16 border-t border-bureau-line pt-6 text-center font-monod text-[11px] uppercase tracking-[0.2em] text-bureau-muted">
           per-market reputation-weighted consensus · decisions emitted on-chain to Mantle
         </footer>
       </div>

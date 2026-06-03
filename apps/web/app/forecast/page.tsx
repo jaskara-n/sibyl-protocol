@@ -53,7 +53,7 @@ export default async function ForecastPage() {
       <div className="mx-auto max-w-6xl px-5 pb-24">
         {/* Header */}
         <header className="relative pt-12 pb-10">
-          <p className="font-monod text-[11px] uppercase tracking-[0.42em] text-brass">The forecast</p>
+          <p className="font-monod text-[11px] uppercase tracking-[0.2em] text-brass">The forecast</p>
           <h1 className="mt-4 max-w-3xl font-serifd text-[clamp(2.2rem,4.6vw,3.6rem)] leading-[1.02]">
             Trade the <span className="italic text-brass">probability</span> of the future.
           </h1>
@@ -133,7 +133,7 @@ export default async function ForecastPage() {
           )}
         </section>
 
-        <footer className="mt-16 border-t border-bureau-line pt-6 text-center font-monod text-[11px] uppercase tracking-[0.3em] text-bureau-muted/70">
+        <footer className="mt-16 border-t border-bureau-line pt-6 text-center font-monod text-[11px] uppercase tracking-[0.2em] text-bureau-muted/70">
           FPMM price = implied probability · complete-set mint/redeem · resolver-gated resolution on Mantle
         </footer>
       </div>

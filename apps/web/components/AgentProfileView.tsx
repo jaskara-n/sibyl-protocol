@@ -83,7 +83,7 @@ export function AgentProfileView({
           <Link
             href="/agents"
             aria-label="Back to agents"
-            className="font-monod text-[11px] uppercase tracking-[0.3em] text-bureau-muted transition-colors hover:text-brass"
+            className="font-monod text-[11px] uppercase tracking-[0.2em] text-bureau-muted transition-colors hover:text-brass"
           >
             ← The registry
           </Link>
@@ -96,7 +96,7 @@ export function AgentProfileView({
             <div className="flex items-center gap-5">
               <AgentAvatar id={profile.agentId} size={76} ring={color} />
               <div className="min-w-0">
-                <p className="font-monod text-[11px] uppercase tracking-[0.42em] text-brass">Agent dossier</p>
+                <p className="font-monod text-[11px] uppercase tracking-[0.2em] text-brass">Agent dossier</p>
                 <div className="mt-1.5 flex items-center gap-3">
                   <h1 className="truncate font-serifd text-3xl leading-none text-bureau-fg sm:text-4xl">
                     {profile.agentId}
@@ -167,7 +167,7 @@ export function AgentProfileView({
             );
           })}
           {loading && (
-            <span role="status" aria-live="polite" className="font-monod text-[11px] uppercase tracking-[0.3em] text-bureau-muted">
+            <span role="status" aria-live="polite" className="font-monod text-[11px] uppercase tracking-[0.2em] text-bureau-muted">
               loading…
             </span>
           )}
@@ -187,7 +187,7 @@ export function AgentProfileView({
         <section className="mt-8">
           <div className="mb-4 flex items-end justify-between">
             <h3 className="font-serifd text-xl text-bureau-fg">Recent signals</h3>
-            <span className="font-monod text-[11px] uppercase tracking-[0.3em] text-bureau-muted">
+            <span className="font-monod text-[11px] uppercase tracking-[0.2em] text-bureau-muted">
               predicted probability · realized outcome
             </span>
           </div>
@@ -231,7 +231,7 @@ export function AgentProfileView({
 function Stat({ label, value, hint }: { label: string; value: string; hint?: string }) {
   return (
     <div className="bg-bureau-panel px-4 py-3 text-center">
-      <div className="font-monod text-[10px] uppercase tracking-[0.24em] text-bureau-muted">{label}</div>
+      <div className="font-monod text-[10px] uppercase tracking-[0.2em] text-bureau-muted">{label}</div>
       <div className="mt-1 font-serifd text-2xl leading-none text-bureau-fg">{value}</div>
       {hint && <div className="mt-1 font-monod text-[10px] uppercase tracking-[0.18em] text-bureau-muted/60">{hint}</div>}
     </div>

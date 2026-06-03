@@ -333,7 +333,7 @@ export default function CreateMarketPage() {
       <div className="mx-auto max-w-3xl px-5 pb-24">
         {/* Header */}
         <header className="relative pt-12 pb-8">
-          <p className="font-monod text-[11px] uppercase tracking-[0.42em] text-brass">Launch a market</p>
+          <p className="font-monod text-[11px] uppercase tracking-[0.2em] text-brass">Launch a market</p>
           <h1 className="mt-4 font-serifd text-[clamp(2.2rem,4.6vw,3.6rem)] leading-[1.02]">
             File a new <span className="italic text-brass">prediction market.</span>
           </h1>
@@ -351,7 +351,7 @@ export default function CreateMarketPage() {
             <div className="bureau-grain" aria-hidden />
 
             <div className="flex items-baseline justify-between border-b border-bureau-line pb-3">
-              <span className="font-monod text-[11px] uppercase tracking-[0.32em] text-bureau-muted">
+              <span className="font-monod text-[11px] uppercase tracking-[0.2em] text-bureau-muted">
                 New market
               </span>
               <span className="border border-rise/50 px-2 py-0.5 font-monod text-[11px] uppercase tracking-[0.18em] text-rise">
@@ -366,7 +366,7 @@ export default function CreateMarketPage() {
 
             {/* Question */}
             <label className="mt-5 block">
-              <span className="font-monod text-[11px] uppercase tracking-[0.28em] text-bureau-muted">Question</span>
+              <span className="font-monod text-[11px] uppercase tracking-[0.18em] text-bureau-muted">Question</span>
               <textarea
                 value={question}
                 onChange={(e) => {
@@ -381,7 +381,7 @@ export default function CreateMarketPage() {
 
             {/* Resolve time */}
             <label className="mt-5 block">
-              <span className="font-monod text-[11px] uppercase tracking-[0.28em] text-bureau-muted">
+              <span className="font-monod text-[11px] uppercase tracking-[0.18em] text-bureau-muted">
                 Resolution date &amp; time (your local timezone)
               </span>
               <input
@@ -397,7 +397,7 @@ export default function CreateMarketPage() {
 
             {/* Seed */}
             <label className="mt-5 block">
-              <span className="font-monod text-[11px] uppercase tracking-[0.28em] text-bureau-muted">
+              <span className="font-monod text-[11px] uppercase tracking-[0.18em] text-bureau-muted">
                 Initial liquidity in sUSD (optional)
               </span>
               <input
@@ -492,7 +492,7 @@ export default function CreateMarketPage() {
             {isConfirmed && phase !== 'approving' && newFpmm !== null && (
               <div className="mt-4 border border-brass/60 p-5">
                 <div className="flex items-baseline justify-between border-b border-bureau-line pb-3">
-                  <span className="font-monod text-[11px] uppercase tracking-[0.32em] text-brass">
+                  <span className="font-monod text-[11px] uppercase tracking-[0.2em] text-brass">
                     Market launched
                   </span>
                   <span className="rotate-[-4deg] border border-brass px-2 py-0.5 font-serifd text-sm text-brass">
@@ -500,7 +500,7 @@ export default function CreateMarketPage() {
                   </span>
                 </div>
                 <div className="mt-3 flex items-baseline justify-between gap-6">
-                  <span className="font-monod text-[11px] uppercase tracking-[0.28em] text-bureau-muted">
+                  <span className="font-monod text-[11px] uppercase tracking-[0.18em] text-bureau-muted">
                     FPMM pool
                   </span>
                   <a
@@ -582,7 +582,7 @@ function PreviewRow({
 }) {
   return (
     <div className="flex items-baseline justify-between gap-6 py-1.5 text-sm">
-      <span className="font-monod text-[11px] uppercase tracking-[0.24em] text-bureau-muted">
+      <span className="font-monod text-[11px] uppercase tracking-[0.2em] text-bureau-muted">
         {label}
         {hint && <span className="ml-1.5 normal-case tracking-normal text-bureau-muted/60">{hint}</span>}
       </span>
@@ -594,7 +594,7 @@ function PreviewRow({
 function Stat({ label, value, accent }: { label: string; value: string; accent?: string }) {
   return (
     <div className="border border-bureau-line bg-bureau-panel p-3">
-      <div className="font-monod text-[11px] uppercase tracking-[0.24em] text-bureau-muted">{label}</div>
+      <div className="font-monod text-[11px] uppercase tracking-[0.2em] text-bureau-muted">{label}</div>
       <div className={`mt-1 font-monod text-sm font-medium ${accent ?? 'text-bureau-fg'}`}>{value}</div>
     </div>
   );
