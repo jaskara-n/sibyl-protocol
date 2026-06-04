@@ -1,8 +1,22 @@
-import { Controller, Get } from '@nestjs/common';
+import { Controller, Get, Param, Query } from '@nestjs/common';
 import { existsSync, readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { weightPpm, toPpm, DEFAULT_MAX_AGENT_WEIGHT_PPM } from '@sibyl/shared';
-import { readReplayArtifact } from '../lib/artifacts.js';
+import { readReplayArtifact, readFrozenSamples, scoresForMarket } from '../lib/artifacts.js';
+
+/** Per-agent analytics derived from the frozen replay dataset. */
+type AgentProfile = {
+  agentId: string;
+  marketId?: string | null;
+  erc8004AgentId?: string | null;
+  brier: number;
+  count: number;
+  hitRate: number;
+  isRogue: boolean;
+  reputationCurve: { window: number; cumBrier: number }[];
+  reliability: { bucket: number; predicted: number; actual: number; n: number }[];
+  recentSignals: { ts: number; prob: number; outcome: number }[];
+};
 
 type AgentIdentity = {
   name: string;
@@ -32,16 +46,20 @@ function readAgentIdentities(): Map<string, string> {
 @Controller('agents')
 export class AgentsController {
   @Get()
-  list() {
+  list(@Query('marketId') marketId?: string) {
     const replay = readReplayArtifact();
     if (!replay) return [];
 
     const cap = BigInt(DEFAULT_MAX_AGENT_WEIGHT_PPM);
     const identities = readAgentIdentities();
 
+    // Per-market scores when marketId is given; aggregated (mean Brier per agent across
+    // markets) when omitted. Each market gives an agent an independent reputation.
+    const scores = scoresForMarket(replay, marketId);
+
     // Canonical capped weight per agent (mirrors the on-chain weighting), then normalized
     // into a share so the leaderboard shows the actual influence each agent has on consensus.
-    const enriched = replay.scores.map((score) => {
+    const enriched = scores.map((score) => {
       const brierPpm = toPpm(score.brier);
       const raw = weightPpm(brierPpm);
       const capped = raw > cap ? cap : raw;
@@ -68,5 +86,96 @@ export class AgentsController {
         isRogue: a.isRogue
       }))
       .sort((x, y) => y.weightShare - x.weightShare);
+  }
+
+  @Get(':id/profile')
+  profile(@Param('id') id: string, @Query('marketId') marketId?: string): AgentProfile {
+    const identities = readAgentIdentities();
+    const erc8004AgentId = identities.get(id) ?? null;
+    const isRogue = id.includes('rogue');
+
+    // Chronological per-agent samples from the frozen replay dataset, scoped to a market
+    // when marketId is given (the frozen `symbol` column is the market id). Omitting it
+    // aggregates the agent's samples across every market.
+    const samples = readFrozenSamples()
+      .filter((s) => s.agentId === id && (marketId === undefined || s.symbol === marketId))
+      .sort((a, b) => a.timestamp - b.timestamp);
+
+    const count = samples.length;
+    if (count === 0) {
+      return {
+        agentId: id,
+        marketId: marketId ?? null,
+        erc8004AgentId,
+        brier: 0,
+        count: 0,
+        hitRate: 0,
+        isRogue,
+        reputationCurve: [],
+        reliability: Array.from({ length: 10 }, (_, bucket) => ({
+          bucket,
+          predicted: 0,
+          actual: 0,
+          n: 0
+        })),
+        recentSignals: []
+      };
+    }
+
+    // Brier = mean squared error of probability vs binary outcome.
+    const seBrier = samples.map((s) => (s.probability - s.outcome) ** 2);
+    const brier = seBrier.reduce((sum, x) => sum + x, 0) / count;
+
+    // Hit rate = share of windows where the thresholded prediction matched the outcome.
+    const hits = samples.filter((s) => Math.round(s.probability) === s.outcome).length;
+    const hitRate = hits / count;
+
+    // Reputation curve = cumulative Brier after each window, downsampled to ~60 points.
+    const fullCurve: { window: number; cumBrier: number }[] = [];
+    let running = 0;
+    for (let i = 0; i < count; i++) {
+      running += seBrier[i];
+      fullCurve.push({ window: i + 1, cumBrier: Number((running / (i + 1)).toFixed(6)) });
+    }
+    const targetPoints = 60;
+    const step = Math.max(1, Math.ceil(count / targetPoints));
+    const reputationCurve = fullCurve.filter((_, i) => i % step === 0 || i === count - 1);
+
+    // Reliability diagram: 10 equal-width buckets over p in [0, 1).
+    const buckets = Array.from({ length: 10 }, () => ({ pSum: 0, oSum: 0, n: 0 }));
+    for (const s of samples) {
+      let idx = Math.floor(s.probability * 10);
+      if (idx > 9) idx = 9;
+      if (idx < 0) idx = 0;
+      buckets[idx].pSum += s.probability;
+      buckets[idx].oSum += s.outcome;
+      buckets[idx].n += 1;
+    }
+    const reliability = buckets.map((b, bucket) => ({
+      bucket,
+      predicted: b.n === 0 ? 0 : Number((b.pSum / b.n).toFixed(6)),
+      actual: b.n === 0 ? 0 : Number((b.oSum / b.n).toFixed(6)),
+      n: b.n
+    }));
+
+    // Most recent ~20 signals (newest last, matching chronological order).
+    const recentSignals = samples.slice(-20).map((s) => ({
+      ts: s.timestamp,
+      prob: s.probability,
+      outcome: s.outcome
+    }));
+
+    return {
+      agentId: id,
+      marketId: marketId ?? null,
+      erc8004AgentId,
+      brier: Number(brier.toFixed(6)),
+      count,
+      hitRate: Number(hitRate.toFixed(6)),
+      isRogue,
+      reputationCurve,
+      reliability,
+      recentSignals
+    };
   }
 }

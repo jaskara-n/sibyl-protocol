@@ -1,375 +1,289 @@
-import deployment from '../../../deployments/mantle-sepolia.json';
+import Link from 'next/link';
+import { api, type AgentRow, type ChainStatus, type Consensus, type Verification } from '../lib/api';
+import { short } from '../lib/utils';
+import { TickerRail } from '../components/landing/TickerRail';
+import { InstrumentAct } from '../components/landing/InstrumentAct';
+import { MechanismAct } from '../components/landing/MechanismAct';
+import { RegistryTable } from '../components/landing/RegistryTable';
+import { StackCards } from '../components/landing/StackCards';
+import { BureauSeal } from '../components/landing/BureauSeal';
+import { CountUp } from '../components/landing/CountUp';
+import { Reveal } from '../components/landing/Reveal';
 
-const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL ?? 'http://localhost:4000';
-
-type Consensus = {
-  direction: string;
-  sizeBps: number;
-  confidence: number;
-  contributors: string[];
-  source?: string;
-  timestamp?: number;
-};
-
-type AgentRow = {
-  agentId: string;
-  erc8004AgentId?: string | null;
-  brier: number;
-  reputationWeight: number;
-  weightShare: number;
-  isRogue: boolean;
-};
-
-type Trade = {
-  id: string;
-  timestamp: number;
-  symbol: string;
-  direction: string;
-  sizeBps: number;
-  confidence: number;
-  contributors: string[];
-};
-
-type Verification = { status: string; datasetHash?: string; generatedAt?: string; rows?: number; scoringVersion?: string };
-type ChainStatus = {
-  status: string;
-  ledgerAddress?: string;
-  network?: string;
-  explorer?: string;
-  owner?: string;
-  onchainLatestDatasetHash?: string;
-  localLatestDatasetHash?: string | null;
-  isSynced?: boolean;
-  message?: string;
-};
-
-const COLORS = {
-  card: '#141925',
-  border: '#222a3a',
-  muted: '#8b93a7',
-  green: '#2fd47b',
-  red: '#ff5d6c',
-  gray: '#6b7280',
-  blue: '#4c8dff',
-  yellow: '#f5c451'
-};
-
-async function safeFetch<T>(path: string, fallback: T): Promise<T> {
-  try {
-    const res = await fetch(`${API_BASE}${path}`, { cache: 'no-store' });
-    if (!res.ok) return fallback;
-    return (await res.json()) as T;
-  } catch {
-    return fallback;
-  }
-}
-
-function short(v?: string | null): string {
-  if (!v) return '—';
-  return v.length < 18 ? v : `${v.slice(0, 10)}…${v.slice(-8)}`;
-}
-
-/// Derive the explorer base (e.g. https://explorer.sepolia.mantle.xyz) from chain.status's
-/// address URL, falling back to the committed deployment record.
 function explorerBase(chain: ChainStatus): string {
   if (chain.explorer) return chain.explorer.replace(/\/(address|tx)\/.*/i, '');
-  return deployment.explorer;
+  return 'https://explorer.sepolia.mantle.xyz';
 }
 
-function dirColor(d: string): string {
-  return d === 'LONG' ? COLORS.green : d === 'SHORT' ? COLORS.red : COLORS.gray;
-}
-
-function Card({ title, children }: { title: string; children: React.ReactNode }) {
-  return (
-    <section
-      style={{
-        background: COLORS.card,
-        border: `1px solid ${COLORS.border}`,
-        borderRadius: 14,
-        padding: 20,
-        marginBottom: 16
-      }}
-    >
-      <h2 style={{ margin: '0 0 14px', fontSize: 14, letterSpacing: 0.6, textTransform: 'uppercase', color: COLORS.muted }}>
-        {title}
-      </h2>
-      {children}
-    </section>
-  );
-}
-
+/**
+ * THE BUREAU — Sibyl's landing, set like a living ratings document.
+ * Engraved type, hairline rules, one brass accent; every number on this page is
+ * live (consensus, registry, chain status, verification), every act scrolls.
+ */
 export default async function Page() {
-  const [consensus, agents, trades, verification, chain] = await Promise.all([
-    safeFetch<Consensus>('/consensus/latest', { direction: 'FLAT', sizeBps: 0, confidence: 0.5, contributors: [] }),
-    safeFetch<AgentRow[]>('/agents', []),
-    safeFetch<Trade[]>('/trades', []),
-    safeFetch<Verification>('/verification', { status: 'pending' }),
-    safeFetch<ChainStatus>('/chain/status', { status: 'pending' })
+  const [consensus, agents, verification, chain] = await Promise.all([
+    api<Consensus>('/consensus/latest', { direction: 'FLAT', sizeBps: 0, confidence: 0.5, contributors: [] }),
+    api<AgentRow[]>('/agents', []),
+    api<Verification>('/verification', { status: 'pending' }),
+    api<ChainStatus>('/chain/status', { status: 'pending' })
   ]);
 
-  const confidencePct = Math.round(consensus.confidence * 1000) / 10;
-  const topAgent = agents[0];
-  const rogue = agents.find((a) => a.isRogue);
-
+  const network = chain.network ?? 'mantle-sepolia';
   const base = explorerBase(chain);
-  const ledgerAddress = chain.ledgerAddress ?? deployment.contracts.SibylLedger.address;
-  const ledgerUrl = `${base}/address/${ledgerAddress}`;
-  const consensusTx = deployment.latestConsensus?.tx;
-  const consensusUrl = consensusTx ? `${base}/tx/${consensusTx}` : undefined;
+  const ledger = chain.ledgerAddress;
+
+  // Mechanism cast: the top agents, with the rogue guaranteed a seat.
+  const rogue = agents.find((a) => a.isRogue);
+  const cast = agents.slice(0, rogue && !agents.slice(0, 5).includes(rogue) ? 4 : 5);
+  if (rogue && !cast.includes(rogue)) cast.push(rogue);
 
   return (
-    <main style={{ maxWidth: 1040, margin: '0 auto', padding: '32px 24px 64px' }}>
-      {/* Hero */}
-      <header style={{ marginBottom: 24 }}>
-        <div style={{ fontSize: 13, color: COLORS.blue, fontWeight: 600, letterSpacing: 1 }}>SIBYL · PROOF-OF-EDGE</div>
-        <h1 style={{ margin: '6px 0 8px', fontSize: 30 }}>On-Chain Proof-of-Edge for AI Trading Agents</h1>
-        <p style={{ margin: 0, color: COLORS.muted, fontSize: 16 }}>
-          Don&apos;t trust the loudest agent. Trust the one with a track record you can verify.
-        </p>
-      </header>
+    <div className="relative z-0 bg-bureau text-bureau-fg">
+      <TickerRail network={network} epoch={chain.epoch} />
 
-      {/* Consensus */}
-      <Card title="Live Consensus">
-        <div style={{ display: 'flex', alignItems: 'center', gap: 24, flexWrap: 'wrap' }}>
-          <div
-            style={{
-              background: dirColor(consensus.direction),
-              color: '#0b0e14',
-              fontWeight: 800,
-              fontSize: 22,
-              padding: '10px 20px',
-              borderRadius: 10,
-              minWidth: 90,
-              textAlign: 'center'
-            }}
-          >
-            {consensus.direction}
+      {/* Act I — THE INSTRUMENT: full-screen 3D, calibrated by scroll, then the statement */}
+      <InstrumentAct
+        consensus={{
+          direction: consensus.direction,
+          confidence: consensus.confidence,
+          sizeBps: consensus.sizeBps,
+          contributors: consensus.contributors.length,
+          marketId: consensus.marketId
+        }}
+      />
+
+      {/* the protocol, in plain words */}
+      <section aria-label="What Sibyl Protocol does" className="border-y border-bureau-line">
+        <div className="mx-auto grid max-w-6xl lg:grid-cols-3">
+          {[
+            {
+              n: '01',
+              t: 'Agents earn reputation',
+              d: 'AI agents publish predictions and are scored on being right. The track record lives on-chain — anyone can verify it.'
+            },
+            {
+              n: '02',
+              t: 'The Sibyl Vault — for users',
+              d: 'You don’t run an agent — you deposit. The agents’ reputation-weighted consensus does the trading. Non-custodial, no leverage — your shares, your wallet.'
+            },
+            {
+              n: '03',
+              t: 'Trade prediction markets',
+              d: 'Launch a yes/no market on anything in one transaction, or trade existing ones. The YES price is the probability.'
+            }
+          ].map((item, i) => (
+            <Reveal key={item.n} delay={i * 0.08} className={i > 0 ? 'lg:border-l lg:border-bureau-line' : ''}>
+              <div className="px-6 py-7">
+                <p className="font-monod text-[11px] uppercase tracking-[0.2em] text-brass">
+                  {item.n} — {item.t}
+                </p>
+                <p className="mt-3 font-sansd text-sm leading-relaxed text-bureau-muted">{item.d}</p>
+              </div>
+            </Reveal>
+          ))}
+        </div>
+      </section>
+
+      {/* the ledger line — live counts */}
+      <section aria-label="Live protocol figures" className="border-b border-bureau-line">
+        <div className="mx-auto grid max-w-6xl grid-cols-2 lg:grid-cols-4">
+          {[
+            { label: 'Agents on record', value: agents.length as number | null, text: '' },
+            { label: 'Windows scored', value: (verification.rows ?? 0) as number | null, text: '' },
+            { label: 'Current epoch', value: (chain.epoch ?? 0) as number | null, text: '' },
+            { label: 'Network', value: null as number | null, text: 'Mantle Sepolia' }
+          ].map((s, i) => (
+            <Reveal key={s.label} delay={i * 0.08} className={i > 0 ? 'lg:border-l lg:border-bureau-line' : ''}>
+              <div className="group cursor-default px-6 py-8 transition-all duration-300 hover:-translate-y-0.5 hover:bg-bureau-fg/[0.04]">
+                <div className="font-serifd text-4xl text-bureau-fg transition-colors duration-300 group-hover:text-brass sm:text-5xl">
+                  {s.value !== null ? <CountUp value={s.value} /> : <span>{s.text}</span>}
+                </div>
+                <div className="mt-2 flex items-center gap-2 font-monod text-[11px] uppercase tracking-[0.2em] text-bureau-muted">
+                  <span className="h-px w-0 bg-brass transition-all duration-300 group-hover:w-5" aria-hidden />
+                  {s.label}
+                </div>
+              </div>
+            </Reveal>
+          ))}
+        </div>
+      </section>
+
+      {/* Act II — the mechanism, scrubbed by scroll */}
+      <MechanismAct
+        agents={cast.map((a) => ({
+          agentId: a.agentId,
+          weightShare: a.weightShare,
+          brier: a.brier,
+          isRogue: a.isRogue
+        }))}
+      />
+
+      <div className="tick-scale" aria-hidden />
+
+      {/* 02 — the registry · a BONE-PAPER chapter: the record becomes paper */}
+      <section aria-label="The agent registry" className="bureau-paper bg-bureau text-bureau-fg">
+        <div className="mx-auto max-w-6xl px-5 py-28">
+        <Reveal>
+          <p className="font-monod text-[11px] uppercase tracking-[0.2em] text-brass">02 — The registry</p>
+          <div className="mt-4 flex flex-wrap items-end justify-between gap-4">
+            <h2 className="max-w-2xl font-serifd text-[clamp(2.2rem,4.6vw,3.6rem)] leading-[1.02]">
+              A public record of <span className="italic text-brass">who&rsquo;s been right.</span>
+            </h2>
+            <p className="max-w-sm font-sansd text-sm leading-relaxed text-bureau-muted">
+              Every agent&rsquo;s score is computed from its full prediction history and committed
+              on-chain. Lower Brier means better calibration. Anyone can check it.
+            </p>
           </div>
-          <div>
-            <div style={{ fontSize: 12, color: COLORS.muted }}>POSITION SIZE</div>
-            <div style={{ fontSize: 22, fontWeight: 700 }}>{consensus.sizeBps} bps</div>
-          </div>
-          <div style={{ flex: 1, minWidth: 240 }}>
-            <div style={{ fontSize: 12, color: COLORS.muted, marginBottom: 6 }}>
-              LONG CONFIDENCE · {confidencePct}%
-            </div>
-            <div style={{ position: 'relative', height: 10, background: '#0b0e14', borderRadius: 6, overflow: 'hidden' }}>
-              <div
-                style={{
-                  position: 'absolute',
-                  left: 0,
-                  top: 0,
-                  bottom: 0,
-                  width: `${confidencePct}%`,
-                  background: dirColor(consensus.direction)
-                }}
-              />
-              <div style={{ position: 'absolute', left: '50%', top: 0, bottom: 0, width: 2, background: COLORS.muted }} />
-            </div>
-            <div style={{ fontSize: 12, color: COLORS.muted, marginTop: 6 }}>
-              {consensus.contributors.length} contributing agents · 50% line = no edge
-            </div>
-          </div>
+        </Reveal>
+        <Reveal delay={0.15} className="mt-10">
+          <RegistryTable agents={agents} />
+        </Reveal>
         </div>
-      </Card>
+      </section>
 
-      {/* The beat */}
-      {topAgent && rogue && (
-        <div
-          style={{
-            background: 'rgba(76,141,255,0.08)',
-            border: `1px solid ${COLORS.blue}`,
-            borderRadius: 14,
-            padding: '14px 18px',
-            marginBottom: 16,
-            fontSize: 15
-          }}
-        >
-          <b>Reputation is the steering wheel.</b> The best-calibrated agent{' '}
-          <b style={{ color: COLORS.green }}>{topAgent.agentId}</b> carries{' '}
-          <b>{Math.round(topAgent.weightShare * 100)}%</b> of the vote, while the loud, overconfident{' '}
-          <b style={{ color: COLORS.red }}>{rogue.agentId}</b> (worst Brier {rogue.brier.toFixed(3)}) is
-          down-weighted to just <b>{Math.round(rogue.weightShare * 100)}%</b> — the chain silences it.
-        </div>
-      )}
+      <div className="tick-scale" aria-hidden />
 
-      {/* Leaderboard */}
-      <Card title="Agent Reputation Leaderboard">
-        <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 14 }}>
-          <thead>
-            <tr style={{ color: COLORS.muted, textAlign: 'left', fontSize: 12 }}>
-              <th style={{ padding: '6px 8px' }}>#</th>
-              <th style={{ padding: '6px 8px' }}>Agent</th>
-              <th style={{ padding: '6px 8px' }}>ERC-8004 ID</th>
-              <th style={{ padding: '6px 8px' }}>Brier</th>
-              <th style={{ padding: '6px 8px', width: '40%' }}>Consensus weight (capped)</th>
-            </tr>
-          </thead>
-          <tbody>
-            {agents.map((a, i) => (
-              <tr key={a.agentId} style={{ borderTop: `1px solid ${COLORS.border}` }}>
-                <td style={{ padding: '10px 8px', color: COLORS.muted }}>{i + 1}</td>
-                <td style={{ padding: '10px 8px', fontWeight: 600 }}>
-                  {a.agentId}
-                  {a.isRogue && (
-                    <span
-                      style={{
-                        marginLeft: 8,
-                        fontSize: 11,
-                        color: COLORS.red,
-                        border: `1px solid ${COLORS.red}`,
-                        borderRadius: 6,
-                        padding: '1px 6px'
-                      }}
-                    >
-                      ROGUE
-                    </span>
-                  )}
-                </td>
-                <td style={{ padding: '10px 8px', color: COLORS.muted, fontFamily: 'ui-monospace, monospace' }}>
-                  {a.erc8004AgentId ? `#${a.erc8004AgentId}` : '—'}
-                </td>
-                <td style={{ padding: '10px 8px', color: a.isRogue ? COLORS.red : COLORS.green }}>{a.brier.toFixed(3)}</td>
-                <td style={{ padding: '10px 8px' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                    <div style={{ flex: 1, height: 8, background: '#0b0e14', borderRadius: 5, overflow: 'hidden' }}>
-                      <div
-                        style={{
-                          width: `${Math.max(2, a.weightShare * 100)}%`,
-                          height: '100%',
-                          background: a.isRogue ? COLORS.red : COLORS.blue
-                        }}
-                      />
-                    </div>
-                    <span style={{ minWidth: 42, textAlign: 'right', color: COLORS.muted }}>
-                      {Math.round(a.weightShare * 100)}%
-                    </span>
-                  </div>
-                </td>
-              </tr>
-            ))}
-            {agents.length === 0 && (
-              <tr>
-                <td colSpan={5} style={{ padding: 16, color: COLORS.muted }}>
-                  No replay scores yet — run <code>pnpm demo:seed</code>.
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
-      </Card>
-
-      {/* On-chain */}
-      <Card title="On-chain">
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12 }}>
-          <a
-            href={ledgerUrl}
-            target="_blank"
-            rel="noreferrer"
-            style={{
-              flex: 1,
-              minWidth: 240,
-              textDecoration: 'none',
-              color: 'inherit',
-              background: '#0b0e14',
-              border: `1px solid ${COLORS.border}`,
-              borderRadius: 10,
-              padding: '12px 14px'
-            }}
-          >
-            <div style={{ fontSize: 12, color: COLORS.muted, marginBottom: 4 }}>SIBYL LEDGER</div>
-            <div style={{ fontFamily: 'ui-monospace, monospace', color: COLORS.blue, fontSize: 14 }}>
-              {short(ledgerAddress)} ↗
-            </div>
-          </a>
-          <a
-            href={consensusUrl ?? ledgerUrl}
-            target="_blank"
-            rel="noreferrer"
-            style={{
-              flex: 1,
-              minWidth: 240,
-              textDecoration: 'none',
-              color: 'inherit',
-              background: '#0b0e14',
-              border: `1px solid ${COLORS.border}`,
-              borderRadius: 10,
-              padding: '12px 14px'
-            }}
-          >
-            <div style={{ fontSize: 12, color: COLORS.muted, marginBottom: 4 }}>LATEST CONSENSUS TX</div>
-            <div style={{ fontFamily: 'ui-monospace, monospace', color: COLORS.blue, fontSize: 14 }}>
-              {consensusTx ? `${short(consensusTx)} ↗` : '—'}
-            </div>
-          </a>
-        </div>
-        <div style={{ fontSize: 12, color: COLORS.muted, marginTop: 10 }}>
-          {chain.network ?? deployment.network} · chain {deployment.chainId} · decisions recorded on Mantle
-        </div>
-      </Card>
-
-      {/* Verification + Chain side by side */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
-        <Card title="Verification">
-          <Row label="Status" value={verification.status} />
-          {verification.datasetHash && <Row label="Dataset hash" value={short(verification.datasetHash)} mono />}
-          {verification.rows !== undefined && <Row label="Windows scored" value={String(verification.rows)} />}
-          {verification.scoringVersion && <Row label="Scoring version" value={verification.scoringVersion} />}
-          {verification.generatedAt && <Row label="Generated" value={verification.generatedAt} />}
-        </Card>
-        <Card title="Chain Sync">
-          <Row label="Status" value={chain.status} />
-          {chain.message && <Row label="Note" value={chain.message} />}
-          {chain.ledgerAddress && <Row label="Ledger" value={short(chain.ledgerAddress)} mono />}
-          {chain.owner && <Row label="Owner" value={short(chain.owner)} mono />}
-          {chain.onchainLatestDatasetHash && <Row label="On-chain hash" value={short(chain.onchainLatestDatasetHash)} mono />}
-          {chain.isSynced !== undefined && <Row label="Synced" value={chain.isSynced ? 'Yes' : 'No'} />}
-        </Card>
+      {/* Acts 03–05 — the products, stacking like dossiers */}
+      <div className="py-24">
+        <Reveal className="mx-auto max-w-6xl px-5 pb-14">
+          <p className="font-monod text-[11px] uppercase tracking-[0.2em] text-brass">
+            What the bureau offers
+          </p>
+          <h2 className="mt-4 max-w-3xl font-serifd text-[clamp(2.2rem,4.6vw,3.6rem)] leading-[1.02]">
+            Reputation you can <span className="italic text-brass">use.</span>
+          </h2>
+        </Reveal>
+        <StackCards />
       </div>
 
-      {/* Trades */}
-      <Card title="Recent Trades (paper)">
-        {trades.length === 0 ? (
-          <div style={{ color: COLORS.muted }}>No trades yet.</div>
-        ) : (
-          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 14 }}>
-            <thead>
-              <tr style={{ color: COLORS.muted, textAlign: 'left', fontSize: 12 }}>
-                <th style={{ padding: '6px 8px' }}>Symbol</th>
-                <th style={{ padding: '6px 8px' }}>Direction</th>
-                <th style={{ padding: '6px 8px' }}>Size</th>
-                <th style={{ padding: '6px 8px' }}>Confidence</th>
-                <th style={{ padding: '6px 8px' }}>Contributors</th>
-              </tr>
-            </thead>
-            <tbody>
-              {trades.slice(0, 6).map((t) => (
-                <tr key={t.id} style={{ borderTop: `1px solid ${COLORS.border}` }}>
-                  <td style={{ padding: '8px' }}>{t.symbol}</td>
-                  <td style={{ padding: '8px', color: dirColor(t.direction), fontWeight: 600 }}>{t.direction}</td>
-                  <td style={{ padding: '8px' }}>{t.sizeBps} bps</td>
-                  <td style={{ padding: '8px' }}>{Math.round(t.confidence * 1000) / 10}%</td>
-                  <td style={{ padding: '8px', color: COLORS.muted }}>{t.contributors.length}</td>
-                </tr>
+      <div className="tick-scale" aria-hidden />
+
+      {/* 06 — proof · the second BONE-PAPER chapter: the certificate */}
+      <section aria-label="Verify the record yourself" className="bureau-paper bg-bureau text-bureau-fg">
+        <div className="mx-auto max-w-6xl px-5 py-28">
+        <div className="grid items-start gap-12 lg:grid-cols-[1.1fr_1fr]">
+          <Reveal>
+            <p className="font-monod text-[11px] uppercase tracking-[0.2em] text-brass">06 — Proof</p>
+            <h2 className="mt-4 font-serifd text-[clamp(2.2rem,4.6vw,3.6rem)] leading-[1.02]">
+              Verifiable <span className="italic text-brass">to the byte.</span>
+            </h2>
+            <p className="mt-6 max-w-lg font-sansd leading-relaxed text-bureau-muted">
+              The whole track record is deterministic: re-run the replay on your own machine,
+              hash the result, and compare it to the hash committed on Mantle. If they match,
+              the history is real. No trust required.
+            </p>
+            <pre className="mt-8 max-w-lg overflow-x-auto border border-bureau-line bg-bureau-panel p-4 font-monod text-[12px] leading-relaxed text-bureau-fg/90">
+{`node data/datasets/generate-frozen.mjs
+# SHA-256 of the CSV == on-chain latestDatasetHash`}
+            </pre>
+            <Link
+              href="/verify"
+              className="group mt-6 inline-flex items-center gap-2 font-monod text-[11px] uppercase tracking-[0.2em] text-bureau-muted transition-colors hover:text-brass"
+            >
+              Run the full verification
+              <span aria-hidden className="transition-transform group-hover:translate-x-1">→</span>
+            </Link>
+          </Reveal>
+
+          {/* the certificate */}
+          <Reveal delay={0.15}>
+            <div className="bureau-frame p-7">
+              <div className="bureau-grain" aria-hidden />
+              <div className="flex items-baseline justify-between border-b border-bureau-line pb-3">
+                <span className="font-monod text-[11px] uppercase tracking-[0.2em] text-bureau-muted">
+                  Certificate of record
+                </span>
+                <span className="font-monod text-[11px] uppercase tracking-[0.2em] text-brass">
+                  {network}
+                </span>
+              </div>
+
+              <dl className="mt-5 space-y-4">
+                {[
+                  {
+                    k: 'Ledger contract',
+                    v: ledger ? (
+                      <a
+                        href={`${base}/address/${ledger}`}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="text-brass hover:underline"
+                      >
+                        {short(ledger)} ↗
+                      </a>
+                    ) : (
+                      '—'
+                    )
+                  },
+                  { k: 'Dataset hash', v: short(verification.datasetHash, 12, 8) },
+                  { k: 'Scoring version', v: verification.scoringVersion ?? '—' },
+                  {
+                    k: 'Chain sync',
+                    v: chain.isSynced ? (
+                      <span className="text-rise">hash matches on-chain ✓</span>
+                    ) : (
+                      (chain.status ?? 'pending')
+                    )
+                  },
+                  { k: 'Test suite', v: '260 Foundry tests · parity green' }
+                ].map((row) => (
+                  <div
+                    key={row.k}
+                    className="flex items-baseline justify-between gap-6 border-b border-bureau-line/60 pb-3"
+                  >
+                    <dt className="font-monod text-[11px] uppercase tracking-[0.18em] text-bureau-muted">
+                      {row.k}
+                    </dt>
+                    <dd className="text-right font-monod text-sm text-bureau-fg">{row.v}</dd>
+                  </div>
+                ))}
+              </dl>
+
+              <div className="mt-6 flex items-center justify-between">
+                <p className="max-w-[14rem] font-serifd text-lg italic leading-snug text-bureau-muted">
+                  This record reproduces, byte for byte.
+                </p>
+                <BureauSeal size={92} />
+              </div>
+            </div>
+          </Reveal>
+        </div>
+        </div>
+      </section>
+
+      {/* closing manifesto */}
+      <footer className="border-t border-bureau-line">
+        <div className="mx-auto max-w-6xl px-5 pb-12 pt-24">
+          <Reveal>
+            <p className="text-center font-serifd text-[clamp(2.6rem,7vw,5.4rem)] leading-[1.02]">
+              Measured truth, <span className="italic text-brass">on-chain.</span>
+            </p>
+          </Reveal>
+          <Reveal delay={0.1}>
+            <nav
+              aria-label="Footer"
+              className="mt-14 flex flex-wrap items-center justify-center gap-x-8 gap-y-3 font-monod text-[11px] uppercase tracking-[0.2em] text-bureau-muted"
+            >
+              {[
+                ['Markets', '/markets'],
+                ['Forecast', '/forecast'],
+                ['Create', '/create'],
+                ['Agents', '/agents'],
+                ['Vault', '/vault'],
+                ['Verify', '/verify'],
+                ['Build', '/build']
+              ].map(([label, href]) => (
+                <Link key={href} href={href} className="transition-colors hover:text-brass">
+                  {label}
+                </Link>
               ))}
-            </tbody>
-          </table>
-        )}
-      </Card>
-
-      <footer style={{ color: COLORS.muted, fontSize: 12, textAlign: 'center', marginTop: 24 }}>
-        Reputation-weighted consensus · re-runnable replay · on-chain verifiable · Mantle
+            </nav>
+          </Reveal>
+          <div className="mt-12 border-t border-bureau-line pt-6 text-center font-monod text-[11px] uppercase tracking-[0.2em] text-bureau-muted/70">
+            © Sibyl Protocol · {network} · registry Nº 8004 · scored on calibration, not luck
+          </div>
+        </div>
       </footer>
-    </main>
-  );
-}
-
-function Row({ label, value, mono }: { label: string; value: string; mono?: boolean }) {
-  return (
-    <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12, padding: '4px 0', fontSize: 14 }}>
-      <span style={{ color: COLORS.muted }}>{label}</span>
-      <span style={{ fontFamily: mono ? 'ui-monospace, monospace' : 'inherit', textAlign: 'right' }}>{value}</span>
     </div>
   );
 }

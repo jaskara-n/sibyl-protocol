@@ -4,16 +4,20 @@
 
 > Don't trust the loudest agent. Trust the one with a track record you can verify.
 
-## Live deployment — Mantle Sepolia (chainId 5003)
+## Live deployment — Mantle Sepolia testnet (chainId 5003)
+
+> Testnet only — no mainnet, no real funds.
 
 | | |
 |---|---|
-| `SibylLedger` | [`0x847a6c5a32F5Ed69c43a82f46a84Df75f9B9Bd2A`](https://explorer.sepolia.mantle.xyz/address/0x847a6c5a32F5Ed69c43a82f46a84Df75f9B9Bd2A) |
-| `commitReplay` tx | [`0x97b138e84e382590b868b5b51ea5203313f88bdf349c5157434a8769228ec096`](https://explorer.sepolia.mantle.xyz/tx/0x97b138e84e382590b868b5b51ea5203313f88bdf349c5157434a8769228ec096) |
-| committed datasetHash | `0x0828da8831ebe4f150c01a3ba6e5c12f282cfdcd155d79fb1c62a3ccf09049aa` |
-| scoringVersion · epoch · agents | `1` · `1` · `5` |
+| `SibylLedger` (multi-market) | [`0x1C4cCc2c917EDF45aD1C3C9675cF130b47Db8c11`](https://explorer.sepolia.mantle.xyz/address/0x1C4cCc2c917EDF45aD1C3C9675cF130b47Db8c11) |
+| Markets | `MNT-USD` · `ETH-USD` — independent per-(agent,market) reputation |
+| committed datasetHash | `0xc433aaa9dd68b65da3b2c659dd3881f9c2cbeb82781c801ae58c350be628b796` |
+| `commitReplay` txs | MNT [`0x6f6a4447…`](https://explorer.sepolia.mantle.xyz/tx/0x6f6a4447de203bd5522754cf5209a762f42cbdae55536b43fad7b339870e7294) · ETH [`0x587f394d…`](https://explorer.sepolia.mantle.xyz/tx/0x587f394d8628dbed584727d927a6aa28a4eda5ee915adce8c38ffcc9189f15cf) |
+| `ConsensusReached` | MNT [`0xc8165df8…`](https://explorer.sepolia.mantle.xyz/tx/0xc8165df8445b6fa56eb3487d09096fb428acab4d61b9b04dc35738ea1fc93c25) · ETH [`0x8bd37993…`](https://explorer.sepolia.mantle.xyz/tx/0x8bd3799350a5157405d0b9e4434d83e1bc32aa92df88c7af6314a890e187353b) |
+| ERC-8004 identity registry | [`0x8004A818BFB912233c491871b3d84c89A494BD9e`](https://explorer.sepolia.mantle.xyz/address/0x8004A818BFB912233c491871b3d84c89A494BD9e) — agents #98–102 |
 
-**Verify it yourself:** `node data/datasets/generate-frozen.mjs` → SHA-256 the CSV → it equals the on-chain `latestDatasetHash`.
+**Verify it yourself:** `node data/datasets/generate-frozen.mjs` → SHA-256 the CSV → it equals the on-chain committed `datasetHash`.
 
 ## Monorepo
 

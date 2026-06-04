@@ -17,6 +17,8 @@ import { mantleSepoliaTestnet } from 'viem/chains';
 /// A consensus decision turned into an executable order.
 export interface ExecutionOrder {
   id: string;
+  /// Off-chain market identifier (e.g. "MNT-USD"). Carried end-to-end so venues stay multi-market.
+  marketId: string;
   timestamp: number;
   symbol: string;
   direction: 'LONG' | 'SHORT' | 'FLAT';
@@ -27,6 +29,8 @@ export interface ExecutionOrder {
 
 export interface ExecutionReceipt {
   venue: string;
+  /// Echoes the order's market so callers can correlate receipts per market.
+  marketId: string;
   status: 'filled' | 'skipped' | 'failed';
   ref: string;
   detail?: string;
@@ -41,22 +45,49 @@ export interface IExecutionVenue {
 
 const ARTIFACT_DIR = resolve(process.cwd(), '../../data/artifacts');
 
-/// Default venue: records a bounded paper trade to the artifacts feed. No real funds, no leverage.
+/// Max paper trade-events retained PER MARKET (bounded so the feed never grows without limit
+/// in a multi-market loop). The file holds at most MAX_EVENTS_PER_MARKET * (#markets) entries.
+const MAX_EVENTS_PER_MARKET = 100;
+
+type PaperTradeEvent = ExecutionOrder & { mode: 'paper' };
+
+/// Default venue: records a bounded, market-tagged paper trade to the artifacts feed.
+/// No real funds, no leverage, no broadcast.
 export class PaperVenue implements IExecutionVenue {
   readonly name = 'paper';
 
   async execute(order: ExecutionOrder): Promise<ExecutionReceipt> {
     if (order.direction === 'FLAT' || order.sizeBps === 0) {
-      return { venue: this.name, status: 'skipped', ref: order.id, detail: 'no edge (FLAT / zero size)' };
+      return {
+        venue: this.name,
+        marketId: order.marketId,
+        status: 'skipped',
+        ref: order.id,
+        detail: 'no edge (FLAT / zero size)'
+      };
     }
     const tradesPath = resolve(ARTIFACT_DIR, 'trade-events.json');
     mkdirSync(ARTIFACT_DIR, { recursive: true });
-    const existing: unknown[] = existsSync(tradesPath)
-      ? (JSON.parse(readFileSync(tradesPath, 'utf8')) as unknown[])
+    const existing: PaperTradeEvent[] = existsSync(tradesPath)
+      ? (JSON.parse(readFileSync(tradesPath, 'utf8')) as PaperTradeEvent[])
       : [];
-    existing.unshift({ ...order, mode: 'paper' });
-    writeFileSync(tradesPath, JSON.stringify(existing.slice(0, 100), null, 2));
-    return { venue: this.name, status: 'filled', ref: order.id };
+
+    const event: PaperTradeEvent = { ...order, mode: 'paper' };
+    existing.unshift(event);
+
+    // Bound the feed per market so one market can't starve the others out of the window.
+    const perMarketCount = new Map<string, number>();
+    const bounded: PaperTradeEvent[] = [];
+    for (const e of existing) {
+      const key = e.marketId ?? e.symbol;
+      const seen = perMarketCount.get(key) ?? 0;
+      if (seen >= MAX_EVENTS_PER_MARKET) continue;
+      perMarketCount.set(key, seen + 1);
+      bounded.push(e);
+    }
+
+    writeFileSync(tradesPath, JSON.stringify(bounded, null, 2));
+    return { venue: this.name, marketId: order.marketId, status: 'filled', ref: order.id };
   }
 }
 
@@ -72,6 +103,7 @@ export class ByrealSpotVenue implements IExecutionVenue {
     if (!this.endpoint) {
       return {
         venue: this.name,
+        marketId: order.marketId,
         status: 'skipped',
         ref: order.id,
         detail: 'BYREAL_ENDPOINT not set — RealClaw spot adapter pending the Byreal Skills CLI spec'
@@ -160,29 +192,71 @@ interface MantleSpotConfig {
   slippageBps: number;
   /// Seconds the swap stays valid for (default 120s).
   deadlineSeconds: number;
+  /// Caller-supplied quote: expected tokenOut (human units) for the FULL budget. Required to set
+  /// a non-zero amountOutMinimum (slippage guard); without it the venue refuses to swap.
+  expectedOutFull?: number;
 }
 
-/// Pull config from env. Returns null (clean skip) if any required field is missing, mirroring
-/// the paper/Byreal fallthrough so the worker never crashes when execution isn't wired.
-function loadMantleConfig(): { config?: MantleSpotConfig; missing: string[] } {
+/// Normalize a marketId (e.g. "MNT-USD") into an env-key-safe suffix (e.g. "MNT_USD"):
+/// uppercase, non-alphanumerics -> underscore. Used to key per-market venue env vars.
+function marketEnvKey(marketId: string): string {
+  return marketId.toUpperCase().replace(/[^A-Z0-9]+/g, '_');
+}
+
+/// Per-market env lookup: prefers the market-scoped key (e.g. `MANTLE_PAIR_MNT_USD`) and falls
+/// back to a global key for fields that are not naturally per-market (router / key / RPC).
+function marketEnv(marketId: string, suffix: string, globalKey?: string): string | undefined {
+  const scoped = process.env[`MANTLE_${suffix}_${marketEnvKey(marketId)}`];
+  if (scoped !== undefined) return scoped;
+  return globalKey ? process.env[globalKey] : undefined;
+}
+
+/// Pull per-market config from env. Returns missing-field list (clean skip) if any required
+/// field is absent, mirroring the paper/Byreal fallthrough so the worker never crashes.
+///
+/// Per-market token pair + budget are keyed by marketId:
+///   MANTLE_PAIR_<MARKETID>            = "<tokenIn>,<tokenOut>[,<poolFee>]"   (e.g. MANTLE_PAIR_MNT_USD)
+///   MANTLE_BUDGET_<MARKETID>          = notional budget (human units of tokenIn)
+///   MANTLE_EXPECTED_OUT_<MARKETID>    = quoted tokenOut for the full budget (slippage guard)
+/// Router / private key / RPC / slippage / deadline fall back to the global keys.
+function loadMantleConfig(marketId: string): { config?: MantleSpotConfig; missing: string[] } {
   const missing: string[] = [];
-  const router = process.env.MANTLE_DEX_ROUTER;
-  const tokenIn = process.env.IN_TOKEN;
-  const tokenOut = process.env.OUT_TOKEN;
+
+  const router = marketEnv(marketId, 'DEX_ROUTER', 'MANTLE_DEX_ROUTER');
   const privateKey = process.env.PRIVATE_KEY;
-  const budgetRaw = process.env.MANTLE_NOTIONAL_BUDGET;
+
+  // Per-market token pair: "tokenIn,tokenOut[,poolFee]" via MANTLE_PAIR_<MARKETID>,
+  // or legacy global IN_TOKEN / OUT_TOKEN.
+  const pairRaw = process.env[`MANTLE_PAIR_${marketEnvKey(marketId)}`];
+  let tokenIn: string | undefined;
+  let tokenOut: string | undefined;
+  let pairPoolFee: string | undefined;
+  if (pairRaw) {
+    const [a, b, fee] = pairRaw.split(',').map((s) => s.trim());
+    tokenIn = a;
+    tokenOut = b;
+    pairPoolFee = fee;
+  } else {
+    tokenIn = process.env.IN_TOKEN;
+    tokenOut = process.env.OUT_TOKEN;
+  }
+
+  const budgetRaw = marketEnv(marketId, 'BUDGET', 'MANTLE_NOTIONAL_BUDGET');
 
   if (!router) missing.push('MANTLE_DEX_ROUTER');
-  if (!tokenIn) missing.push('IN_TOKEN');
-  if (!tokenOut) missing.push('OUT_TOKEN');
+  if (!tokenIn) missing.push(`MANTLE_PAIR_${marketEnvKey(marketId)} (tokenIn) or IN_TOKEN`);
+  if (!tokenOut) missing.push(`MANTLE_PAIR_${marketEnvKey(marketId)} (tokenOut) or OUT_TOKEN`);
   if (!privateKey) missing.push('PRIVATE_KEY');
-  if (!budgetRaw) missing.push('MANTLE_NOTIONAL_BUDGET');
+  if (!budgetRaw) missing.push(`MANTLE_BUDGET_${marketEnvKey(marketId)} or MANTLE_NOTIONAL_BUDGET`);
   if (missing.length > 0) return { missing };
 
   const budget = Number(budgetRaw);
   if (!Number.isFinite(budget) || budget <= 0) {
-    return { missing: ['MANTLE_NOTIONAL_BUDGET (must be a positive number)'] };
+    return { missing: [`MANTLE_BUDGET_${marketEnvKey(marketId)} (must be a positive number)`] };
   }
+
+  const poolFeeRaw = pairPoolFee ?? marketEnv(marketId, 'POOL_FEE', 'MANTLE_POOL_FEE') ?? '3000';
+  const expectedOutRaw = marketEnv(marketId, 'EXPECTED_OUT', 'MANTLE_EXPECTED_OUT');
 
   return {
     missing: [],
@@ -190,14 +264,15 @@ function loadMantleConfig(): { config?: MantleSpotConfig; missing: string[] } {
       router: getAddress(router as string),
       tokenIn: getAddress(tokenIn as string),
       tokenOut: getAddress(tokenOut as string),
-      poolFee: Number(process.env.MANTLE_POOL_FEE ?? '3000'),
+      poolFee: Number(poolFeeRaw),
       privateKey: (privateKey as string).startsWith('0x')
         ? (privateKey as Hex)
         : (`0x${privateKey}` as Hex),
       rpcUrl: process.env.MANTLE_RPC_URL,
       notionalBudget: budget,
       slippageBps: Number(process.env.MANTLE_SLIPPAGE_BPS ?? '50'),
-      deadlineSeconds: Number(process.env.MANTLE_DEADLINE_SECONDS ?? '120')
+      deadlineSeconds: Number(process.env.MANTLE_DEADLINE_SECONDS ?? '120'),
+      expectedOutFull: expectedOutRaw !== undefined ? Number(expectedOutRaw) : undefined
     }
   };
 }
@@ -212,19 +287,26 @@ function loadMantleConfig(): { config?: MantleSpotConfig; missing: string[] } {
 ///
 /// CAUTION: router + token addresses come entirely from env and are NOT validated against any
 /// allowlist here. Verify MANTLE_DEX_ROUTER against the official Agni / Merchant Moe deployment
-/// (and IN_TOKEN/OUT_TOKEN against the canonical Mantle token list) before broadcasting real funds.
+/// (and the token pair against the canonical Mantle token list) before broadcasting real funds.
+///
+/// Config is resolved PER MARKET from env at execute() time (keyed by order.marketId), so a
+/// single venue instance trades multiple markets with independent token pairs and budgets.
+///
+/// SAFETY (this phase): broadcasting is gated behind MANTLE_BROADCAST=1. Without it the venue
+/// builds + validates the swap (slippage/deadline/minOut guards) but stops before sending,
+/// returning a 'skipped' dry-run receipt — never moving funds.
 export class MantleSpotVenue implements IExecutionVenue {
   readonly name = 'mantle-spot';
 
-  constructor(private readonly config?: MantleSpotConfig) {}
-
   async execute(order: ExecutionOrder): Promise<ExecutionReceipt> {
-    if (!this.config) {
+    const { config, missing } = loadMantleConfig(order.marketId);
+    if (!config) {
       return {
         venue: this.name,
+        marketId: order.marketId,
         status: 'skipped',
         ref: order.id,
-        detail: 'Mantle spot venue not configured (set MANTLE_DEX_ROUTER, IN_TOKEN, OUT_TOKEN, PRIVATE_KEY, MANTLE_NOTIONAL_BUDGET)'
+        detail: `Mantle spot venue not configured for ${order.marketId} (missing: ${missing.join(', ')})`
       };
     }
 
@@ -232,17 +314,18 @@ export class MantleSpotVenue implements IExecutionVenue {
     if (order.direction !== 'LONG' || order.sizeBps === 0) {
       return {
         venue: this.name,
+        marketId: order.marketId,
         status: 'skipped',
         ref: order.id,
         detail: `no spot buy (direction=${order.direction}, sizeBps=${order.sizeBps})`
       };
     }
     if (order.sizeBps < 0 || order.sizeBps > 10_000) {
-      return { venue: this.name, status: 'failed', ref: order.id, detail: `sizeBps out of range: ${order.sizeBps}` };
+      return { venue: this.name, marketId: order.marketId, status: 'failed', ref: order.id, detail: `sizeBps out of range: ${order.sizeBps}` };
     }
 
-    const { router, tokenIn, tokenOut, poolFee, privateKey, rpcUrl, notionalBudget, slippageBps, deadlineSeconds } =
-      this.config;
+    const { router, tokenIn, tokenOut, poolFee, privateKey, rpcUrl, notionalBudget, slippageBps, deadlineSeconds, expectedOutFull: quotedOut } =
+      config;
 
     try {
       const account = privateKeyToAccount(privateKey);
@@ -260,7 +343,7 @@ export class MantleSpotVenue implements IExecutionVenue {
       const budgetUnits = parseUnits(notionalBudget.toString(), decimals);
       const amountIn = (budgetUnits * BigInt(Math.round(order.sizeBps))) / 10_000n;
       if (amountIn === 0n) {
-        return { venue: this.name, status: 'skipped', ref: order.id, detail: 'computed amountIn rounds to zero' };
+        return { venue: this.name, marketId: order.marketId, status: 'skipped', ref: order.id, detail: 'computed amountIn rounds to zero' };
       }
 
       const balance = (await publicClient.readContract({
@@ -272,39 +355,33 @@ export class MantleSpotVenue implements IExecutionVenue {
       if (balance < amountIn) {
         return {
           venue: this.name,
+          marketId: order.marketId,
           status: 'failed',
           ref: order.id,
           detail: `insufficient tokenIn balance: have ${formatUnits(balance, decimals)}, need ${formatUnits(amountIn, decimals)}`
         };
       }
 
-      // Ensure the router can pull tokenIn. Approve exactly amountIn if allowance is short.
+      // Allowance check (read-only). A real broadcast would approve here; in dry-run we only
+      // surface whether an approve would be needed, never sending one.
       const allowance = (await publicClient.readContract({
         address: tokenIn,
         abi: ERC20_ABI,
         functionName: 'allowance',
         args: [account.address, router]
       })) as bigint;
-      if (allowance < amountIn) {
-        const approveData = encodeFunctionData({
-          abi: ERC20_ABI,
-          functionName: 'approve',
-          args: [router, amountIn]
-        });
-        const approveHash = await walletClient.sendTransaction({ to: tokenIn, data: approveData });
-        await publicClient.waitForTransactionReceipt({ hash: approveHash });
-      }
+      const needsApprove = allowance < amountIn;
 
-      // Slippage guard. Prefer a caller-supplied quote (expected amountOut in tokenOut human units)
-      // via order/env; absent a quote we cannot safely set amountOutMinimum, so refuse rather than
-      // broadcast a 0-min swap that invites sandwiching.
-      const quoteRaw = process.env.MANTLE_EXPECTED_OUT;
-      if (!quoteRaw) {
+      // Slippage guard. Requires a caller-supplied quote (expected tokenOut in human units for the
+      // full budget) keyed per market; absent a quote we cannot safely set amountOutMinimum, so
+      // refuse rather than broadcast a 0-min swap that invites sandwiching.
+      if (quotedOut === undefined || !Number.isFinite(quotedOut) || quotedOut <= 0) {
         return {
           venue: this.name,
+          marketId: order.marketId,
           status: 'failed',
           ref: order.id,
-          detail: 'refusing swap with no amountOutMinimum: set MANTLE_EXPECTED_OUT (quoted tokenOut for full budget) to enable a slippage guard'
+          detail: `refusing swap with no amountOutMinimum: set MANTLE_EXPECTED_OUT_${marketEnvKey(order.marketId)} (quoted tokenOut for full budget) to enable a slippage guard`
         };
       }
       const tokenOutDecimals = (await publicClient.readContract({
@@ -313,14 +390,37 @@ export class MantleSpotVenue implements IExecutionVenue {
         functionName: 'decimals'
       })) as number;
       // Expected out scales with the same sizeBps fraction as amountIn.
-      const expectedOutFull = parseUnits(Number(quoteRaw).toString(), tokenOutDecimals);
+      const expectedOutFull = parseUnits(quotedOut.toString(), tokenOutDecimals);
       const expectedOut = (expectedOutFull * BigInt(Math.round(order.sizeBps))) / 10_000n;
       const amountOutMinimum = (expectedOut * BigInt(10_000 - Math.round(slippageBps))) / 10_000n;
       if (amountOutMinimum === 0n) {
-        return { venue: this.name, status: 'failed', ref: order.id, detail: 'amountOutMinimum rounds to zero; check MANTLE_EXPECTED_OUT' };
+        return { venue: this.name, marketId: order.marketId, status: 'failed', ref: order.id, detail: 'amountOutMinimum rounds to zero; check the per-market MANTLE_EXPECTED_OUT quote' };
       }
 
       const deadline = BigInt(Math.floor(Date.now() / 1000) + Math.max(1, Math.round(deadlineSeconds)));
+
+      // SAFETY GATE: this phase never broadcasts. Unless MANTLE_BROADCAST=1 is explicitly set,
+      // we stop here after fully validating the swap and return a dry-run receipt.
+      if (process.env.MANTLE_BROADCAST !== '1') {
+        return {
+          venue: this.name,
+          marketId: order.marketId,
+          status: 'skipped',
+          ref: order.id,
+          detail: `dry-run (no broadcast): would swap ${formatUnits(amountIn, decimals)} tokenIn -> tokenOut, minOut ${formatUnits(amountOutMinimum, tokenOutDecimals)} (slippage ${slippageBps}bps, deadline +${deadlineSeconds}s${needsApprove ? ', approve required' : ''}). Set MANTLE_BROADCAST=1 to send.`
+        };
+      }
+
+      // Beyond here funds can move. Approve if short, then swap.
+      if (needsApprove) {
+        const approveData = encodeFunctionData({
+          abi: ERC20_ABI,
+          functionName: 'approve',
+          args: [router, amountIn]
+        });
+        const approveHash = await walletClient.sendTransaction({ to: tokenIn, data: approveData });
+        await publicClient.waitForTransactionReceipt({ hash: approveHash });
+      }
 
       const swapData = encodeFunctionData({
         abi: SWAP_ROUTER_ABI,
@@ -343,10 +443,11 @@ export class MantleSpotVenue implements IExecutionVenue {
       const receipt = await publicClient.waitForTransactionReceipt({ hash: swapHash });
 
       if (receipt.status !== 'success') {
-        return { venue: this.name, status: 'failed', ref: order.id, detail: `swap reverted (tx ${swapHash})` };
+        return { venue: this.name, marketId: order.marketId, status: 'failed', ref: order.id, detail: `swap reverted (tx ${swapHash})` };
       }
       return {
         venue: this.name,
+        marketId: order.marketId,
         status: 'filled',
         ref: swapHash,
         detail: `spot buy ${formatUnits(amountIn, decimals)} tokenIn -> tokenOut (minOut ${formatUnits(amountOutMinimum, tokenOutDecimals)}, slippage ${slippageBps}bps)`
@@ -354,6 +455,7 @@ export class MantleSpotVenue implements IExecutionVenue {
     } catch (error) {
       return {
         venue: this.name,
+        marketId: order.marketId,
         status: 'failed',
         ref: order.id,
         detail: error instanceof Error ? error.message : String(error)
@@ -362,12 +464,12 @@ export class MantleSpotVenue implements IExecutionVenue {
   }
 }
 
-/// Select the venue from EXECUTION_VENUE (default: paper).
+/// Select the venue from EXECUTION_VENUE (default: paper). The chosen venue trades every active
+/// market; per-market config (Mantle token pair / budget) is resolved inside execute().
 export function selectVenue(): IExecutionVenue {
   const mode = (process.env.EXECUTION_VENUE ?? 'paper').toLowerCase();
   if (mode === 'mantle' || mode === 'mantle-spot') {
-    const { config } = loadMantleConfig();
-    return new MantleSpotVenue(config);
+    return new MantleSpotVenue();
   }
   if (mode === 'byreal' || mode === 'byreal-spot') {
     return new ByrealSpotVenue(process.env.BYREAL_ENDPOINT);

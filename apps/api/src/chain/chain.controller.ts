@@ -31,7 +31,8 @@ export class ChainController {
         epoch: state.epoch,
         onchainLatestDatasetHash: state.latestDatasetHash,
         localLatestDatasetHash: replay?.datasetHash ?? null,
-        isSynced: replay ? replay.datasetHash === state.latestDatasetHash : false
+        isSynced: replay ? replay.datasetHash === state.latestDatasetHash : false,
+        latestConsensusTx: deployed?.latestConsensusTx
       };
     } catch (error) {
       return {

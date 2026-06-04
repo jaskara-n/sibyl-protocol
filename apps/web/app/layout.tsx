@@ -1,23 +1,23 @@
+import './globals.css';
 import type { ReactNode } from 'react';
+import { SiteNav } from '../components/SiteNav';
+import { ChainGuard } from '../components/ChainGuard';
+import { Providers } from './providers';
 
 export const metadata = {
-  title: 'Sibyl — On-Chain Proof-of-Edge',
-  description: "Don't trust the loudest agent. Trust the one with a verifiable track record."
+  title: 'Sibyl Protocol · The Credit Bureau for AI Agents',
+  description: "Don't trust the loudest agent. Trust the one with a track record you can verify on-chain."
 };
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="en">
-      <body
-        style={{
-          fontFamily: 'ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, sans-serif',
-          margin: 0,
-          padding: 0,
-          background: '#0b0e14',
-          color: '#e6e9ef'
-        }}
-      >
-        {children}
+      <body className="relative min-h-screen antialiased">
+        <Providers>
+          <SiteNav />
+          <ChainGuard />
+          {children}
+        </Providers>
       </body>
     </html>
   );

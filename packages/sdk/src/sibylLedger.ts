@@ -13,15 +13,21 @@ import { mantleSepoliaTestnet } from 'viem/chains';
 import { mantleClient } from './index.js';
 
 export const SIBYL_LEDGER_ABI = parseAbi([
-  'function commitReplay(bytes32 datasetHash, uint32 scoringVersion, (bytes32 agentId,uint32 brierPpm,uint64 updatedEpoch,bool active,bool exists)[] scores)',
+  'function commitReplay(bytes32 datasetHash, uint32 scoringVersion, bytes32 marketId, (bytes32 agentId,uint32 brierPpm,uint64 updatedEpoch,bool active,bool exists,bytes32 marketId)[] scores)',
   'function latestDatasetHash() view returns (bytes32)',
   'function latestScoringVersion() view returns (uint32)',
   'function epoch() view returns (uint64)',
   'function maxAgentWeightPpm() view returns (uint32)',
   'function paused() view returns (bool)',
   'function owner() view returns (address)',
-  'function emitConsensus((bytes32 agentId, bool isLong, uint32 probabilityPpm)[] signals) returns ((uint8 direction, uint16 sizeBps, uint32 confidencePpm, uint32 contributorCount))',
-  'event ConsensusReached(uint8 direction, uint16 sizeBps, uint32 confidencePpm, uint32 contributorCount)'
+  'function registerMarket(bytes32 marketId)',
+  'function setMarketActive(bytes32 marketId, bool active)',
+  'function getMarkets() view returns (bytes32[])',
+  'function isMarketActive(bytes32 marketId) view returns (bool)',
+  'function convictionIndex(bytes32 marketId) view returns (uint256 totalWeight, uint32 activeAgentCount)',
+  'function computeConsensus(bytes32 marketId, (bytes32 agentId, bytes32 marketId, bool isLong, uint32 probabilityPpm)[] signals) view returns ((uint8 direction, uint16 sizeBps, uint32 confidencePpm, uint32 contributorCount))',
+  'function emitConsensus(bytes32 marketId, (bytes32 agentId, bytes32 marketId, bool isLong, uint32 probabilityPpm)[] signals) returns ((uint8 direction, uint16 sizeBps, uint32 confidencePpm, uint32 contributorCount))',
+  'event ConsensusReached(bytes32 indexed marketId, uint8 direction, uint16 sizeBps, uint32 confidencePpm, uint32 contributorCount)'
 ]);
 
 /// Direction enum codes as emitted on-chain (FLAT=0, LONG=1, SHORT=2).
@@ -35,16 +41,18 @@ export type CommitReplayScore = {
 export type CommitReplayPayload = {
   datasetHash: `0x${string}`;
   scoringVersion: number;
+  marketId: `0x${string}`;
   scores: CommitReplayScore[];
 };
 
-function toContractScores(scores: CommitReplayScore[]) {
+function toContractScores(marketId: `0x${string}`, scores: CommitReplayScore[]) {
   return scores.map((score) => ({
     agentId: score.agentIdHex,
     brierPpm: score.brierPpm,
     updatedEpoch: 0n,
     active: true,
-    exists: true
+    exists: true,
+    marketId
   }));
 }
 
@@ -52,7 +60,12 @@ export function encodeCommitReplayCalldata(payload: CommitReplayPayload): Hex {
   return encodeFunctionData({
     abi: SIBYL_LEDGER_ABI,
     functionName: 'commitReplay',
-    args: [payload.datasetHash, payload.scoringVersion, toContractScores(payload.scores)]
+    args: [
+      payload.datasetHash,
+      payload.scoringVersion,
+      payload.marketId,
+      toContractScores(payload.marketId, payload.scores)
+    ]
   });
 }
 
@@ -76,6 +89,40 @@ export async function readLedgerState(ledgerAddress: Address) {
   };
 }
 
+/// Read the registered market id hashes (bytes32) from the ledger's getMarkets() view.
+export async function getMarkets(ledgerAddress: Address): Promise<readonly Hex[]> {
+  return mantleClient.readContract({
+    address: ledgerAddress,
+    abi: SIBYL_LEDGER_ABI,
+    functionName: 'getMarkets'
+  });
+}
+
+/// Whether a given market id hash is currently active on the ledger.
+export async function isMarketActive(ledgerAddress: Address, marketId: Hex): Promise<boolean> {
+  return mantleClient.readContract({
+    address: ledgerAddress,
+    abi: SIBYL_LEDGER_ABI,
+    functionName: 'isMarketActive',
+    args: [marketId]
+  });
+}
+
+/// The on-chain reputation-weighted conviction index for a market: summed capped agent
+/// weight (ppm) + active agent count. Reads convictionIndex(marketId) from the ledger.
+export async function readConvictionIndex(
+  ledgerAddress: Address,
+  marketId: Hex
+): Promise<{ totalWeight: bigint; activeAgentCount: number }> {
+  const [totalWeight, activeAgentCount] = await mantleClient.readContract({
+    address: ledgerAddress,
+    abi: SIBYL_LEDGER_ABI,
+    functionName: 'convictionIndex',
+    args: [marketId]
+  });
+  return { totalWeight, activeAgentCount: Number(activeAgentCount) };
+}
+
 export async function simulateCommitReplay(ledgerAddress: Address, payload: CommitReplayPayload, caller?: Address) {
   const from = caller ?? getAddress('0x0000000000000000000000000000000000000001');
 
@@ -84,7 +131,12 @@ export async function simulateCommitReplay(ledgerAddress: Address, payload: Comm
     abi: SIBYL_LEDGER_ABI,
     functionName: 'commitReplay',
     account: from,
-    args: [payload.datasetHash, payload.scoringVersion, toContractScores(payload.scores)]
+    args: [
+      payload.datasetHash,
+      payload.scoringVersion,
+      payload.marketId,
+      toContractScores(payload.marketId, payload.scores)
+    ]
   });
 }
 
@@ -101,18 +153,24 @@ export async function commitReplayOnchain(ledgerAddress: Address, payload: Commi
     abi: SIBYL_LEDGER_ABI,
     functionName: 'commitReplay',
     account,
-    args: [payload.datasetHash, payload.scoringVersion, toContractScores(payload.scores)]
+    args: [
+      payload.datasetHash,
+      payload.scoringVersion,
+      payload.marketId,
+      toContractScores(payload.marketId, payload.scores)
+    ]
   });
 
   return walletClient.writeContract(request);
 }
 
-export type OnchainSignal = { agentId: Hex; isLong: boolean; probabilityPpm: number };
+export type OnchainSignal = { agentId: Hex; marketId: Hex; isLong: boolean; probabilityPpm: number };
 
 /// Broadcast emitConsensus to record a live ConsensusReached decision on-chain, then read the
 /// result back from the emitted event. Owner-gated on the contract.
 export async function emitConsensusOnchain(
   ledgerAddress: Address,
+  marketId: Hex,
   signals: OnchainSignal[],
   privateKey: Hex
 ): Promise<{ txHash: Hex; direction: number; sizeBps: number; confidencePpm: number; contributorCount: number }> {
@@ -127,7 +185,7 @@ export async function emitConsensusOnchain(
     address: ledgerAddress,
     abi: SIBYL_LEDGER_ABI,
     functionName: 'emitConsensus',
-    args: [signals],
+    args: [marketId, signals],
     account,
     chain: mantleSepoliaTestnet
   });
@@ -145,6 +203,7 @@ export async function emitConsensusOnchain(
 }
 
 export type ConsensusReachedEvent = {
+  marketId: Hex;
   direction: number;
   sizeBps: number;
   confidencePpm: number;
@@ -165,6 +224,7 @@ export function watchConsensusReached(
       for (const log of logs) {
         const a = log.args as Partial<ConsensusReachedEvent>;
         onConsensus({
+          marketId: (a.marketId ?? `0x${'0'.repeat(64)}`) as Hex,
           direction: Number(a.direction ?? 0),
           sizeBps: Number(a.sizeBps ?? 0),
           confidencePpm: Number(a.confidencePpm ?? 0),

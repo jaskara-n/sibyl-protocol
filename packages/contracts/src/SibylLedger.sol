@@ -51,15 +51,31 @@ contract SibylLedger is ISibylLedger, Ownable2Step, Pausable {
     uint32 public latestScoringVersion;
 
     /// @notice Monotonic commit counter; incremented on every {commitReplay}.
-    uint64 public epoch;
+    uint64 public override epoch;
 
     /// @notice Per-agent weight ceiling (ppm), tunable by the owner.
     uint32 public maxAgentWeightPpm;
 
+    /// @notice Global list of every agent ever seen (across all markets).
     bytes32[] private _agents;
+    /// @notice Whether an agent id has been added to `_agents` (global dedup).
+    mapping(bytes32 => bool) private _agentSeen;
+
+    /// @dev Per-(agent,market) composite key => current score.
     mapping(bytes32 => AgentScore) private _scores;
+    /// @dev Per-(agent,market) composite key => append-only score history.
     mapping(bytes32 => AgentScore[]) private _scoreHistory;
+    /// @dev Idempotency guard keyed by (datasetHash, scoringVersion, marketId).
     mapping(bytes32 => bool) private _committedReplays;
+
+    /// @notice Registered market ids.
+    bytes32[] private _markets;
+    /// @notice Whether a market id is registered.
+    mapping(bytes32 => bool) private _marketExists;
+    /// @notice Whether a market is active.
+    mapping(bytes32 => bool) private _marketActive;
+    /// @dev Per-market list of agent ids that have a score in that market.
+    mapping(bytes32 => bytes32[]) private _agentsByMarket;
 
     /// @param initialMaxAgentWeightPpm Per-agent weight cap (ppm); pass 0 for the default.
     constructor(uint32 initialMaxAgentWeightPpm) {
@@ -74,22 +90,41 @@ contract SibylLedger is ISibylLedger, Ownable2Step, Pausable {
     //////////////////////////////////////////////////////////////*/
 
     /// @inheritdoc ISibylLedger
-    function registerAgent(bytes32 agentId) external override onlyOwner whenNotPaused {
-        if (agentId == bytes32(0)) revert InvalidAgentId();
-        _ensureAgent(agentId);
+    // Permissionless: ANY address (incl. agent wallets) can spin up a market — the open-agent-economy
+    // primitive. setMarketActive stays owner-gated for spam cleanup; reputation (commitReplay) stays owner-scored.
+    function registerMarket(bytes32 marketId) external override whenNotPaused {
+        if (marketId == bytes32(0)) revert InvalidMarketId();
+        if (_marketExists[marketId]) return; // idempotent
+        _marketExists[marketId] = true;
+        _marketActive[marketId] = true;
+        _markets.push(marketId);
+        emit MarketRegistered(marketId, epoch);
     }
 
     /// @inheritdoc ISibylLedger
-    function deactivateAgent(bytes32 agentId) external override onlyOwner whenNotPaused {
-        AgentScore storage score = _scores[agentId];
+    function setMarketActive(bytes32 marketId, bool active) external override onlyOwner whenNotPaused {
+        if (!_marketExists[marketId]) revert UnknownMarket(marketId);
+        _marketActive[marketId] = active;
+        emit MarketActiveSet(marketId, active);
+    }
+
+    /// @inheritdoc ISibylLedger
+    function registerAgent(bytes32 agentId) external override onlyOwner whenNotPaused {
+        if (agentId == bytes32(0)) revert InvalidAgentId();
+        _ensureAgentGlobal(agentId);
+    }
+
+    /// @inheritdoc ISibylLedger
+    function deactivateAgent(bytes32 agentId, bytes32 marketId) external override onlyOwner whenNotPaused {
+        AgentScore storage score = _scores[_key(agentId, marketId)];
         if (!score.exists) revert UnknownAgent(agentId);
         score.active = false;
         emit AgentDeactivated(agentId, epoch);
     }
 
     /// @inheritdoc ISibylLedger
-    function reactivateAgent(bytes32 agentId) external override onlyOwner whenNotPaused {
-        AgentScore storage score = _scores[agentId];
+    function reactivateAgent(bytes32 agentId, bytes32 marketId) external override onlyOwner whenNotPaused {
+        AgentScore storage score = _scores[_key(agentId, marketId)];
         if (!score.exists) revert UnknownAgent(agentId);
         score.active = true;
         emit AgentReactivated(agentId, epoch);
@@ -114,17 +149,18 @@ contract SibylLedger is ISibylLedger, Ownable2Step, Pausable {
     }
 
     /// @inheritdoc ISibylLedger
-    function commitReplay(bytes32 datasetHash, uint32 scoringVersion, AgentScore[] calldata scores)
-        external
-        override
-        onlyOwner
-        whenNotPaused
-    {
+    function commitReplay(
+        bytes32 datasetHash,
+        uint32 scoringVersion,
+        bytes32 marketId,
+        AgentScore[] calldata scores
+    ) external override onlyOwner whenNotPaused {
         if (datasetHash == bytes32(0)) revert InvalidDatasetHash();
+        if (!_marketExists[marketId]) revert UnknownMarket(marketId);
         if (scores.length == 0) revert EmptyScores();
         if (scores.length > MAX_BATCH) revert TooManyItems(scores.length);
 
-        bytes32 replayKey = keccak256(abi.encodePacked(datasetHash, scoringVersion));
+        bytes32 replayKey = keccak256(abi.encodePacked(datasetHash, scoringVersion, marketId));
         if (_committedReplays[replayKey]) revert DuplicateReplay(datasetHash, scoringVersion);
         _committedReplays[replayKey] = true;
 
@@ -136,14 +172,17 @@ contract SibylLedger is ISibylLedger, Ownable2Step, Pausable {
             if (agentId == bytes32(0)) revert InvalidAgentId();
             if (brierPpm > ONE_PPM) revert BrierOutOfRange(agentId, brierPpm);
 
-            AgentScore storage existing = _scores[agentId];
+            // Auto-register the agent globally on first sight anywhere.
+            _ensureAgentGlobal(agentId);
+
+            bytes32 key = _key(agentId, marketId);
+            AgentScore storage existing = _scores[key];
             bool active;
             if (existing.exists) {
-                active = existing.active; // preserve a manual deactivation across commits
+                active = existing.active; // preserve a manual per-market deactivation across commits
             } else {
-                _agents.push(agentId);
+                _agentsByMarket[marketId].push(agentId);
                 active = true;
-                emit AgentRegistered(agentId, newEpoch);
             }
 
             AgentScore memory updated = AgentScore({
@@ -151,15 +190,16 @@ contract SibylLedger is ISibylLedger, Ownable2Step, Pausable {
                 brierPpm: brierPpm,
                 updatedEpoch: newEpoch,
                 active: active,
-                exists: true
+                exists: true,
+                marketId: marketId
             });
-            _scores[agentId] = updated;
-            _scoreHistory[agentId].push(updated);
+            _scores[key] = updated;
+            _scoreHistory[key].push(updated);
         }
 
         latestDatasetHash = datasetHash;
         latestScoringVersion = scoringVersion;
-        emit ReplayCommitted(datasetHash, scoringVersion, newEpoch, scores.length);
+        emit ReplayCommitted(datasetHash, scoringVersion, newEpoch, marketId, scores.length);
     }
 
     /// @inheritdoc ISibylLedger
@@ -173,48 +213,70 @@ contract SibylLedger is ISibylLedger, Ownable2Step, Pausable {
     //////////////////////////////////////////////////////////////*/
 
     /// @inheritdoc ISibylLedger
-    function computeConsensus(Signal[] calldata signals) public view override returns (ConsensusResult memory) {
-        uint256 total = signals.length;
-        if (total > MAX_BATCH) revert TooManyItems(total);
+    function computeConsensus(bytes32 marketId, Signal[] calldata signals)
+        public
+        view
+        override
+        returns (ConsensusResult memory result)
+    {
+        (uint32[] memory brierPpm, bool[] memory isLong, uint32[] memory probabilityPpm) =
+            _filter(marketId, signals);
 
-        // Validate probability bounds for every signal, then count contributors.
-        uint256 contributors;
-        for (uint256 i = 0; i < total; i++) {
-            if (signals[i].probabilityPpm > ONE_PPM) {
-                revert ProbabilityOutOfRange(signals[i].agentId, signals[i].probabilityPpm);
-            }
-            AgentScore storage score = _scores[signals[i].agentId];
-            if (score.exists && score.active) contributors++;
-        }
-
-        uint32[] memory brierPpm = new uint32[](contributors);
-        bool[] memory isLong = new bool[](contributors);
-        uint32[] memory probabilityPpm = new uint32[](contributors);
-
-        uint256 k;
-        for (uint256 i = 0; i < total; i++) {
-            AgentScore storage score = _scores[signals[i].agentId];
-            if (score.exists && score.active) {
-                brierPpm[k] = score.brierPpm;
-                isLong[k] = signals[i].isLong;
-                probabilityPpm[k] = signals[i].probabilityPpm;
-                k++;
-            }
-        }
-
-        return SibylConsensusLib.compute(brierPpm, isLong, probabilityPpm, maxAgentWeightPpm);
+        result = SibylConsensusLib.compute(brierPpm, isLong, probabilityPpm, maxAgentWeightPpm);
     }
 
     /// @inheritdoc ISibylLedger
-    function emitConsensus(Signal[] calldata signals)
+    function emitConsensus(bytes32 marketId, Signal[] calldata signals)
         external
         override
         onlyOwner
         whenNotPaused
         returns (ConsensusResult memory result)
     {
-        result = computeConsensus(signals);
-        emit ConsensusReached(result.direction, result.sizeBps, result.confidencePpm, result.contributorCount);
+        result = computeConsensus(marketId, signals);
+        emit ConsensusReached(
+            marketId, result.direction, result.sizeBps, result.confidencePpm, result.contributorCount
+        );
+    }
+
+    /// @inheritdoc ISibylLedger
+    function convictionIndex(bytes32 marketId)
+        external
+        view
+        override
+        returns (uint256 totalWeight, uint32 activeAgentCount)
+    {
+        bytes32[] storage agents = _agentsByMarket[marketId];
+        uint256 cap = maxAgentWeightPpm;
+        for (uint256 i = 0; i < agents.length; i++) {
+            AgentScore storage score = _scores[_key(agents[i], marketId)];
+            if (score.exists && score.active) {
+                uint256 w = SibylConsensusLib.weightPpm(score.brierPpm);
+                if (w > cap) w = cap;
+                totalWeight += w;
+                activeAgentCount++;
+            }
+        }
+    }
+
+    /// @inheritdoc ISibylLedger
+    function convictionForSignals(bytes32 marketId, Signal[] calldata signals)
+        external
+        view
+        override
+        returns (uint256 totalWeight, uint32 confidencePpm)
+    {
+        (uint32[] memory brierPpm, bool[] memory isLong, uint32[] memory probabilityPpm) =
+            _filter(marketId, signals);
+        ConsensusResult memory r = SibylConsensusLib.compute(brierPpm, isLong, probabilityPpm, maxAgentWeightPpm);
+        confidencePpm = r.confidencePpm;
+
+        uint256 cap = maxAgentWeightPpm;
+        for (uint256 i = 0; i < brierPpm.length; i++) {
+            uint256 w = SibylConsensusLib.weightPpm(brierPpm[i]);
+            if (w > cap) w = cap;
+            totalWeight += w;
+        }
     }
 
     /*//////////////////////////////////////////////////////////////
@@ -222,8 +284,54 @@ contract SibylLedger is ISibylLedger, Ownable2Step, Pausable {
     //////////////////////////////////////////////////////////////*/
 
     /// @inheritdoc ISibylLedger
-    function getAgentScore(bytes32 agentId) external view override returns (AgentScore memory) {
-        return _scores[agentId];
+    function getAgentScore(bytes32 agentId, bytes32 marketId) external view override returns (AgentScore memory) {
+        return _scores[_key(agentId, marketId)];
+    }
+
+    /// @inheritdoc ISibylLedger
+    function isMarketActive(bytes32 marketId) external view override returns (bool) {
+        return _marketExists[marketId] && _marketActive[marketId];
+    }
+
+    /// @inheritdoc ISibylLedger
+    function getMarkets() external view override returns (bytes32[] memory) {
+        return _markets;
+    }
+
+    /// @inheritdoc ISibylLedger
+    function marketCount() external view override returns (uint256) {
+        return _markets.length;
+    }
+
+    /// @inheritdoc ISibylLedger
+    function getMarketsPaginated(uint256 offset, uint256 limit)
+        external
+        view
+        override
+        returns (bytes32[] memory page, uint256 total)
+    {
+        total = _markets.length;
+        (uint256 start, uint256 len) = _window(offset, limit, total);
+        page = new bytes32[](len);
+        for (uint256 i = 0; i < len; i++) {
+            page[i] = _markets[start + i];
+        }
+    }
+
+    /// @inheritdoc ISibylLedger
+    function getAgentScoresByMarketPaginated(bytes32 marketId, uint256 offset, uint256 limit)
+        external
+        view
+        override
+        returns (AgentScore[] memory page, uint256 total)
+    {
+        bytes32[] storage agents = _agentsByMarket[marketId];
+        total = agents.length;
+        (uint256 start, uint256 len) = _window(offset, limit, total);
+        page = new AgentScore[](len);
+        for (uint256 i = 0; i < len; i++) {
+            page[i] = _scores[_key(agents[start + i], marketId)];
+        }
     }
 
     /// @inheritdoc ISibylLedger
@@ -258,28 +366,13 @@ contract SibylLedger is ISibylLedger, Ownable2Step, Pausable {
     }
 
     /// @inheritdoc ISibylLedger
-    function getAgentScoresPaginated(uint256 offset, uint256 limit)
+    function getAgentScoreHistory(bytes32 agentId, bytes32 marketId, uint256 offset, uint256 limit)
         external
         view
         override
         returns (AgentScore[] memory page, uint256 total)
     {
-        total = _agents.length;
-        (uint256 start, uint256 len) = _window(offset, limit, total);
-        page = new AgentScore[](len);
-        for (uint256 i = 0; i < len; i++) {
-            page[i] = _scores[_agents[start + i]];
-        }
-    }
-
-    /// @inheritdoc ISibylLedger
-    function getAgentScoreHistory(bytes32 agentId, uint256 offset, uint256 limit)
-        external
-        view
-        override
-        returns (AgentScore[] memory page, uint256 total)
-    {
-        AgentScore[] storage history = _scoreHistory[agentId];
+        AgentScore[] storage history = _scoreHistory[_key(agentId, marketId)];
         total = history.length;
         (uint256 start, uint256 len) = _window(offset, limit, total);
         page = new AgentScore[](len);
@@ -290,11 +383,16 @@ contract SibylLedger is ISibylLedger, Ownable2Step, Pausable {
 
     /// @inheritdoc ISibylLedger
     /// @dev Returns the score in effect as of `atEpoch` (latest entry with `updatedEpoch <= atEpoch`).
-    ///      Returns an empty struct if the agent had no score by then. History is appended once per
-    ///      {commitReplay} and `epoch` is strictly increasing, so `_scoreHistory` is sorted ascending
-    ///      by `updatedEpoch`; this uses an O(log n) binary search for the rightmost matching entry.
-    function getAgentScoreAt(bytes32 agentId, uint64 atEpoch) external view override returns (AgentScore memory) {
-        AgentScore[] storage history = _scoreHistory[agentId];
+    ///      Returns an empty struct if the (agent, market) had no score by then. History is appended
+    ///      once per {commitReplay} and `epoch` is strictly increasing, so `_scoreHistory` is sorted
+    ///      ascending by `updatedEpoch`; this uses an O(log n) binary search for the rightmost match.
+    function getAgentScoreAt(bytes32 agentId, bytes32 marketId, uint64 atEpoch)
+        external
+        view
+        override
+        returns (AgentScore memory)
+    {
+        AgentScore[] storage history = _scoreHistory[_key(agentId, marketId)];
         uint256 lo = 0;
         uint256 hi = history.length;
         while (lo < hi) {
@@ -305,7 +403,7 @@ contract SibylLedger is ISibylLedger, Ownable2Step, Pausable {
                 hi = mid;
             }
         }
-        if (lo == 0) return AgentScore(bytes32(0), 0, 0, false, false);
+        if (lo == 0) return AgentScore(bytes32(0), 0, 0, false, false, bytes32(0));
         return history[lo - 1];
     }
 
@@ -313,14 +411,60 @@ contract SibylLedger is ISibylLedger, Ownable2Step, Pausable {
                                 INTERNAL
     //////////////////////////////////////////////////////////////*/
 
-    function _ensureAgent(bytes32 agentId) internal {
-        AgentScore storage score = _scores[agentId];
-        if (!score.exists) {
+    /// @dev Composite key for per-(agent, market) reputation storage.
+    function _key(bytes32 agentId, bytes32 marketId) internal pure returns (bytes32) {
+        return keccak256(abi.encodePacked(agentId, marketId));
+    }
+
+    /// @dev Add an agent to the global list exactly once; emits {AgentRegistered} on first sight.
+    function _ensureAgentGlobal(bytes32 agentId) internal {
+        if (!_agentSeen[agentId]) {
+            _agentSeen[agentId] = true;
             _agents.push(agentId);
-            score.agentId = agentId;
-            score.active = true;
-            score.exists = true;
             emit AgentRegistered(agentId, epoch);
+        }
+    }
+
+    /// @dev Build the three parallel arrays for {SibylConsensusLib.compute} from the signals that
+    ///      pass the market-scoped filter: market active, signal.marketId == marketId, and the
+    ///      (agentId, marketId) score exists && active. Validates probability bounds for every
+    ///      signal. Reverts {TooManyItems} past {MAX_BATCH}; otherwise never reverts on filtering.
+    function _filter(bytes32 marketId, Signal[] calldata signals)
+        internal
+        view
+        returns (uint32[] memory brierPpm, bool[] memory isLong, uint32[] memory probabilityPpm)
+    {
+        uint256 total = signals.length;
+        if (total > MAX_BATCH) revert TooManyItems(total);
+
+        bool marketOk = _marketExists[marketId] && _marketActive[marketId];
+
+        uint256 contributors;
+        for (uint256 i = 0; i < total; i++) {
+            if (signals[i].probabilityPpm > ONE_PPM) {
+                revert ProbabilityOutOfRange(signals[i].agentId, signals[i].probabilityPpm);
+            }
+            if (!marketOk || signals[i].marketId != marketId) continue;
+            AgentScore storage score = _scores[_key(signals[i].agentId, marketId)];
+            if (score.exists && score.active) contributors++;
+        }
+
+        brierPpm = new uint32[](contributors);
+        isLong = new bool[](contributors);
+        probabilityPpm = new uint32[](contributors);
+
+        if (!marketOk) return (brierPpm, isLong, probabilityPpm);
+
+        uint256 k;
+        for (uint256 i = 0; i < total; i++) {
+            if (signals[i].marketId != marketId) continue;
+            AgentScore storage score = _scores[_key(signals[i].agentId, marketId)];
+            if (score.exists && score.active) {
+                brierPpm[k] = score.brierPpm;
+                isLong[k] = signals[i].isLong;
+                probabilityPpm[k] = signals[i].probabilityPpm;
+                k++;
+            }
         }
     }
 

@@ -1,6 +1,9 @@
 import type { Direction, Signal } from '@sibyl/shared';
 
 export interface AgentInput {
+  /// Market this snapshot is for (e.g. "MNT-USD"). Stamped onto every emitted Signal so the
+  /// consensus engine can scope per market. Defaults to `symbol` when not set explicitly.
+  marketId?: string;
   symbol: string;
   timestamp: number;
   price: number;
@@ -8,6 +11,11 @@ export interface AgentInput {
   oiDelta: number;
   momentum: number;
   newsSentiment: number;
+}
+
+/// The market a signal belongs to: explicit `marketId`, else the snapshot symbol.
+function inputMarketId(input: AgentInput): string {
+  return input.marketId ?? input.symbol;
 }
 
 export interface SignalAgent {
@@ -33,6 +41,7 @@ export class NewsAgent implements SignalAgent {
     const score = input.newsSentiment;
     return {
       agentId: this.id,
+      marketId: inputMarketId(input),
       timestamp: input.timestamp,
       symbol: input.symbol,
       direction: directionFromScore(score),
@@ -48,6 +57,7 @@ export class FundingAgent implements SignalAgent {
     const score = -input.fundingRate * 20;
     return {
       agentId: this.id,
+      marketId: inputMarketId(input),
       timestamp: input.timestamp,
       symbol: input.symbol,
       direction: directionFromScore(score),
@@ -63,6 +73,7 @@ export class OnchainOiAgent implements SignalAgent {
     const score = input.oiDelta;
     return {
       agentId: this.id,
+      marketId: inputMarketId(input),
       timestamp: input.timestamp,
       symbol: input.symbol,
       direction: directionFromScore(score),
@@ -78,6 +89,7 @@ export class MomentumAgent implements SignalAgent {
     const score = input.momentum;
     return {
       agentId: this.id,
+      marketId: inputMarketId(input),
       timestamp: input.timestamp,
       symbol: input.symbol,
       direction: directionFromScore(score),
@@ -94,6 +106,7 @@ export class RogueLeverageAgent implements SignalAgent {
     const score = oscillation > 0 ? 1 : -1;
     return {
       agentId: this.id,
+      marketId: inputMarketId(input),
       timestamp: input.timestamp,
       symbol: input.symbol,
       direction: score > 0 ? 'LONG' : 'SHORT',

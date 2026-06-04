@@ -1,0 +1,214 @@
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=JetBrains+Mono:wght@400;500;700&family=Inter:wght@400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Geist:wght@400..700&family=Geist+Mono:wght@400..700&family=Instrument+Serif:ital@0;1&family=Instrument+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap');
+@import 'tailwindcss';
+
+@theme {
+  --color-ink: #06070d;
+  --color-surface: #0b0e16;
+  --color-card: #0f131d;
+  --color-line: #1b2233;
+  --color-muted: #8b93a7;
+  --color-fg: #e9edf6;
+  --color-long: #2fe3a0;
+  --color-short: #ff5470;
+  --color-flat: #7c8699;
+  --color-brand: #8b5cf6;
+  --color-cyan: #22d3ee;
+  --color-amber: #fbbf24;
+
+  --font-display: 'Space Grotesk', ui-sans-serif, system-ui, sans-serif;
+  --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+
+  /* ---- THE BUREAU (landing design language) ---- */
+  --color-bureau: #0d0c0a; /* warm lamp-black */
+  --color-bureau-panel: #14120e;
+  --color-bureau-line: #29251c; /* hairline */
+  --color-bureau-fg: #ece8df; /* paper white */
+  --color-bureau-muted: #b5ae9f; /* lifted twice — labels must read */
+  --color-brass: #cff04e; /* VOLT — electric chartreuse, the live-signal signature */
+  --color-brass-deep: #8da832;
+  --color-rise: #0ecb81; /* LONG / positive — phosphor */
+  --color-fall: #f6465d; /* SHORT / negative — vermilion */
+
+  /* true serif — italic accent words + the seal only */
+  --font-serifd: 'Instrument Serif', Georgia, 'Times New Roman', serif;
+  --font-sansd: 'Geist', ui-sans-serif, system-ui, sans-serif;
+  --font-monod: 'Geist Mono', ui-monospace, monospace;
+}
+
+@layer base {
+  html {
+    background: var(--color-bureau);
+    color-scheme: dark;
+  }
+  body {
+    background: var(--color-bureau);
+    color: var(--color-bureau-fg);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+  }
+  ::selection {
+    background: color-mix(in oklab, var(--color-brass) 40%, transparent);
+  }
+  ::-webkit-scrollbar { width: 10px; height: 10px; }
+  ::-webkit-scrollbar-thumb { background: #2a261c; border-radius: 8px; }
+  ::-webkit-scrollbar-thumb:hover { background: #2a261c; }
+}
+
+/* ---------- utilities ---------- */
+.font-display { font-family: var(--font-display); }
+.font-mono { font-family: var(--font-mono); }
+
+.text-gradient {
+  background: linear-gradient(100deg, #c4b5fd 0%, #8b5cf6 35%, #22d3ee 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.glass {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.015));
+  border: 1px solid var(--color-line);
+  backdrop-filter: blur(8px);
+}
+
+.glow-brand { box-shadow: 0 0 0 1px rgba(139, 92, 246, 0.25), 0 0 40px -10px rgba(139, 92, 246, 0.5); }
+.glow-long { box-shadow: 0 0 40px -12px rgba(47, 227, 160, 0.6); }
+.glow-short { box-shadow: 0 0 40px -12px rgba(255, 84, 112, 0.6); }
+
+.grid-faint {
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.035) 1px, transparent 1px);
+  background-size: 44px 44px;
+  mask-image: radial-gradient(ellipse 80% 60% at 50% 0%, #000 40%, transparent 100%);
+}
+
+/* aurora blobs */
+.aurora {
+  position: fixed;
+  inset: -20% -10% auto -10%;
+  height: 70vh;
+  z-index: -1;
+  filter: blur(80px);
+  opacity: 0.55;
+  pointer-events: none;
+}
+.aurora::before, .aurora::after {
+  content: '';
+  position: absolute;
+  border-radius: 999px;
+}
+.aurora::before {
+  width: 46vw; height: 46vw; left: 4%; top: -6%;
+  background: radial-gradient(circle at 30% 30%, #8b5cf6, transparent 60%);
+  animation: drift 18s ease-in-out infinite alternate;
+}
+.aurora::after {
+  width: 40vw; height: 40vw; right: 2%; top: -2%;
+  background: radial-gradient(circle at 70% 30%, #22d3ee, transparent 60%);
+  animation: drift2 22s ease-in-out infinite alternate;
+}
+
+@keyframes drift { from { transform: translate(0, 0) scale(1); } to { transform: translate(8%, 6%) scale(1.12); } }
+@keyframes drift2 { from { transform: translate(0, 0) scale(1.05); } to { transform: translate(-7%, 5%) scale(0.95); } }
+
+@keyframes shimmer { 0% { background-position: -200% 0; } 100% { background-position: 200% 0; } }
+.shimmer {
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.08), transparent);
+  background-size: 200% 100%;
+  animation: shimmer 2.4s linear infinite;
+}
+
+@keyframes pulse-dot { 0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(47,227,160,0.6);} 50% { opacity: 0.5; box-shadow: 0 0 0 6px rgba(47,227,160,0);} }
+.live-dot { animation: pulse-dot 1.6s ease-in-out infinite; }
+
+/* ---------- THE BUREAU utilities ---------- */
+/*
+ * Headlines: modern grotesk (Geist), semibold, tight tracking — while any
+ * `.italic` accent inside (or on) the element renders the elegant serif.
+ * The sans-bold × serif-italic contrast is the bureau's typographic signature.
+ */
+.font-serifd {
+  font-family: 'Geist', ui-sans-serif, system-ui, sans-serif;
+  font-weight: 600;
+  letter-spacing: -0.025em;
+}
+/* accent words: same clean Geist, volt color only — no italic, no serif */
+.font-serifd .italic,
+.font-serifd.italic {
+  font-family: 'Geist', ui-sans-serif, system-ui, sans-serif;
+  font-style: normal;
+  font-weight: 600;
+  letter-spacing: -0.025em;
+}
+.font-sansd { font-family: var(--font-sansd); }
+/* semibold — micro mono-caps must read crisp, never faint */
+.font-monod { font-family: var(--font-monod); font-variant-numeric: tabular-nums; font-weight: 650; }
+
+/* engraved print grain — drop inside any positioned container */
+.bureau-grain {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.05;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* measuring-tape divider: minor ticks every 14px, brass major ticks every 112px */
+.tick-scale {
+  height: 10px;
+  background-image:
+    repeating-linear-gradient(
+      to right,
+      color-mix(in oklab, var(--color-brass) 60%, transparent) 0 1px,
+      transparent 1px 112px
+    ),
+    repeating-linear-gradient(to right, var(--color-bureau-line) 0 1px, transparent 1px 14px);
+  border-bottom: 1px solid var(--color-bureau-line);
+}
+
+/* hairline frame with a brass corner tick — the bureau panel signature */
+.bureau-frame {
+  position: relative;
+  border: 1px solid var(--color-bureau-line);
+  background: var(--color-bureau-panel);
+}
+.bureau-frame::before,
+.bureau-frame::after {
+  content: '';
+  position: absolute;
+  width: 14px;
+  height: 14px;
+  border-color: var(--color-brass);
+  border-style: solid;
+  opacity: 0.7;
+}
+
+/*
+ * BONE-PAPER chapter — scope override. Wrap a section in .bureau-paper and the
+ * whole bureau palette re-themes to ivory paper, ink text and pigment-deep
+ * brass (the dark→light→dark chapter rhythm). Tailwind v4 utilities resolve to
+ * these vars, so children restyle automatically.
+ */
+.bureau-paper {
+  --color-bureau: #e9e2d2;
+  --color-bureau-panel: #f0ead9;
+  --color-bureau-line: #c6bb9f;
+  --color-bureau-fg: #1a160f;
+  --color-bureau-muted: #57503f; /* ink-dark for label legibility on paper */
+  --color-brass: #55611f; /* volt as olive ink on paper */
+  --color-brass-deep: #55611f;
+  --color-rise: #1e7a52;
+  --color-fall: #b03e2c;
+}
+.bureau-frame::before { top: -1px; left: -1px; border-width: 1px 0 0 1px; }
+.bureau-frame::after { bottom: -1px; right: -1px; border-width: 0 1px 1px 0; }
+
+@keyframes seal-rotate { to { transform: rotate(360deg); } }
+.seal-rotate { animation: seal-rotate 70s linear infinite; }
+@media (prefers-reduced-motion: reduce) {
+  .seal-rotate { animation: none; }
+}

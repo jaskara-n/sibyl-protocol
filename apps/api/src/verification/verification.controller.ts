@@ -2,6 +2,9 @@ import { Controller, Get } from '@nestjs/common';
 import { encodeCommitReplayCalldata, type CommitReplayPayload } from '@sibyl/sdk';
 import { readReplayArtifact, readReplayCommitPayload } from '../lib/artifacts.js';
 
+const COMMIT_REPLAY_SIGNATURE =
+  'commitReplay(bytes32,uint32,bytes32,(bytes32,uint32,uint64,bool,bool,bytes32)[])';
+
 @Controller('verification')
 export class VerificationController {
   @Get()
@@ -50,32 +53,43 @@ export class VerificationController {
       };
     }
 
-    const commitPayload: CommitReplayPayload = {
-      datasetHash: payload.datasetHash,
-      scoringVersion: payload.scoringVersionId ?? 1,
-      scores: payload.scores.map((score) => ({
-        agentIdHex: score.agentIdHex,
-        brierPpm: score.brierPpm
-      }))
-    };
+    // Multi-market: re-derive calldata per market via the SDK helper (proving each per-market
+    // payload encodes against the SibylLedger ABI), one entry per market.
+    const markets = payload.markets.map((market) => {
+      const commitPayload: CommitReplayPayload = {
+        datasetHash: payload.datasetHash,
+        scoringVersion: payload.scoringVersionId ?? 1,
+        marketId: market.marketIdHex,
+        scores: market.scores.map((score) => ({
+          agentIdHex: score.agentIdHex,
+          brierPpm: score.brierPpm
+        }))
+      };
 
-    const calldata = encodeCommitReplayCalldata(commitPayload);
+      return {
+        marketId: market.marketId,
+        marketIdHex: market.marketIdHex,
+        args: {
+          datasetHash: payload.datasetHash,
+          scoringVersion: commitPayload.scoringVersion,
+          marketId: market.marketIdHex,
+          scores: market.scores.map((score) => ({
+            agentId: score.agentIdHex,
+            brierPpm: score.brierPpm,
+            updatedEpoch: 0,
+            active: true,
+            exists: true,
+            marketId: market.marketIdHex
+          }))
+        },
+        calldata: encodeCommitReplayCalldata(commitPayload)
+      };
+    });
 
     return {
       status: 'ready',
-      function: 'commitReplay(bytes32,uint32,(bytes32,uint32,uint64,bool,bool)[])',
-      args: {
-        datasetHash: payload.datasetHash,
-        scoringVersion: commitPayload.scoringVersion,
-        scores: payload.scores.map((score) => ({
-          agentId: score.agentIdHex,
-          brierPpm: score.brierPpm,
-          updatedEpoch: 0,
-          active: true,
-          exists: true
-        }))
-      },
-      calldata
+      function: COMMIT_REPLAY_SIGNATURE,
+      markets
     };
   }
 }
