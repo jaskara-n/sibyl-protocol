@@ -92,7 +92,7 @@ export function InstrumentAct({ consensus }: { consensus: HeroConsensus }) {
   // docks to the MEASURED column center (px), scale fitted to the column
   const objX = useTransform(sp, [0.46, 0.78], [0, park.x]);
   const objY = useTransform(sp, [0.46, 0.78], [0, park.y]);
-  const objScale = useTransform(sp, [0.46, 0.78], [1, park.scale]);
+  const objScale = useTransform(sp, [0, 0.35, 0.46, 0.78], [0.92, 1.12, 1.12, park.scale]);
 
   // intro overline — present early, files away before the statement
   const introOpacity = useTransform(sp, [0, 0.05, 0.3, 0.4], [0, 1, 1, 0]);

@@ -82,12 +82,9 @@ function Armillary({
 
     if (root.current) {
       // the dial settles perfectly face-on — engraved text reads true.
-      // scale arc: commanding entry (0.85) -> full-screen beat (1.15) -> parks
-      // at 1.0 so the under-dial verdict sits safely inside the camera frustum
+      // NO scale here: the DOM spring is the ONLY scale authority (two
+      // competing scale animations are what made the park feel broken)
       root.current.rotation.x = lerp(0.3, 0, assembly);
-      const beat = lerp(0.85, 1.15, assembly);
-      const settle = Math.max(0, Math.min(1, (p - 0.45) / 0.3));
-      root.current.scale.setScalar(lerp(beat, 1.0, settle));
     }
     // the gyroscope heart spins; the dial stays legible
     if (gyro.current) gyro.current.rotation.y += delta * (0.12 + p * 0.18);
