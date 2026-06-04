@@ -44,7 +44,7 @@ export default async function VaultPage() {
             consensus. NAV is idle cash plus the value of open venue positions — no leverage, no borrow path.
           </p>
           <div className="mt-6 flex flex-wrap items-center gap-2">
-            <Stamp>{totalAssets.toLocaleString(undefined, { maximumFractionDigits: 0 })} assets</Stamp>
+            <Stamp>{totalAssets.toLocaleString('en-US', { maximumFractionDigits: 0 })} assets</Stamp>
             <Stamp className="text-brass">{positions.length} positions</Stamp>
             <Stamp className="text-rise">live deposit / withdraw · Mantle Sepolia</Stamp>
           </div>

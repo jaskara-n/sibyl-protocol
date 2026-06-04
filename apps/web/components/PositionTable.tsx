@@ -58,7 +58,7 @@ export function PositionTable({ positions }: { positions: VaultPosition[] }) {
                 </span>
               </span>
               <span className="text-right font-monod text-sm text-bureau-fg">
-                {r.value.toLocaleString(undefined, { maximumFractionDigits: 2 })}
+                {r.value.toLocaleString('en-US', { maximumFractionDigits: 2 })}
               </span>
               <span className="text-right font-monod text-sm text-brass">{pct}%</span>
             </li>

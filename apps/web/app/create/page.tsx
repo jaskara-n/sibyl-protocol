@@ -96,7 +96,7 @@ function toUnix(local: string): number | null {
 function fmt(v: bigint | undefined, maxFractionDigits = 2): string {
   if (v === undefined) return '—';
   const n = Number(v) / 10 ** DEC;
-  return n.toLocaleString(undefined, { maximumFractionDigits: maxFractionDigits });
+  return n.toLocaleString('en-US', { maximumFractionDigits: maxFractionDigits });
 }
 
 export default function CreateMarketPage() {

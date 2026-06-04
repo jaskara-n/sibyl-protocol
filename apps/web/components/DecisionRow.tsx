@@ -13,6 +13,9 @@ function relTime(ts: number): string {
   const h = Math.round(m / 60);
   if (h < 24) return `${h}h ago`;
   const d = Math.round(h / 24);
+  // the frozen replay's deterministic windows carry archival timestamps —
+  // "20588d ago" reads like a bug; name it what it is
+  if (d > 365) return 'replay archive';
   return `${d}d ago`;
 }
 

@@ -44,7 +44,7 @@ const EXPLORER = mantleSepolia.blockExplorers.default.url;
 function fmt(v: bigint | undefined, maxFractionDigits = 6): string {
   if (v === undefined) return '—';
   const n = Number(formatUnits(v, DEC));
-  return n.toLocaleString(undefined, { maximumFractionDigits: maxFractionDigits });
+  return n.toLocaleString('en-US', { maximumFractionDigits: maxFractionDigits });
 }
 
 export function VaultForm({ sharePrice }: { sharePrice: number }) {
@@ -134,7 +134,7 @@ export function VaultForm({ sharePrice }: { sharePrice: number }) {
     }
     return fallback === null
       ? '—'
-      : fallback.toLocaleString(undefined, { maximumFractionDigits: 6 });
+      : fallback.toLocaleString('en-US', { maximumFractionDigits: 6 });
   }, [mode, previewDepositShares, previewRedeemAssets, fallback]);
 
   // ---- Writes ----
@@ -287,7 +287,7 @@ export function VaultForm({ sharePrice }: { sharePrice: number }) {
       <div className="mt-5 border border-bureau-line bg-bureau-panel p-4">
         <PreviewRow
           label="Share price"
-          value={price.toLocaleString(undefined, { maximumFractionDigits: 6 })}
+          value={price.toLocaleString('en-US', { maximumFractionDigits: 6 })}
         />
         {mode === 'deposit' ? (
           <PreviewRow

@@ -15,7 +15,7 @@ function fmtReserve(v: string | null): string {
   try {
     const n = Number(v) / 10 ** SUSD_DECIMALS;
     if (!Number.isFinite(n)) return '—';
-    return n.toLocaleString(undefined, { maximumFractionDigits: n < 1 ? 4 : 2 });
+    return n.toLocaleString('en-US', { maximumFractionDigits: n < 1 ? 4 : 2 });
   } catch {
     return '—';
   }
@@ -23,7 +23,7 @@ function fmtReserve(v: string | null): string {
 
 function fmtResolveTime(ts: number | null): string {
   if (!ts) return '—';
-  return new Date(ts * 1000).toLocaleString(undefined, {
+  return new Date(ts * 1000).toLocaleString('en-US', {
     year: 'numeric',
     month: 'short',
     day: 'numeric',

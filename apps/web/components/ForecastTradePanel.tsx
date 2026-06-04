@@ -51,7 +51,7 @@ type Side = 'YES' | 'NO';
 function fmt(v: bigint | undefined, maxFractionDigits = 4): string {
   if (v === undefined) return '—';
   const n = Number(formatUnits(v, DEC));
-  return n.toLocaleString(undefined, { maximumFractionDigits: maxFractionDigits });
+  return n.toLocaleString('en-US', { maximumFractionDigits: maxFractionDigits });
 }
 
 export function ForecastTradePanel({

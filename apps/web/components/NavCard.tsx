@@ -33,7 +33,7 @@ export function NavCard({
       </div>
 
       <div className="mt-6 font-serifd text-[clamp(2.6rem,6vw,4rem)] leading-[1] text-bureau-fg">
-        {totalAssets.toLocaleString(undefined, { maximumFractionDigits: 2 })}
+        {totalAssets.toLocaleString('en-US', { maximumFractionDigits: 2 })}
         <span className="ml-3 align-baseline font-monod text-sm uppercase tracking-[0.2em] text-bureau-muted">
           assets
         </span>
@@ -41,11 +41,11 @@ export function NavCard({
 
       {/* Ruled figure ledger */}
       <dl className="mt-6 border-t border-bureau-line/60">
-        <Figure label="Idle cash" value={cash.toLocaleString(undefined, { maximumFractionDigits: 2 })} />
-        <Figure label="Deployed" value={deployed.toLocaleString(undefined, { maximumFractionDigits: 2 })} accent="text-rise" />
+        <Figure label="Idle cash" value={cash.toLocaleString('en-US', { maximumFractionDigits: 2 })} />
+        <Figure label="Deployed" value={deployed.toLocaleString('en-US', { maximumFractionDigits: 2 })} accent="text-rise" />
         <Figure
           label="Share price"
-          value={sharePrice.toLocaleString(undefined, { maximumFractionDigits: 6 })}
+          value={sharePrice.toLocaleString('en-US', { maximumFractionDigits: 6 })}
           accent="text-brass"
         />
       </dl>

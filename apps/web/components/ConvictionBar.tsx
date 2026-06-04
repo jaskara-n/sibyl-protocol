@@ -33,13 +33,13 @@ export function ConvictionBar({
     <div className="flex flex-col gap-2.5">
       <div className="flex items-baseline justify-between font-monod text-[11px] uppercase tracking-[0.18em]">
         <span className="text-bureau-muted">Conviction index</span>
-        <span className="text-brass">{conviction.toLocaleString()}</span>
+        <span className="text-brass">{conviction.toLocaleString('en-US')}</span>
       </div>
 
       {/* Reputation-weight gauge line */}
       <div
         role="img"
-        aria-label={`Conviction index ${conviction.toLocaleString()}: ${activeAgentCount} active agents, total reputation weight ${Math.round(totalWeight).toLocaleString()}`}
+        aria-label={`Conviction index ${conviction.toLocaleString('en-US')}: ${activeAgentCount} active agents, total reputation weight ${Math.round(totalWeight).toLocaleString('en-US')}`}
         className="h-[3px] w-full bg-bureau-line/60"
       >
         <motion.div
@@ -68,7 +68,7 @@ export function ConvictionBar({
           )}
         </div>
         <span className="shrink-0 font-monod text-[11px] uppercase tracking-[0.2em] text-bureau-muted">
-          {activeAgentCount} active · weight {Math.round(totalWeight).toLocaleString()}
+          {activeAgentCount} active · weight {Math.round(totalWeight).toLocaleString('en-US')}
         </span>
       </div>
     </div>
