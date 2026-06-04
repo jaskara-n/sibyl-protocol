@@ -10,6 +10,7 @@ import {
 } from '../../../lib/api';
 import { ConsensusGauge } from '../../../components/ConsensusGauge';
 import { ConvictionBar } from '../../../components/ConvictionBar';
+import { LiveRoundPanel } from '../../../components/LiveRoundPanel';
 import { Reveal } from '../../../components/landing/Reveal';
 import { CalibrationDial } from '../../../components/landing/CalibrationDial';
 import { tier } from '../../../lib/utils';
@@ -121,6 +122,9 @@ export default async function MarketPage({ params }: { params: Promise<{ marketI
         </header>
 
         <div className="tick-scale" aria-hidden />
+
+        {/* The live wire — real-time rounds, agents on the record */}
+        <LiveRoundPanel market={id} />
 
         {/* Consensus + conviction */}
         <section className="mt-10 grid items-stretch gap-5 md:grid-cols-[320px_1fr]">
