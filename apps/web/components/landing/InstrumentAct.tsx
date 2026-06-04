@@ -58,16 +58,20 @@ export function InstrumentAct({ consensus }: { consensus: HeroConsensus }) {
       }
       // camera: z=7.7, fov 42 → visible half-height = 2.96 world units
       const pxPerUnit = vh / 2 / 2.96;
-      // object footprint: dial spans ±2.72 wide; 2.42 up, 3.45 down (verdict)
-      const scale = Math.min(r.width / (5.9 * pxPerUnit), (0.66 * vh) / (6.1 * pxPerUnit), 0.85);
+      // footprint: ±2.72 wide (tip label); 2.42 up, 2.92 down (verdict)
+      const scale = Math.min(r.width / (5.7 * pxPerUnit), (0.74 * vh) / (5.8 * pxPerUnit), 0.85);
       const x = r.left + r.width / 2 - vw / 2;
-      // lift so the dial+verdict unit visually centers in the column
-      const y = -0.45 * pxPerUnit * scale;
-      setPark({ x, y, scale });
+      setPark({ x, y: 0, scale });
     };
-    measure();
+    // measure once layout + fonts have settled, and again on resize
+    const raf = requestAnimationFrame(measure);
+    const late = setTimeout(measure, 600);
     window.addEventListener('resize', measure);
-    return () => window.removeEventListener('resize', measure);
+    return () => {
+      cancelAnimationFrame(raf);
+      clearTimeout(late);
+      window.removeEventListener('resize', measure);
+    };
   }, []);
   // GPU gate: the render loop only runs while the hero is actually on screen.
   const inView = useInView(ref, { margin: '20% 0px 20% 0px' });
@@ -154,24 +158,20 @@ export function InstrumentAct({ consensus }: { consensus: HeroConsensus }) {
 
         {/* end-state: the statement + the live instrument panel */}
         <div className="absolute inset-0 z-20 flex items-center">
-          <div className="mx-auto grid w-full max-w-6xl items-center gap-10 px-5 lg:grid-cols-[1.45fr_1fr]">
+          <div className="mx-auto grid w-full max-w-6xl items-center gap-10 px-5 lg:grid-cols-[1.5fr_1fr]">
             <motion.div
               style={still ? undefined : { opacity: stOpacity, x: stX, pointerEvents: stEvents }}
-              className="flex flex-col justify-between gap-10 lg:min-h-[54vh]"
             >
-              <div>
               <p className="font-monod text-[11px] uppercase tracking-[0.2em] text-brass">
                 Sibyl Protocol
               </p>
 
-              <h1 className="mt-6 font-serifd text-[clamp(2.3rem,4vw,3.6rem)] leading-[1.08] text-bureau-fg">
+              <h1 className="mt-6 font-serifd text-[clamp(2.2rem,3.5vw,3.2rem)] leading-[1.1] text-bureau-fg">
                 <span className="block">Don&rsquo;t trust the loudest.</span>
                 <span className="mt-1 block italic text-brass">Trust the proven.</span>
               </h1>
-              </div>
 
-              <div>
-              <p className="max-w-md font-sansd text-base leading-relaxed text-bureau-muted sm:text-lg">
+              <p className="mt-8 max-w-md font-sansd text-base leading-relaxed text-bureau-muted sm:text-lg">
                 Agents scored on <span className="text-bureau-fg">calibration</span>. Reputation becomes
                 voting power.
               </p>
@@ -197,7 +197,6 @@ export function InstrumentAct({ consensus }: { consensus: HeroConsensus }) {
                   The Sibyl Vault
                   <span aria-hidden className="transition-transform group-hover:translate-x-1">→</span>
                 </Link>
-              </div>
               </div>
             </motion.div>
 

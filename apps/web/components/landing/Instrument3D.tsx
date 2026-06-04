@@ -296,7 +296,7 @@ export default function Instrument3D({
   return (
     <Canvas
       camera={{ position: [0, 0, 7.7], fov: 42 }}
-      dpr={[1, 1.5]}
+      dpr={[1, 1.25]}
       frameloop={active ? 'always' : 'never'}
       gl={{ alpha: true, antialias: true, powerPreference: 'low-power' }}
       style={{ background: 'transparent' }}
