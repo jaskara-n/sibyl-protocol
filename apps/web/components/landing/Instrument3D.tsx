@@ -22,9 +22,14 @@ const PAPER = '#ece8df';
 const MUTEDC = '#b5ae9f';
 const FONT = '/fonts/GeistMono.ttf';
 
-/** value 0..100 → dial angle (radians): a 180° arc from -140.4° to +39.6° */
+/**
+ * value 0..100 → dial angle (radians) — a true SPEEDOMETER sweep:
+ * 0 at lower-left (210°), 50 at the top (90°), 100 at lower-right (-30°),
+ * the needle sweeping clockwise over the crown. 240° of scale.
+ */
 function dialAngle(v: number): number {
-  return -Math.PI * 0.78 + Math.PI * (Math.max(0, Math.min(100, v)) / 100);
+  const deg = 210 - 2.4 * Math.max(0, Math.min(100, v));
+  return (deg * Math.PI) / 180;
 }
 
 function lerp(a: number, b: number, t: number): number {
@@ -54,6 +59,9 @@ function Armillary({
   const needle = useRef<THREE.Group>(null);
   const tipLabel = useRef<THREE.Group>(null);
   const core = useRef<THREE.Mesh>(null);
+  // troika text objects — fillOpacity is mutated per-frame (cheap uniform)
+  const tipText = useRef<any>(null);
+  const verdictTexts = useRef<any[]>([]);
 
   // scale ticks only along the measuring arc — a gauge, not a clock
   const ticks = useMemo(() => {
@@ -73,8 +81,10 @@ function Armillary({
     const assembly = Math.min(1, p / 0.35);
 
     if (root.current) {
-      root.current.rotation.x = lerp(0.4, 0.14, assembly);
-      root.current.scale.setScalar(lerp(0.62, 1, assembly));
+      // the dial settles perfectly face-on — engraved text reads true.
+      // starts commanding, grows to fill the screen for the calibration beat
+      root.current.rotation.x = lerp(0.3, 0, assembly);
+      root.current.scale.setScalar(lerp(0.85, 1.15, assembly));
     }
     // the gyroscope heart spins; the dial stays legible
     if (gyro.current) gyro.current.rotation.y += delta * (0.12 + p * 0.18);
@@ -92,8 +102,15 @@ function Armillary({
     if (needle.current) {
       const sweep = Math.max(0, Math.min(1, (p - 0.15) / 0.5));
       needle.current.rotation.z = lerp(dialAngle(0), dialAngle(confidence), sweep);
-      // the value label rides the tip, counter-rotated to stay upright
+      // the value label rides the tip, counter-rotated to stay upright,
+      // and only INKS IN as the needle settles on its reading
       if (tipLabel.current) tipLabel.current.rotation.z = -needle.current.rotation.z;
+      if (tipText.current) tipText.current.fillOpacity = Math.max(0, (sweep - 0.75) / 0.25);
+    }
+    // the verdict etches in once the instrument has spoken
+    const verdictIn = Math.max(0, Math.min(1, (p - 0.52) / 0.18));
+    for (const t of verdictTexts.current) {
+      if (t) t.fillOpacity = verdictIn;
     }
     if (core.current) {
       core.current.rotation.x += delta * 0.3;
@@ -159,42 +176,58 @@ function Armillary({
           <coneGeometry args={[0.04, 0.14, 12]} />
           <meshStandardMaterial color={accent} emissive={accent} emissiveIntensity={1.2} />
         </mesh>
-        <group ref={tipLabel} position={[2.32, 0, 0]}>
-          <Text font={FONT} fontSize={0.21} letterSpacing={0.04} color={accent} anchorX="center" anchorY="middle">
+        <group ref={tipLabel} position={[2.72, 0, 0]}>
+          <Text
+            ref={tipText}
+            font={FONT}
+            fontSize={0.21}
+            letterSpacing={0.04}
+            color={accent}
+            fillOpacity={0}
+            anchorX="center"
+            anchorY="middle"
+          >
             {`${Math.round(confidence)}%`}
           </Text>
         </group>
       </group>
 
-      {/* the verdict, etched under the hub */}
+      {/* the verdict, etched in the dial's open lower window — inks in as the
+          instrument settles on its reading */}
       <Text
+        ref={(el: unknown) => { verdictTexts.current[0] = el; }}
         font={FONT}
-        position={[0, -1.06, 0.05]}
+        position={[0, -1.5, 0.5]}
         fontSize={0.3}
         letterSpacing={0.14}
         color={accent}
+        fillOpacity={0}
         anchorX="center"
         anchorY="middle"
       >
         {direction}
       </Text>
       <Text
+        ref={(el: unknown) => { verdictTexts.current[1] = el; }}
         font={FONT}
-        position={[0, -1.38, 0.05]}
-        fontSize={0.105}
+        position={[0, -1.82, 0.5]}
+        fontSize={0.1}
         letterSpacing={0.16}
         color={MUTEDC}
+        fillOpacity={0}
         anchorX="center"
         anchorY="middle"
       >
         {metricsLine}
       </Text>
       <Text
+        ref={(el: unknown) => { verdictTexts.current[2] = el; }}
         font={FONT}
-        position={[0, -1.58, 0.05]}
-        fontSize={0.095}
+        position={[0, -2.02, 0.5]}
+        fontSize={0.09}
         letterSpacing={0.16}
         color={VOLT}
+        fillOpacity={0}
         anchorX="center"
         anchorY="middle"
       >

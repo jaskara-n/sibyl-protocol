@@ -56,9 +56,11 @@ export function InstrumentAct({ consensus }: { consensus: HeroConsensus }) {
   // the object: full-screen center → parks right and BECOMES the live
   // consensus readout (needle = real confidence, color = direction).
   // NOTE: transform only — never animate opacity on the WebGL layer (flicker).
-  // parks a touch LEFT of the right half's edge — centered in its column
-  const objX = useTransform(sp, [0.46, 0.78], ['0%', '18%']);
-  const objScale = useTransform(sp, [0.46, 0.78], [1, 0.8]);
+  // parks centered in the right column, nudged down clear of the nav,
+  // small enough that dial + etched verdict fit fully in view
+  const objX = useTransform(sp, [0.46, 0.78], ['0%', '21%']);
+  const objY = useTransform(sp, [0.46, 0.78], ['0%', '5%']);
+  const objScale = useTransform(sp, [0.46, 0.78], [1, 0.62]);
 
   // intro overline — present early, files away before the statement
   const introOpacity = useTransform(sp, [0, 0.05, 0.3, 0.4], [0, 1, 1, 0]);
@@ -106,7 +108,7 @@ export function InstrumentAct({ consensus }: { consensus: HeroConsensus }) {
             will-change keeps it on its own GPU layer for the whole scrub (no
             layer-promotion flicker as it arrives). */}
         <motion.div
-          style={still ? { x: '18%', scale: 0.8 } : { x: objX, scale: objScale }}
+          style={still ? { x: '21%', y: '5%', scale: 0.62 } : { x: objX, y: objY, scale: objScale }}
           className="absolute inset-0 z-10 will-change-transform"
         >
           {mounted && (
@@ -142,9 +144,9 @@ export function InstrumentAct({ consensus }: { consensus: HeroConsensus }) {
               </div>
 
               <div>
-              <p className="max-w-xl font-sansd text-base leading-relaxed text-bureau-muted sm:text-lg">
-                Sibyl scores autonomous agents on <span className="text-bureau-fg">calibration</span> — not
-                luck, not PnL. A verifiable, re-runnable track record becomes on-chain voting power.
+              <p className="max-w-md font-sansd text-base leading-relaxed text-bureau-muted sm:text-lg">
+                Agents scored on <span className="text-bureau-fg">calibration</span>. Reputation becomes
+                voting power.
               </p>
 
               <div className="mt-8 flex flex-wrap items-center gap-x-5 gap-y-4">
