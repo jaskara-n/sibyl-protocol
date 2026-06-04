@@ -40,6 +40,35 @@ export function InstrumentAct({ consensus }: { consensus: HeroConsensus }) {
   // dynamic({ ssr: false }) without webpack/nodenext resolution drama.
   const [mounted, setMounted] = useState(false);
   useEffect(() => setMounted(true), []);
+
+  // PRO DOCKING: the parked position is MEASURED from the live page grid (the
+  // right column's center), not eyeballed — pixel-exact on every screen size.
+  const colRef = useRef<HTMLDivElement>(null);
+  const [park, setPark] = useState({ x: 0, y: 0, scale: 0.62 });
+  useEffect(() => {
+    const measure = () => {
+      const el = colRef.current;
+      if (!el) return;
+      const r = el.getBoundingClientRect();
+      const vw = window.innerWidth;
+      const vh = window.innerHeight;
+      if (r.width < 80) {
+        setPark({ x: 0, y: 0, scale: 0.62 }); // small screens: stay centered
+        return;
+      }
+      // camera: z=7.7, fov 42 → visible half-height = 2.96 world units
+      const pxPerUnit = vh / 2 / 2.96;
+      // object footprint: dial spans ±2.72 wide; 2.42 up, 3.45 down (verdict)
+      const scale = Math.min(r.width / (5.9 * pxPerUnit), (0.66 * vh) / (6.1 * pxPerUnit), 0.85);
+      const x = r.left + r.width / 2 - vw / 2;
+      // lift so the dial+verdict unit visually centers in the column
+      const y = -0.45 * pxPerUnit * scale;
+      setPark({ x, y, scale });
+    };
+    measure();
+    window.addEventListener('resize', measure);
+    return () => window.removeEventListener('resize', measure);
+  }, []);
   // GPU gate: the render loop only runs while the hero is actually on screen.
   const inView = useInView(ref, { margin: '20% 0px 20% 0px' });
 
@@ -51,16 +80,15 @@ export function InstrumentAct({ consensus }: { consensus: HeroConsensus }) {
   // ONE tight smoothing layer: stiff spring tracks the scroll nearly 1:1
   // (accurate) while still rounding off wheel steps (smooth). No double-lag.
   // overdamped: fast tracking, zero overshoot (no arrival wobble)
-  const sp = useSpring(scrollYProgress, { stiffness: 140, damping: 30, mass: 0.25 });
+  const sp = useSpring(scrollYProgress, { stiffness: 260, damping: 40, mass: 0.16 });
 
   // the object: full-screen center → parks right and BECOMES the live
   // consensus readout (needle = real confidence, color = direction).
   // NOTE: transform only — never animate opacity on the WebGL layer (flicker).
-  // parks centered in the right column, nudged down clear of the nav,
-  // small enough that dial + etched verdict fit fully in view
-  const objX = useTransform(sp, [0.46, 0.78], ['0%', '21%']);
-  const objY = useTransform(sp, [0.46, 0.78], ['0%', '5%']);
-  const objScale = useTransform(sp, [0.46, 0.78], [1, 0.62]);
+  // docks to the MEASURED column center (px), scale fitted to the column
+  const objX = useTransform(sp, [0.46, 0.78], [0, park.x]);
+  const objY = useTransform(sp, [0.46, 0.78], [0, park.y]);
+  const objScale = useTransform(sp, [0.46, 0.78], [1, park.scale]);
 
   // intro overline — present early, files away before the statement
   const introOpacity = useTransform(sp, [0, 0.05, 0.3, 0.4], [0, 1, 1, 0]);
@@ -108,7 +136,7 @@ export function InstrumentAct({ consensus }: { consensus: HeroConsensus }) {
             will-change keeps it on its own GPU layer for the whole scrub (no
             layer-promotion flicker as it arrives). */}
         <motion.div
-          style={still ? { x: '21%', y: '5%', scale: 0.62 } : { x: objX, y: objY, scale: objScale }}
+          style={still ? { x: park.x, y: park.y, scale: park.scale } : { x: objX, y: objY, scale: objScale }}
           className="absolute inset-0 z-10 will-change-transform"
         >
           {mounted && (
@@ -136,10 +164,9 @@ export function InstrumentAct({ consensus }: { consensus: HeroConsensus }) {
                 Sibyl Protocol
               </p>
 
-              <h1 className="mt-6 font-serifd text-[clamp(2.4rem,4.6vw,4.1rem)] leading-[1.06] text-bureau-fg">
-                <span className="block">Don&rsquo;t trust the</span>
-                <span className="block">loudest agent.</span>
-                <span className="mt-1 block italic text-brass">Trust the one that&rsquo;s been right.</span>
+              <h1 className="mt-6 font-serifd text-[clamp(2.3rem,4vw,3.6rem)] leading-[1.08] text-bureau-fg">
+                <span className="block">Don&rsquo;t trust the loudest.</span>
+                <span className="mt-1 block italic text-brass">Trust the proven.</span>
               </h1>
               </div>
 
@@ -174,8 +201,8 @@ export function InstrumentAct({ consensus }: { consensus: HeroConsensus }) {
               </div>
             </motion.div>
 
-            {/* right half belongs to the instrument itself (readout is printed on it) */}
-            <div aria-hidden className="hidden lg:block" />
+            {/* right half belongs to the instrument itself — it DOCKS to this column */}
+            <div ref={colRef} aria-hidden className="hidden lg:block lg:self-stretch" />
           </div>
         </div>
 

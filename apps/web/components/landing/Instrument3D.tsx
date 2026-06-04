@@ -76,15 +76,18 @@ function Armillary({
 
   useFrame((_state, delta) => {
     // fast damp: hugs the scroll position (accurate), kills frame jitter only
-    smooth.current += (progressRef.current - smooth.current) * Math.min(1, delta * 10);
+    smooth.current += (progressRef.current - smooth.current) * Math.min(1, delta * 14);
     const p = smooth.current;
     const assembly = Math.min(1, p / 0.35);
 
     if (root.current) {
       // the dial settles perfectly face-on — engraved text reads true.
-      // starts commanding, grows to fill the screen for the calibration beat
+      // scale arc: commanding entry (0.85) -> full-screen beat (1.15) -> parks
+      // at 1.0 so the under-dial verdict sits safely inside the camera frustum
       root.current.rotation.x = lerp(0.3, 0, assembly);
-      root.current.scale.setScalar(lerp(0.85, 1.15, assembly));
+      const beat = lerp(0.85, 1.15, assembly);
+      const settle = Math.max(0, Math.min(1, (p - 0.45) / 0.3));
+      root.current.scale.setScalar(lerp(beat, 1.0, settle));
     }
     // the gyroscope heart spins; the dial stays legible
     if (gyro.current) gyro.current.rotation.y += delta * (0.12 + p * 0.18);
@@ -197,8 +200,8 @@ function Armillary({
       <Text
         ref={(el: unknown) => { verdictTexts.current[0] = el; }}
         font={FONT}
-        position={[0, -1.5, 0.5]}
-        fontSize={0.3}
+        position={[0, -2.6, 0]}
+        fontSize={0.26}
         letterSpacing={0.14}
         color={accent}
         fillOpacity={0}
@@ -210,8 +213,8 @@ function Armillary({
       <Text
         ref={(el: unknown) => { verdictTexts.current[1] = el; }}
         font={FONT}
-        position={[0, -1.82, 0.5]}
-        fontSize={0.1}
+        position={[0, -2.78, 0]}
+        fontSize={0.095}
         letterSpacing={0.16}
         color={MUTEDC}
         fillOpacity={0}
@@ -223,8 +226,8 @@ function Armillary({
       <Text
         ref={(el: unknown) => { verdictTexts.current[2] = el; }}
         font={FONT}
-        position={[0, -2.02, 0.5]}
-        fontSize={0.09}
+        position={[0, -2.92, 0]}
+        fontSize={0.085}
         letterSpacing={0.16}
         color={VOLT}
         fillOpacity={0}
