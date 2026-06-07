@@ -4,6 +4,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import {
   API_BASE,
+  EXPLORER_TX_BASE,
   type LiveReputation,
   type LiveRound,
   type RoundEvent,
@@ -128,6 +129,20 @@ export function LiveRoundPanel({ market }: { market: string }) {
                 </span>{' '}
                 <span className="text-bureau-fg">{current.consensus.sizeBps}bps</span> ·{' '}
                 <span className="tabular-nums">{(current.consensus.confidence * 100).toFixed(1)}%</span>
+                {current.chainTx && (
+                  <>
+                    {' '}
+                    ·{' '}
+                    <a
+                      href={`${EXPLORER_TX_BASE}/${current.chainTx}`}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="text-brass hover:underline"
+                    >
+                      on mantle ↗
+                    </a>
+                  </>
+                )}
               </div>
             )}
           </div>
@@ -178,6 +193,16 @@ export function LiveRoundPanel({ market }: { market: string }) {
                 <span className="text-bureau-muted">
                   {lastResolved.results?.filter((r) => r.correct).length}/{lastResolved.results?.length} agents right
                 </span>
+                {lastResolved.chainTx && (
+                  <a
+                    href={`${EXPLORER_TX_BASE}/${lastResolved.chainTx}`}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="text-brass hover:underline"
+                  >
+                    recorded on mantle ↗
+                  </a>
+                )}
               </motion.div>
             )}
           </AnimatePresence>

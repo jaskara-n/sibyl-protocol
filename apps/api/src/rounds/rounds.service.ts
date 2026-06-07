@@ -2,8 +2,10 @@ import { Injectable, OnModuleDestroy, OnModuleInit } from '@nestjs/common';
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { Observable, Subject, filter, map } from 'rxjs';
+import { getAddress, keccak256, toBytes, type Hex } from 'viem';
 import { computeConsensusPpm, toPpm } from '@sibyl/shared';
 import { DEFAULT_AGENTS, type AgentInput } from '@sibyl/agents';
+import { emitConsensusOnchain, toAgentId, type OnchainSignal } from '@sibyl/sdk';
 import { listMarkets, readReplayArtifact, scoresForMarket } from '../lib/artifacts.js';
 
 /**
@@ -58,6 +60,8 @@ export type LiveRound = {
   resolvedAt?: number;
   consensusCorrect?: boolean;
   results?: LiveResult[];
+  /** emitConsensus tx hash when this round's house call was recorded on Mantle. */
+  chainTx?: string;
 };
 
 export type LiveReputation = {
@@ -106,6 +110,16 @@ export class RoundsService implements OnModuleInit, OnModuleDestroy {
 
   readonly roundSeconds = Math.max(10, Number(process.env.ROUND_SECONDS ?? 60));
   readonly enabled = process.env.ROUNDS_ENABLED !== 'false';
+
+  /** On-chain recording: ROUNDS_CHAIN_EMIT=1 + PRIVATE_KEY (ledger owner) broadcasts the
+   *  live house call via emitConsensus, throttled per market so gas stays sane. */
+  private readonly chainKey = (process.env.ROUNDS_CHAIN_EMIT === '1' ? process.env.PRIVATE_KEY : undefined) as
+    | Hex
+    | undefined;
+  private readonly chainEmitIntervalMs =
+    Math.max(60, Number(process.env.ROUNDS_CHAIN_EMIT_INTERVAL_SEC ?? 600)) * 1000;
+  private lastChainEmit = new Map<string, number>();
+  private ledgerAddr: `0x${string}` | null | undefined;
 
   onModuleInit(): void {
     this.load();
@@ -231,6 +245,67 @@ export class RoundsService implements OnModuleInit, OnModuleDestroy {
     };
     this.current.set(market, round);
     this.events$.next({ type: 'round_open', market, round, reputation: this.reputationFor(market) });
+    this.maybeEmitOnchain(round);
+  }
+
+  /*//////////////////////////// on-chain record ////////////////////////////*/
+
+  /** Record the round's house call on Mantle (fire-and-forget — the engine never
+   *  blocks on RPC, and a chain failure never touches a tick). When the tx lands,
+   *  the round is re-broadcast with its chainTx so the live wire can link it. */
+  private maybeEmitOnchain(round: LiveRound): void {
+    if (!this.chainKey) return;
+    const last = this.lastChainEmit.get(round.market) ?? 0;
+    if (Date.now() - last < this.chainEmitIntervalMs) return;
+    const ledger = this.resolveLedger();
+    if (!ledger) return;
+    this.lastChainEmit.set(round.market, Date.now());
+
+    const marketId = keccak256(toBytes(round.market));
+    const signals: OnchainSignal[] = round.predictions.map((p) => ({
+      agentId: toAgentId(p.agentId),
+      marketId,
+      isLong: p.direction !== 'SHORT',
+      probabilityPpm: toPpm(p.probability)
+    }));
+
+    emitConsensusOnchain(ledger, marketId, signals, this.chainKey)
+      .then((res) => {
+        round.chainTx = res.txHash;
+        const cur = this.current.get(round.market);
+        if (cur && cur.id === round.id) {
+          this.events$.next({
+            type: 'round_open',
+            market: round.market,
+            round,
+            reputation: this.reputationFor(round.market)
+          });
+        }
+        this.persist();
+      })
+      .catch(() => {
+        // allow a retry at the next throttle window rather than burning it
+        this.lastChainEmit.set(round.market, 0);
+      });
+  }
+
+  private resolveLedger(): `0x${string}` | null {
+    if (this.ledgerAddr !== undefined) return this.ledgerAddr;
+    try {
+      if (process.env.SIBYL_LEDGER_ADDRESS) {
+        this.ledgerAddr = getAddress(process.env.SIBYL_LEDGER_ADDRESS);
+        return this.ledgerAddr;
+      }
+      const p = resolve(process.cwd(), '../../deployments/mantle-sepolia.json');
+      const d = JSON.parse(readFileSync(p, 'utf8')) as {
+        contracts?: { SibylLedger?: { address?: string } };
+      };
+      const addr = d.contracts?.SibylLedger?.address;
+      this.ledgerAddr = addr ? getAddress(addr) : null;
+    } catch {
+      this.ledgerAddr = null;
+    }
+    return this.ledgerAddr;
   }
 
   /*//////////////////////////// data ////////////////////////////*/

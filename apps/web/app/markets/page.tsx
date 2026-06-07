@@ -3,6 +3,7 @@ import type { ReactNode } from 'react';
 import { api, type Consensus, type Market } from '../../lib/api';
 import { ConsensusGauge } from '../../components/ConsensusGauge';
 import { ConvictionBar } from '../../components/ConvictionBar';
+import { LiveWireTicker } from '../../components/LiveWireTicker';
 import { Reveal } from '../../components/landing/Reveal';
 
 function num(v: unknown): number {
@@ -36,6 +37,7 @@ export default async function MarketsPage() {
 
   return (
     <div className="relative z-0 bg-bureau text-bureau-fg">
+      <LiveWireTicker />
       <div className="mx-auto max-w-6xl px-5 pb-24">
         {/* Header */}
         <header className="relative pt-12 pb-10">

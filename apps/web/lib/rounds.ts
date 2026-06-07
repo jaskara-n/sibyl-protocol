@@ -35,7 +35,11 @@ export type LiveRound = {
   resolvedAt?: number;
   consensusCorrect?: boolean;
   results?: LiveResult[];
+  /** emitConsensus tx hash when this round's house call was recorded on Mantle. */
+  chainTx?: string;
 };
+
+export const EXPLORER_TX_BASE = 'https://explorer.sepolia.mantle.xyz/tx';
 
 export type LiveReputation = {
   agentId: string;
