@@ -1,0 +1,19 @@
+<svg width="480" height="480" viewBox="0 0 480 480" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <clipPath id="sq">
+      <path d="M0,140 C0,30 30,0 140,0 H340 C450,0 480,30 480,140 V340 C480,450 450,480 340,480 H140 C30,480 0,450 0,340 Z"/>
+    </clipPath>
+  </defs>
+  <g clip-path="url(#sq)">
+    <rect width="480" height="480" fill="#0e1117"/>
+  </g>
+  <!-- geometric S monogram, stroked -->
+  <path d="M 312 176
+           C 312 150 276 140 240 140
+           C 196 140 168 162 168 194
+           C 168 224 192 238 240 246
+           C 288 254 312 268 312 300
+           C 312 332 284 342 240 342
+           C 204 342 168 332 168 306"
+        fill="none" stroke="#34d399" stroke-width="40" stroke-linecap="round"/>
+</svg>

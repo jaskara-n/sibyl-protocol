@@ -1,7 +1,12 @@
 {
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
-    "outDir": "dist"
+    "outDir": "dist",
+    "rootDir": "src",
+    // Clear the base `paths` so @sibyl/shared resolves to its built types via
+    // node_modules (not source). Keeps the emit flat (dist/index.js) instead of
+    // pulling shared/src into the program and nesting the output.
+    "paths": {}
   },
   "include": ["src/**/*.ts"]
 }

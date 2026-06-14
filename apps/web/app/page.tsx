@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { api, type AgentRow, type ChainStatus, type Consensus, type Verification } from '../lib/api';
 import { short } from '../lib/utils';
+import { LiveWireTicker } from '../components/LiveWireTicker';
 import { TickerRail } from '../components/landing/TickerRail';
 import { InstrumentAct } from '../components/landing/InstrumentAct';
 import { MechanismAct } from '../components/landing/MechanismAct';
@@ -51,6 +52,9 @@ export default async function Page() {
           marketId: consensus.marketId
         }}
       />
+
+      {/* the live wire — the protocol is on the record RIGHT NOW */}
+      <LiveWireTicker />
 
       {/* the protocol, in plain words */}
       <section aria-label="What Sibyl Protocol does" className="border-y border-bureau-line">

@@ -9,6 +9,8 @@ import { DecisionsController } from '../decisions/decisions.controller.js';
 import { MarketsController } from '../markets/markets.controller.js';
 import { VaultController } from '../vault/vault.controller.js';
 import { PredictionsController } from '../predictions/predictions.controller.js';
+import { RoundsController } from '../rounds/rounds.controller.js';
+import { RoundsService } from '../rounds/rounds.service.js';
 
 @Module({
   controllers: [
@@ -21,7 +23,9 @@ import { PredictionsController } from '../predictions/predictions.controller.js'
     DecisionsController,
     MarketsController,
     VaultController,
-    PredictionsController
-  ]
+    PredictionsController,
+    RoundsController
+  ],
+  providers: [RoundsService]
 })
 export class AppModule {}

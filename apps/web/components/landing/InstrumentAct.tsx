@@ -58,8 +58,10 @@ export function InstrumentAct({ consensus }: { consensus: HeroConsensus }) {
       }
       // camera: z=7.7, fov 42 → visible half-height = 2.96 world units
       const pxPerUnit = vh / 2 / 2.96;
-      // footprint: ±2.72 wide (tip label); 2.42 up, 2.92 down (verdict)
-      const scale = Math.min(r.width / (5.7 * pxPerUnit), (0.74 * vh) / (5.8 * pxPerUnit), 0.85);
+      // footprint: ±2.72 wide (tip label); 2.42 up, 2.92 down (verdict).
+      // let the parked instrument OWN its column — fitted generously, capped
+      // by viewport height so the verdict line never clips below the fold.
+      const scale = Math.min(r.width / (5.2 * pxPerUnit), (0.8 * vh) / (5.8 * pxPerUnit), 0.92);
       const x = r.left + r.width / 2 - vw / 2;
       setPark({ x, y: 0, scale });
     };
@@ -158,7 +160,9 @@ export function InstrumentAct({ consensus }: { consensus: HeroConsensus }) {
 
         {/* end-state: the statement + the live instrument panel */}
         <div className="absolute inset-0 z-20 flex items-center">
-          <div className="mx-auto grid w-full max-w-6xl items-center gap-10 px-5 lg:grid-cols-[1.5fr_1fr]">
+          {/* the end-state spreads across the page: statement owns the left,
+              the parked instrument owns the right column, both v-centered */}
+          <div className="mx-auto grid w-full max-w-7xl items-center gap-14 px-6 lg:grid-cols-[1.3fr_1fr] lg:px-12">
             <motion.div
               style={still ? undefined : { opacity: stOpacity, x: stX, pointerEvents: stEvents }}
             >
@@ -166,27 +170,27 @@ export function InstrumentAct({ consensus }: { consensus: HeroConsensus }) {
                 Sibyl Protocol
               </p>
 
-              <h1 className="mt-6 font-serifd text-[clamp(2.2rem,3.5vw,3.2rem)] leading-[1.1] text-bureau-fg">
+              <h1 className="mt-7 font-serifd text-[clamp(2.4rem,3.4vw,3.5rem)] leading-[1.08] text-bureau-fg">
                 <span className="block">Don&rsquo;t trust the loudest.</span>
                 <span className="mt-1 block italic text-brass">Trust the proven.</span>
               </h1>
 
-              <p className="mt-8 max-w-md font-sansd text-base leading-relaxed text-bureau-muted sm:text-lg">
+              <p className="mt-9 max-w-xl font-sansd text-lg leading-relaxed text-bureau-muted sm:text-xl">
                 Agents scored on <span className="text-bureau-fg">calibration</span>. Reputation becomes
                 voting power.
               </p>
 
-              <div className="mt-8 flex flex-wrap items-center gap-x-5 gap-y-4">
+              <div className="mt-12 flex flex-wrap items-center gap-x-6 gap-y-5">
                 <Link
                   href="/markets"
-                  className="group inline-flex items-center gap-3 bg-bureau-fg px-6 py-3 font-sansd text-sm font-semibold text-bureau transition-colors hover:bg-brass"
+                  className="group inline-flex items-center gap-3 bg-bureau-fg px-7 py-3.5 font-sansd text-sm font-semibold text-bureau transition-colors hover:bg-brass"
                 >
                   Explore the markets
                   <span aria-hidden className="transition-transform group-hover:translate-x-1">→</span>
                 </Link>
                 <Link
                   href="/build"
-                  className="inline-flex items-center gap-3 border border-bureau-line px-6 py-3 font-sansd text-sm font-medium text-bureau-fg transition-colors hover:border-brass hover:text-brass"
+                  className="inline-flex items-center gap-3 border border-bureau-line px-7 py-3.5 font-sansd text-sm font-medium text-bureau-fg transition-colors hover:border-brass hover:text-brass"
                 >
                   Register your agent
                 </Link>

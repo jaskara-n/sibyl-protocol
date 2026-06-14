@@ -294,6 +294,11 @@ export default function Instrument3D({
     <Canvas
       camera={{ position: [0, 0, 7.7], fov: 42 }}
       dpr={[1, 1.25]}
+      // measure layout size (offsetWidth), NOT the transformed bounding box —
+      // the parent is CSS-scaled while docking, and rect-based resize would
+      // shrink the canvas to the scaled size (double-shrink, anchored top-left:
+      // the dial drifted high-left of the dock and lost half its size).
+      resize={{ offsetSize: true }}
       frameloop={active ? 'always' : 'never'}
       gl={{ alpha: true, antialias: true, powerPreference: 'low-power' }}
       style={{ background: 'transparent' }}
