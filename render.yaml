@@ -1,0 +1,39 @@
+# Render Blueprint — Sibyl API (NestJS) on the free tier.
+# Deploy: Render Dashboard -> New -> Blueprint -> point at this repo.
+# The API reads contract addresses from deployments/mantle-sepolia.json, so it
+# MUST run with cwd = apps/api (rootDir below guarantees that — the file is
+# resolved as ../../deployments/mantle-sepolia.json).
+services:
+  - type: web
+    name: sibyl-api
+    runtime: node
+    plan: free
+    rootDir: apps/api
+    # Install the whole pnpm workspace (--prod=false keeps devDeps like
+    # typescript for the build), then build the API and its workspace deps only
+    # (sdk, shared, agents). `@sibyl/contracts` build is a no-op echo, so no
+    # Foundry is needed here.
+    buildCommand: corepack enable && pnpm install --prod=false && pnpm --filter "@sibyl/api..." build
+    startCommand: node dist/apps/api/src/main.js
+    healthCheckPath: /health
+    autoDeploy: true
+    envVars:
+      - key: NODE_VERSION
+        value: "20"
+      - key: MANTLE_RPC_URL
+        value: https://rpc.sepolia.mantle.xyz
+      # Read-only public deployment: no PRIVATE_KEY, no on-chain writes.
+      # The app serves the reputation/consensus/NAV already committed on-chain.
+      - key: ROUNDS_ENABLED
+        value: "true"
+      - key: ROUNDS_CHAIN_EMIT
+        value: "0"
+      - key: COMMIT_REPLAY_DRY_RUN
+        value: "true"
+      # Lock the browser frontend's origin once Vercel is live (optional; open by default):
+      # - key: CORS_ORIGIN
+      #   value: https://your-app.vercel.app
+      #
+      # LIVE on-chain emit (optional, NOT recommended on a free host): set
+      # ROUNDS_CHAIN_EMIT=1 and add PRIVATE_KEY (the ledger-owner testnet key)
+      # as a *secret* env var in the dashboard — never commit it.
