@@ -1,0 +1,120 @@
+<svg width="480" height="480" viewBox="0 0 480 480" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <radialGradient id="bg" cx="50%" cy="42%" r="75%">
+      <stop offset="0%" stop-color="#101b26"/>
+      <stop offset="55%" stop-color="#0a121a"/>
+      <stop offset="100%" stop-color="#05080b"/>
+    </radialGradient>
+    <linearGradient id="teal" x1="0" y1="0" x2="480" y2="480" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#3df0c5"/>
+      <stop offset="50%" stop-color="#13d6b0"/>
+      <stop offset="100%" stop-color="#0bb6cf"/>
+    </linearGradient>
+    <linearGradient id="violet" x1="0" y1="480" x2="480" y2="0" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#a855f7"/>
+      <stop offset="100%" stop-color="#7c5cff"/>
+    </linearGradient>
+    <linearGradient id="silver" x1="0" y1="0" x2="0" y2="480" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#e7eef5"/>
+      <stop offset="100%" stop-color="#8b9bab"/>
+    </linearGradient>
+    <radialGradient id="irisGlow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#5bffd8" stop-opacity="0.9"/>
+      <stop offset="40%" stop-color="#16d8b2" stop-opacity="0.35"/>
+      <stop offset="100%" stop-color="#0bb6cf" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="glow" x="-40%" y="-40%" width="180%" height="180%">
+      <feGaussianBlur stdDeviation="4.5" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="softglow" x="-60%" y="-60%" width="220%" height="220%">
+      <feGaussianBlur stdDeviation="9" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <clipPath id="squircle">
+      <path d="M0,140 C0,30 30,0 140,0 H340 C450,0 480,30 480,140 V340 C480,450 450,480 340,480 H140 C30,480 0,450 0,340 Z"/>
+    </clipPath>
+  </defs>
+
+  <!-- background squircle -->
+  <g clip-path="url(#squircle)">
+    <rect width="480" height="480" fill="url(#bg)"/>
+    <!-- faint grid / depth -->
+    <circle cx="240" cy="220" r="200" fill="url(#irisGlow)" opacity="0.18"/>
+  </g>
+
+  <!-- outer hexagon protocol frame -->
+  <g opacity="0.55" filter="url(#glow)">
+    <polygon points="240,52 403,146 403,334 240,428 77,334 77,146"
+      fill="none" stroke="url(#silver)" stroke-width="2"/>
+    <polygon points="240,72 386,156 386,324 240,408 94,324 94,156"
+      fill="none" stroke="url(#teal)" stroke-width="1" opacity="0.5"/>
+  </g>
+
+  <!-- node links from hex vertices to center -->
+  <g stroke="url(#teal)" stroke-width="1.4" opacity="0.45">
+    <line x1="240" y1="52"  x2="240" y2="240"/>
+    <line x1="403" y1="146" x2="240" y2="240"/>
+    <line x1="403" y1="334" x2="240" y2="240"/>
+    <line x1="240" y1="428" x2="240" y2="240"/>
+    <line x1="77"  y1="334" x2="240" y2="240"/>
+    <line x1="77"  y1="146" x2="240" y2="240"/>
+  </g>
+  <g fill="#3df0c5">
+    <circle cx="240" cy="52"  r="5"/><circle cx="403" cy="146" r="5"/>
+    <circle cx="403" cy="334" r="5"/><circle cx="240" cy="428" r="5"/>
+    <circle cx="77"  cy="334" r="5"/><circle cx="77"  cy="146" r="5"/>
+  </g>
+
+  <!-- radial calibration gauge ticks around the eye -->
+  <g stroke="url(#teal)" stroke-width="2" opacity="0.8" filter="url(#glow)">
+    <g transform="rotate(0 240 240)"><line x1="240" y1="120" x2="240" y2="134"/></g>
+    <g transform="rotate(15 240 240)"><line x1="240" y1="122" x2="240" y2="132"/></g>
+    <g transform="rotate(30 240 240)"><line x1="240" y1="122" x2="240" y2="132"/></g>
+    <g transform="rotate(45 240 240)"><line x1="240" y1="120" x2="240" y2="134"/></g>
+    <g transform="rotate(60 240 240)"><line x1="240" y1="122" x2="240" y2="132"/></g>
+    <g transform="rotate(75 240 240)"><line x1="240" y1="122" x2="240" y2="132"/></g>
+    <g transform="rotate(90 240 240)"><line x1="240" y1="120" x2="240" y2="134"/></g>
+    <g transform="rotate(105 240 240)"><line x1="240" y1="122" x2="240" y2="132"/></g>
+    <g transform="rotate(120 240 240)"><line x1="240" y1="122" x2="240" y2="132"/></g>
+    <g transform="rotate(135 240 240)"><line x1="240" y1="120" x2="240" y2="134"/></g>
+    <g transform="rotate(150 240 240)"><line x1="240" y1="122" x2="240" y2="132"/></g>
+    <g transform="rotate(165 240 240)"><line x1="240" y1="122" x2="240" y2="132"/></g>
+    <g transform="rotate(180 240 240)"><line x1="240" y1="120" x2="240" y2="134"/></g>
+    <g transform="rotate(195 240 240)"><line x1="240" y1="122" x2="240" y2="132"/></g>
+    <g transform="rotate(210 240 240)"><line x1="240" y1="122" x2="240" y2="132"/></g>
+    <g transform="rotate(225 240 240)"><line x1="240" y1="120" x2="240" y2="134"/></g>
+    <g transform="rotate(240 240 240)"><line x1="240" y1="122" x2="240" y2="132"/></g>
+    <g transform="rotate(255 240 240)"><line x1="240" y1="122" x2="240" y2="132"/></g>
+    <g transform="rotate(270 240 240)"><line x1="240" y1="120" x2="240" y2="134"/></g>
+    <g transform="rotate(285 240 240)"><line x1="240" y1="122" x2="240" y2="132"/></g>
+    <g transform="rotate(300 240 240)"><line x1="240" y1="122" x2="240" y2="132"/></g>
+    <g transform="rotate(315 240 240)"><line x1="240" y1="120" x2="240" y2="134"/></g>
+    <g transform="rotate(330 240 240)"><line x1="240" y1="122" x2="240" y2="132"/></g>
+    <g transform="rotate(345 240 240)"><line x1="240" y1="122" x2="240" y2="132"/></g>
+  </g>
+
+  <!-- the oracle eye -->
+  <g filter="url(#softglow)">
+    <path d="M96,240 Q240,128 384,240 Q240,352 96,240 Z"
+      fill="#070d12" stroke="url(#violet)" stroke-width="6"/>
+    <path d="M96,240 Q240,128 384,240 Q240,352 96,240 Z"
+      fill="none" stroke="url(#teal)" stroke-width="3"/>
+  </g>
+
+  <!-- iris: calibration rings -->
+  <circle cx="240" cy="240" r="92" fill="url(#irisGlow)"/>
+  <circle cx="240" cy="240" r="82" fill="none" stroke="url(#teal)" stroke-width="2.5" opacity="0.55"/>
+  <circle cx="240" cy="240" r="64" fill="none" stroke="url(#teal)" stroke-width="3" opacity="0.8"/>
+  <circle cx="240" cy="240" r="46" fill="none" stroke="url(#silver)" stroke-width="2" opacity="0.7"/>
+
+  <!-- gauge needle (proof-of-edge pointer) -->
+  <g filter="url(#glow)">
+    <line x1="240" y1="240" x2="296" y2="186" stroke="url(#teal)" stroke-width="4" stroke-linecap="round"/>
+  </g>
+
+  <!-- pupil node -->
+  <circle cx="240" cy="240" r="30" fill="#04090d" stroke="url(#violet)" stroke-width="3"/>
+  <circle cx="240" cy="240" r="11" fill="#5bffd8" filter="url(#glow)"/>
+  <circle cx="252" cy="228" r="4" fill="#eafff9" opacity="0.9"/>
+</svg>

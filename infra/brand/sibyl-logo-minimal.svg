@@ -1,0 +1,31 @@
+<svg width="480" height="480" viewBox="0 0 480 480" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <clipPath id="sq">
+      <path d="M0,140 C0,30 30,0 140,0 H340 C450,0 480,30 480,140 V340 C480,450 450,480 340,480 H140 C30,480 0,450 0,340 Z"/>
+    </clipPath>
+    <radialGradient id="lift" cx="50%" cy="46%" r="60%">
+      <stop offset="0%" stop-color="#14181d"/>
+      <stop offset="100%" stop-color="#0d1014"/>
+    </radialGradient>
+    <radialGradient id="dotglow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#34d399" stop-opacity="0.35"/>
+      <stop offset="100%" stop-color="#34d399" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+
+  <g clip-path="url(#sq)">
+    <rect width="480" height="480" fill="url(#lift)"/>
+  </g>
+
+  <!-- outer aperture ring, open at top -->
+  <path d="M 208.9 124.1 A 120 120 0 1 0 271.1 124.1"
+        fill="none" stroke="#34d399" stroke-width="6" stroke-linecap="round"/>
+
+  <!-- inner ring -->
+  <circle cx="240" cy="240" r="74" fill="none" stroke="#34d399" stroke-width="5" opacity="0.9"/>
+
+  <!-- center -->
+  <circle cx="240" cy="240" r="46" fill="url(#dotglow)"/>
+  <circle cx="240" cy="240" r="15" fill="#34d399"/>
+  <circle cx="245" cy="234" r="4" fill="#d7fff0" opacity="0.85"/>
+</svg>
