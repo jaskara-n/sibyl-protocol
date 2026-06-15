@@ -414,8 +414,8 @@ export default function CreateMarketPage() {
 
             {/* Derived preview — the filing record */}
             <div className="mt-5 border border-bureau-line bg-bureau-panel p-4">
-              <PreviewRow label="marketId" value={marketId ? short(marketId, 10, 8) : '—'} hint="keccak256(slug)" />
-              <PreviewRow label="questionHash" value={questionHash ? short(questionHash, 10, 8) : '—'} hint="keccak256(question)" />
+              <PreviewRow label="Market ID" value={marketId ? short(marketId, 10, 8) : '—'} hint="on-chain id" />
+              <PreviewRow label="Question hash" value={questionHash ? short(questionHash, 10, 8) : '—'} hint="tamper-proof fingerprint" />
               <PreviewRow
                 label="resolver"
                 value={address ? short(address) : 'connect wallet'}
@@ -424,7 +424,7 @@ export default function CreateMarketPage() {
               <PreviewRow
                 label="resolve time"
                 value={resolveUnix !== null ? `${resolveUnix}` : '—'}
-                hint="unix uint64"
+                hint="when it settles"
               />
               <PreviewRow
                 label="seed liquidity"

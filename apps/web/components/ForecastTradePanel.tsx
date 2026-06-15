@@ -461,12 +461,12 @@ export function ForecastTradePanel({
               <div className="mt-4 space-y-2 border border-bureau-line bg-bureau p-4">
                 {tradeMode === 'buy' ? (
                   <>
-                    <PreviewRow label={`${side} shares (quote)`} value={fmt(buyQuote as bigint | undefined)} accent="text-rise" hint="calcBuyAmount" />
+                    <PreviewRow label={`${side} shares (quote)`} value={fmt(buyQuote as bigint | undefined)} accent="text-rise" />
                     <PreviewRow label="min received (1% slippage)" value={fmt(minOut)} />
                   </>
                 ) : (
                   <>
-                    <PreviewRow label={`${side} shares spent (quote)`} value={fmt(sellQuote as bigint | undefined)} accent="text-fall" hint="calcSellAmount" />
+                    <PreviewRow label={`${side} shares spent (quote)`} value={fmt(sellQuote as bigint | undefined)} accent="text-fall" />
                     <PreviewRow label="max spent (1% slippage)" value={fmt(maxIn)} />
                   </>
                 )}
