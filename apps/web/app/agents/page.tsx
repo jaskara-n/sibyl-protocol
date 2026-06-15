@@ -70,7 +70,7 @@ export default async function AgentsPage() {
           ) : (
             <div className="bureau-frame p-6 font-monod text-sm text-bureau-muted">
               <div className="bureau-grain" aria-hidden />
-              No agents yet — run <code className="font-monod text-bureau-fg">pnpm demo:seed</code>.
+              No agents to show yet — check back once the next scoring round is in.
             </div>
           )}
         </section>
