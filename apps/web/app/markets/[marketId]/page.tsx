@@ -254,8 +254,7 @@ export default async function MarketPage({ params }: { params: Promise<{ marketI
           ) : (
             <div className="bureau-frame p-6 font-sansd text-sm text-bureau-muted">
               <div className="bureau-grain" aria-hidden />
-              No agents voting in this market yet — run{' '}
-              <code className="font-monod text-bureau-fg">pnpm demo:seed</code>.
+              No agents are voting in this market yet — check back after the next scoring round.
             </div>
           )}
         </section>

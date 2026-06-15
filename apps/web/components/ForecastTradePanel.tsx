@@ -674,10 +674,9 @@ export function ForecastTradePanel({
       )}
 
       <p className="mt-4 border-t border-bureau-line pt-3 font-monod text-[11px] leading-relaxed text-bureau-muted">
-        Transactions are <b className="text-bureau-fg">real and signed by your wallet</b> on Mantle Sepolia (chain
-        5003). Buys route through an sUSD <code className="text-bureau-fg/80">approve</code> to the pool, then
-        <code className="text-bureau-fg/80"> buy(outcome, in, minOut)</code> at a 1% slippage floor; sells approve the
-        outcome token then <code className="text-bureau-fg/80">sell(outcome, out, maxIn)</code>. Testnet assets only.
+        Trades are <b className="text-bureau-fg">real and signed by your wallet</b> on Mantle Sepolia. Buying may
+        ask for a one-time approval to spend sUSD, then your order fills at the live market price with a 1% slippage
+        limit. Selling works the same way in reverse. Testnet assets only.
       </p>
     </div>
   );

@@ -84,7 +84,7 @@ export function VerifyClient({
 
           <motion.div {...fadeUp} className="bureau-frame p-6">
             <div className="bureau-grain" aria-hidden />
-            <div className="font-monod text-[11px] uppercase tracking-[0.2em] text-brass">02 · committed datasetHash</div>
+            <div className="font-monod text-[11px] uppercase tracking-[0.2em] text-brass">02 · committed dataset hash</div>
             <h2 className="mt-2 font-serifd text-[clamp(1.5rem,2.6vw,2rem)] leading-tight">Anchored on Mantle.</h2>
             <p className="mt-3 font-sansd text-sm leading-relaxed text-bureau-muted">
               The SHA-256 of the frozen dataset is written on-chain. If a single byte of the track record changed, the

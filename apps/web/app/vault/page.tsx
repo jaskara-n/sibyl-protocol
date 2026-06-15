@@ -62,7 +62,7 @@ export default async function VaultPage() {
               <div className="mb-3 flex items-baseline justify-between">
                 <h2 className="font-serifd text-2xl">Open positions</h2>
                 <span className="font-monod text-[11px] uppercase tracking-[0.2em] text-bureau-muted">
-                  per-market venue notional
+                  value held per market
                 </span>
               </div>
               <PositionTable positions={positions} />
@@ -86,12 +86,9 @@ export default async function VaultPage() {
                   Self-custody · on-chain
                 </div>
                 <p className="mt-2 font-sansd text-sm leading-relaxed text-bureau-muted">
-                  The vault is a non-custodial ERC-4626 contract on Mantle Sepolia (chain 5003). Deposits and
-                  withdrawals are real transactions signed by your own wallet: a deposit calls
-                  {' '}<code className="font-monod text-brass">approve</code> (when allowance is insufficient) then{' '}
-                  <code className="font-monod text-brass">deposit(assets, you)</code>, and a withdrawal calls{' '}
-                  <code className="font-monod text-brass">redeem(shares, you, you)</code>. Shares are minted to your
-                  address — only you can redeem them. Testnet assets only.
+                  The vault is a non-custodial ERC-4626 contract on Mantle Sepolia. Every deposit and withdrawal
+                  is a real transaction you sign from your own wallet — your funds are never held by us. Your
+                  shares are minted to your address, and only you can withdraw them. Testnet assets only.
                 </p>
               </div>
             </div>

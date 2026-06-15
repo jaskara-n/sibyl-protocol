@@ -294,14 +294,12 @@ export function VaultForm({ sharePrice }: { sharePrice: number }) {
             label="Shares you'd receive"
             value={previewText}
             accent="text-rise"
-            hint="previewDeposit"
           />
         ) : (
           <PreviewRow
             label="Assets you'd receive"
             value={previewText}
             accent="text-rise"
-            hint="previewRedeem"
           />
         )}
       </div>
@@ -378,10 +376,9 @@ export function VaultForm({ sharePrice }: { sharePrice: number }) {
 
       {/* Disclaimer */}
       <p className="mt-5 border-t border-bureau-line pt-3 font-monod text-[11px] leading-relaxed text-bureau-muted">
-        Transactions are <b className="text-bureau-fg">real and signed by your wallet</b> on Mantle Sepolia
-        (chain 5003). Deposits route through an ERC-20 <code className="text-brass">approve</code> when
-        allowance is insufficient, then <code className="text-brass">deposit(assets, you)</code>; withdrawals
-        call <code className="text-brass">redeem(shares, you, you)</code>. Testnet assets only.
+        Transactions are <b className="text-bureau-fg">real and signed by your wallet</b> on Mantle Sepolia.
+        Your first deposit may ask for a one-time approval to spend sUSD, then the deposit confirms; withdrawing
+        returns your assets to your wallet. Testnet assets only.
       </p>
     </div>
   );

@@ -556,11 +556,10 @@ export default function CreateMarketPage() {
 
             {/* Disclaimer */}
             <p className="mt-5 border-t border-bureau-line pt-3 font-monod text-[11px] leading-relaxed text-bureau-muted">
-              Transactions are <b className="text-bureau-fg">real and signed by your wallet</b> on Mantle Sepolia
-              (chain 5003). The factory derives a fresh YES/NO market and FPMM pool from{' '}
-              <code className="text-brass">createAndSeed(marketId, sUSD, questionHash, resolveTime, resolver, seed)</code>.
-              Seeding routes through an sUSD <code className="text-brass">approve</code> first. You are set as the
-              resolver and can settle the market after its resolve time. Testnet assets only.
+              Transactions are <b className="text-bureau-fg">real and signed by your wallet</b> on Mantle Sepolia.
+              This creates a fresh YES/NO market and seeds it with starting liquidity in one step (you may be asked
+              for a one-time approval to spend sUSD). You become the market&apos;s resolver and can settle the
+              outcome after its resolve time. Testnet assets only.
             </p>
           </div>
         </Reveal>
