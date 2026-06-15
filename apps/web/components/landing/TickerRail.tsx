@@ -36,7 +36,7 @@ export function TickerRail({ network, epoch }: { network: string; epoch?: number
         </span>
         <span className="hidden sm:inline">Live on {network}</span>
         <span>
-          Epoch <span className="text-bureau-fg">{epoch ?? '—'}</span> · ledger committed
+          Scoring round <span className="text-bureau-fg">{epoch ?? '—'}</span> · committed on-chain
         </span>
       </div>
     </div>

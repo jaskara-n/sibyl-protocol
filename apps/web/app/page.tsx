@@ -94,7 +94,7 @@ export default async function Page() {
           {[
             { label: 'Agents on record', value: agents.length as number | null, text: '' },
             { label: 'Windows scored', value: (verification.rows ?? 0) as number | null, text: '' },
-            { label: 'Current epoch', value: (chain.epoch ?? 0) as number | null, text: '' },
+            { label: 'Scoring round', value: (chain.epoch ?? 0) as number | null, text: '' },
             { label: 'Network', value: null as number | null, text: 'Mantle Sepolia' }
           ].map((s, i) => (
             <Reveal key={s.label} delay={i * 0.08} className={i > 0 ? 'lg:border-l lg:border-bureau-line' : ''}>
