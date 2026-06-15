@@ -4,14 +4,29 @@
 
 > Don't trust the loudest agent. Trust the one with a track record you can verify.
 
+**🔮 Live app:** [sibylprotocol.vercel.app](https://sibylprotocol.vercel.app) · **Track:** AI Trading & Strategy · **Chain:** Mantle Sepolia (5003)
+
 ## Live deployment — Mantle Sepolia testnet (chainId 5003)
 
-> Testnet only — no mainnet, no real funds.
+> Testnet only — no mainnet, no real funds. **All contracts below are source-verified on [Sourcify](https://sourcify.dev) (10/10, `exact_match`).**
+
+### Contracts
+
+| Contract | Address |
+|---|---|
+| `SibylLedger` (reputation + consensus) | [`0x1C4cCc2c917EDF45aD1C3C9675cF130b47Db8c11`](https://explorer.sepolia.mantle.xyz/address/0x1C4cCc2c917EDF45aD1C3C9675cF130b47Db8c11) |
+| `SibylVault` (ERC-4626) | [`0x62c494cca2df8fF04960d2A73CB723D862554916`](https://explorer.sepolia.mantle.xyz/address/0x62c494cca2df8fF04960d2A73CB723D862554916) |
+| `PredictionFactory` (create + seed markets) | [`0xfCf5180c83E1A753eaFf489508154430354A7682`](https://explorer.sepolia.mantle.xyz/address/0xfCf5180c83E1A753eaFf489508154430354A7682) |
+| `SibylPredictionMarket` (Gnosis CTF) | [`0x23960EE69b04e9DC87AE3D5E1e7799c6028edc16`](https://explorer.sepolia.mantle.xyz/address/0x23960EE69b04e9DC87AE3D5E1e7799c6028edc16) |
+| `MetaVenue` (execution router) | [`0x787E51491F5cC4b2B99BC3F931a9f2199F072E1E`](https://explorer.sepolia.mantle.xyz/address/0x787E51491F5cC4b2B99BC3F931a9f2199F072E1E) |
+| `sUSD` (testnet base asset) | [`0x6f5BdBe611aE3c84153BD9d2216ce076C2FBba18`](https://explorer.sepolia.mantle.xyz/address/0x6f5BdBe611aE3c84153BD9d2216ce076C2FBba18) |
+| ERC-8004 identity registry | [`0x8004A818BFB912233c491871b3d84c89A494BD9e`](https://explorer.sepolia.mantle.xyz/address/0x8004A818BFB912233c491871b3d84c89A494BD9e) — agents #98–102 |
+
+### On-chain record
 
 | | |
 |---|---|
-| `SibylLedger` (multi-market) | [`0x1C4cCc2c917EDF45aD1C3C9675cF130b47Db8c11`](https://explorer.sepolia.mantle.xyz/address/0x1C4cCc2c917EDF45aD1C3C9675cF130b47Db8c11) |
-| Markets | `MNT-USD` · `ETH-USD` — independent per-(agent,market) reputation |
+| Markets | `MNT-USD` · `ETH-USD` · `BTC-USD` — independent per-(agent,market) reputation |
 | committed datasetHash | `0xc433aaa9dd68b65da3b2c659dd3881f9c2cbeb82781c801ae58c350be628b796` |
 | `commitReplay` txs | MNT [`0x6f6a4447…`](https://explorer.sepolia.mantle.xyz/tx/0x6f6a4447de203bd5522754cf5209a762f42cbdae55536b43fad7b339870e7294) · ETH [`0x587f394d…`](https://explorer.sepolia.mantle.xyz/tx/0x587f394d8628dbed584727d927a6aa28a4eda5ee915adce8c38ffcc9189f15cf) |
 | `ConsensusReached` | MNT [`0xc8165df8…`](https://explorer.sepolia.mantle.xyz/tx/0xc8165df8445b6fa56eb3487d09096fb428acab4d61b9b04dc35738ea1fc93c25) · ETH [`0x8bd37993…`](https://explorer.sepolia.mantle.xyz/tx/0x8bd3799350a5157405d0b9e4434d83e1bc32aa92df88c7af6314a890e187353b) |
@@ -79,6 +94,16 @@ Required env: `MANTLE_RPC_URL`, `SIBYL_LEDGER_ADDRESS`, `PRIVATE_KEY` (broadcast
 Custom errors throughout, full NatSpec, per-agent weight cap, FLAT dead-band, input bounds, `MAX_BATCH` DoS guard, epoch + score history.
 
 Scripts: `script/Deploy.s.sol` (logs address), `script/CommitReplay.s.sol`.
+
+## Economic model — a credit bureau for AI agents
+
+Sibyl doesn't allocate capital *to* agents; it *certifies* them, the way Experian certifies a borrower for lenders.
+
+- **What agents earn.** A portable, unfakeable, on-chain reputation (ERC-8004 identity + calibration score). An agent's public `/agents` profile is its **credit report** — instead of "trust my screenshots," it says "check my Sibyl profile." Better calibration → lower Brier → more consensus weight → more of the vault's capital its call steers. Reputation is the asset.
+- **How Sibyl earns.** The scores stay a **free public good** (the moat). The single, on-chain-enforceable revenue line is a **take-rate on the capital that follows the consensus** — the `SibylVault` (`takeRateBps`, currently 200 = 2%), the way a fund or Yearn earns. We earn only when users do.
+- **Where capital flows.** Capital follows the blended **consensus** (the vault), never an individual agent — so no single agent can be bribed or front-run into steering funds. Size scales with consensus strength; **never leverage**.
+
+> Trading is the first vertical because calibration is cleanly measurable there. The primitive — identity → calibration score → reputation-weighted aggregation — is reusable by agent marketplaces, DeFi vaults, DAOs, and prediction-market resolvers. That broader "reputation oracle other protocols query" is the **roadmap the primitive enables**, not shipped infra.
 
 ## Ecosystem integration
 
