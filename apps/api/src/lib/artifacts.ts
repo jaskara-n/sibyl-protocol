@@ -302,3 +302,40 @@ export function readDeployedLedger(): DeployedLedger | null {
     latestConsensusTx: d.latestConsensus?.tx
   };
 }
+
+/// Canonical on-chain consensus for a market — the recorded ConsensusReached event,
+/// sourced from deployments/mantle-sepolia.json -> latestConsensus[marketId]. This is
+/// the same value the Mantle explorer shows, so the dashboard stays consistent with the
+/// verifiable on-chain record and never depends on a runtime artifact being present.
+export type DeployedConsensus = {
+  marketId: string;
+  direction: string;
+  sizeBps: number;
+  confidence: number;
+  contributors: string[];
+  tx?: string;
+};
+
+export function readDeployedConsensus(marketId: string): DeployedConsensus | null {
+  const path = resolve(process.cwd(), '../../deployments/mantle-sepolia.json');
+  if (!existsSync(path)) return null;
+  const d = JSON.parse(readFileSync(path, 'utf8')) as {
+    latestConsensus?: Record<
+      string,
+      { tx?: string; direction?: string; sizeBps?: number; confidencePct?: number; contributorCount?: number }
+    >;
+    latestReplay?: { commits?: Record<string, { agentsBrierPpm?: Record<string, number> }> };
+  };
+  const c = d.latestConsensus?.[marketId];
+  if (!c || !c.direction) return null;
+  // Real contributing agents for this market (the ones with committed per-market scores).
+  const agents = Object.keys(d.latestReplay?.commits?.[marketId]?.agentsBrierPpm ?? {});
+  return {
+    marketId,
+    direction: c.direction,
+    sizeBps: c.sizeBps ?? 0,
+    confidence: typeof c.confidencePct === 'number' ? c.confidencePct / 100 : 0.5,
+    contributors: agents.length ? agents : Array.from({ length: c.contributorCount ?? 0 }, (_, i) => `agent_${i + 1}`),
+    tx: c.tx
+  };
+}
