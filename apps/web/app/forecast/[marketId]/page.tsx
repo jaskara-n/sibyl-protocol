@@ -134,10 +134,9 @@ export default async function ForecastDetailPage({
                   <ProbabilityBar yesPct={yesPct} />
                 </div>
                 <p className="mt-5 font-monod text-[11px] leading-relaxed text-bureau-muted">
-                  The FPMM sets{' '}
-                  <span className="text-bureau-fg">price(YES) = reserveNO / (reserveYES + reserveNO)</span>, so
-                  the YES price <span className="text-bureau-fg">is</span> the market-implied probability.
-                  Buying YES pushes its price up; buying NO pushes it down.
+                  The YES price <span className="text-bureau-fg">is</span> the market&apos;s implied probability —
+                  a YES price of 60% means the market thinks there&apos;s a 60% chance it happens. Buying YES pushes
+                  that up; buying NO pushes it down.
                 </p>
               </section>
             </Reveal>
