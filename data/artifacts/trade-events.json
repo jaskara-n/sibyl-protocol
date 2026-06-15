@@ -1,0 +1,70 @@
+[
+  {
+    "id": "order-ETH-USD-1780440215",
+    "marketId": "ETH-USD",
+    "timestamp": 1780440215,
+    "symbol": "ETH-USD",
+    "direction": "LONG",
+    "sizeBps": 481,
+    "confidence": 0.620149,
+    "contributors": [
+      "news_v1",
+      "funding_v1",
+      "onchain_oi_v1",
+      "momentum_v1",
+      "rogue_10x_v1"
+    ],
+    "mode": "paper"
+  },
+  {
+    "id": "order-MNT-USD-1780440215",
+    "marketId": "MNT-USD",
+    "timestamp": 1780440215,
+    "symbol": "MNT-USD",
+    "direction": "LONG",
+    "sizeBps": 403,
+    "confidence": 0.600704,
+    "contributors": [
+      "news_v1",
+      "funding_v1",
+      "onchain_oi_v1",
+      "momentum_v1",
+      "rogue_10x_v1"
+    ],
+    "mode": "paper"
+  },
+  {
+    "id": "order-ETH-USD-1780439682",
+    "marketId": "ETH-USD",
+    "timestamp": 1780439682,
+    "symbol": "ETH-USD",
+    "direction": "LONG",
+    "sizeBps": 476,
+    "confidence": 0.619087,
+    "contributors": [
+      "news_v1",
+      "funding_v1",
+      "onchain_oi_v1",
+      "momentum_v1",
+      "rogue_10x_v1"
+    ],
+    "mode": "paper"
+  },
+  {
+    "id": "order-MNT-USD-1780439682",
+    "marketId": "MNT-USD",
+    "timestamp": 1780439682,
+    "symbol": "MNT-USD",
+    "direction": "LONG",
+    "sizeBps": 401,
+    "confidence": 0.600198,
+    "contributors": [
+      "news_v1",
+      "funding_v1",
+      "onchain_oi_v1",
+      "momentum_v1",
+      "rogue_10x_v1"
+    ],
+    "mode": "paper"
+  }
+]

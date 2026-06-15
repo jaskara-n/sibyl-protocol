@@ -1,0 +1,119 @@
+{
+  "generatedAt": "2026-06-03T10:28:14.855Z",
+  "scoringVersion": "brier_v1",
+  "scoringVersionId": 1,
+  "datasetHash": "0xc433aaa9dd68b65da3b2c659dd3881f9c2cbeb82781c801ae58c350be628b796",
+  "rows": 3000,
+  "markets": [
+    "MNT-USD",
+    "ETH-USD"
+  ],
+  "scores": [
+    {
+      "agentId": "momentum_v1",
+      "marketId": "MNT-USD",
+      "brier": 0.153565
+    },
+    {
+      "agentId": "onchain_oi_v1",
+      "marketId": "MNT-USD",
+      "brier": 0.187857
+    },
+    {
+      "agentId": "funding_v1",
+      "marketId": "MNT-USD",
+      "brier": 0.256898
+    },
+    {
+      "agentId": "news_v1",
+      "marketId": "MNT-USD",
+      "brier": 0.207
+    },
+    {
+      "agentId": "rogue_10x_v1",
+      "marketId": "MNT-USD",
+      "brier": 0.4795
+    },
+    {
+      "agentId": "momentum_v1",
+      "marketId": "ETH-USD",
+      "brier": 0.20121
+    },
+    {
+      "agentId": "onchain_oi_v1",
+      "marketId": "ETH-USD",
+      "brier": 0.181089
+    },
+    {
+      "agentId": "funding_v1",
+      "marketId": "ETH-USD",
+      "brier": 0.236361
+    },
+    {
+      "agentId": "news_v1",
+      "marketId": "ETH-USD",
+      "brier": 0.204572
+    },
+    {
+      "agentId": "rogue_10x_v1",
+      "marketId": "ETH-USD",
+      "brier": 0.4345
+    }
+  ],
+  "byMarket": {
+    "MNT-USD": [
+      {
+        "agentId": "momentum_v1",
+        "marketId": "MNT-USD",
+        "brier": 0.153565
+      },
+      {
+        "agentId": "onchain_oi_v1",
+        "marketId": "MNT-USD",
+        "brier": 0.187857
+      },
+      {
+        "agentId": "funding_v1",
+        "marketId": "MNT-USD",
+        "brier": 0.256898
+      },
+      {
+        "agentId": "news_v1",
+        "marketId": "MNT-USD",
+        "brier": 0.207
+      },
+      {
+        "agentId": "rogue_10x_v1",
+        "marketId": "MNT-USD",
+        "brier": 0.4795
+      }
+    ],
+    "ETH-USD": [
+      {
+        "agentId": "momentum_v1",
+        "marketId": "ETH-USD",
+        "brier": 0.20121
+      },
+      {
+        "agentId": "onchain_oi_v1",
+        "marketId": "ETH-USD",
+        "brier": 0.181089
+      },
+      {
+        "agentId": "funding_v1",
+        "marketId": "ETH-USD",
+        "brier": 0.236361
+      },
+      {
+        "agentId": "news_v1",
+        "marketId": "ETH-USD",
+        "brier": 0.204572
+      },
+      {
+        "agentId": "rogue_10x_v1",
+        "marketId": "ETH-USD",
+        "brier": 0.4345
+      }
+    ]
+  }
+}
