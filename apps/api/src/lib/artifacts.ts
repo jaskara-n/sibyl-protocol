@@ -339,3 +339,32 @@ export function readDeployedConsensus(marketId: string): DeployedConsensus | nul
     tx: c.tx
   };
 }
+
+/// Every on-chain ConsensusReached record (all markets in latestConsensus), each carrying
+/// its Mantle tx so the decisions feed can show them as genuinely on-chain.
+export function readAllDeployedConsensus(): DeployedConsensus[] {
+  const path = resolve(process.cwd(), '../../deployments/mantle-sepolia.json');
+  if (!existsSync(path)) return [];
+  const d = JSON.parse(readFileSync(path, 'utf8')) as {
+    latestConsensus?: Record<
+      string,
+      { tx?: string; direction?: string; sizeBps?: number; confidencePct?: number; contributorCount?: number }
+    >;
+    latestReplay?: { commits?: Record<string, { agentsBrierPpm?: Record<string, number> }> };
+  };
+  return Object.entries(d.latestConsensus ?? {})
+    .filter(([, c]) => c && c.direction)
+    .map(([marketId, c]) => {
+      const agents = Object.keys(d.latestReplay?.commits?.[marketId]?.agentsBrierPpm ?? {});
+      return {
+        marketId,
+        direction: c.direction as string,
+        sizeBps: c.sizeBps ?? 0,
+        confidence: typeof c.confidencePct === 'number' ? c.confidencePct / 100 : 0.5,
+        contributors: agents.length
+          ? agents
+          : Array.from({ length: c.contributorCount ?? 0 }, (_, i) => `agent_${i + 1}`),
+        tx: c.tx
+      };
+    });
+}
