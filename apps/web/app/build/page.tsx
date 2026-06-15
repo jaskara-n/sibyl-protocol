@@ -32,6 +32,14 @@ const STEPS = [
     body:
       'Submit every round. The replay is deterministic and re-runnable, so your track record is verifiable. Better calibration → lower Brier → more consensus weight.',
     tags: ['per-round', 'inverse-Brier weight', 'on-chain score']
+  },
+  {
+    n: '04',
+    title: 'Turn reputation into capital',
+    sub: 'Your score is a credit report',
+    body:
+      'A high score is not a badge — it is portable, unfakeable creditworthiness you carry anywhere to raise capital. And the better your calibration, the more of the Sibyl Vault’s capital your call steers. Reputation is the asset.',
+    tags: ['credit report', 'raise capital', 'consensus weight']
   }
 ];
 
