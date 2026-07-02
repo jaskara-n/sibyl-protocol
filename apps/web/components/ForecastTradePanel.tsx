@@ -1,7 +1,7 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
-import { formatUnits, parseUnits, type Address } from 'viem';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { formatUnits, maxUint256, parseUnits, type Address } from 'viem';
 import {
   useAccount,
   useChainId,
@@ -202,6 +202,10 @@ export function ForecastTradePanel({
     error: receiptError
   } = useWaitForTransactionReceipt({ hash: txHash });
 
+  // Holds the action to auto-fire once an approval confirms, so a one-click
+  // "Approve & Buy/Sell/Mint" only needs a single button press.
+  const pendingActionRef = useRef<null | (() => void)>(null);
+
   function refreshAll() {
     void refetchSusd();
     void refetchSusdAllowFpmm();
@@ -212,7 +216,13 @@ export function ForecastTradePanel({
   }
 
   useEffect(() => {
-    if (isConfirmed && txHash) refreshAll();
+    if (!isConfirmed || !txHash) return;
+    refreshAll();
+    // If the confirmed tx was the approval step of a one-click action, fire the
+    // follow-up (buy / sell / mint) automatically — no second button to find.
+    const next = pendingActionRef.current;
+    pendingActionRef.current = null;
+    if (next) next();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isConfirmed, txHash]);
 
@@ -240,16 +250,44 @@ export function ForecastTradePanel({
     susdAllowanceMarket !== undefined &&
     (susdAllowanceMarket as bigint) < parsedAmount;
 
+  // Balance guards so a bad amount never produces a reverted tx on camera.
+  const insufficientSusdForBuy =
+    tab === 'trade' &&
+    tradeMode === 'buy' &&
+    parsedAmount !== null &&
+    susdBalance !== undefined &&
+    parsedAmount > (susdBalance as bigint);
+
+  const insufficientSusdForMint =
+    tab === 'set' &&
+    parsedAmount !== null &&
+    susdBalance !== undefined &&
+    parsedAmount > (susdBalance as bigint);
+
   // ---- Write handlers ----
+  const clearPending = () => {
+    pendingActionRef.current = null;
+  };
+
   function approveSusdToFpmm() {
     if (parsedAmount === null || !fpmm) return;
     resetWrite();
-    writeContract({
-      address: SUSD_ADDRESS,
-      abi: ERC20_ABI,
-      functionName: 'approve',
-      args: [fpmm, parsedAmount]
-    });
+    // Infinite (max) approval — one-time only; subsequent buys are a single tx.
+    writeContract(
+      {
+        address: SUSD_ADDRESS,
+        abi: ERC20_ABI,
+        functionName: 'approve',
+        args: [fpmm, maxUint256]
+      },
+      { onError: clearPending }
+    );
+  }
+
+  // One click: approve sUSD (if needed) then auto-fire the buy on confirmation.
+  function approveAndBuy() {
+    pendingActionRef.current = onBuy;
+    approveSusdToFpmm();
   }
 
   function onBuy() {
@@ -266,12 +304,22 @@ export function ForecastTradePanel({
   function approveOutcomeToFpmm() {
     if (!activeToken || !fpmm || maxIn === undefined) return;
     resetWrite();
-    writeContract({
-      address: activeToken,
-      abi: ERC20_ABI,
-      functionName: 'approve',
-      args: [fpmm, maxIn]
-    });
+    // Infinite (max) approval — one-time only; subsequent sells are a single tx.
+    writeContract(
+      {
+        address: activeToken,
+        abi: ERC20_ABI,
+        functionName: 'approve',
+        args: [fpmm, maxUint256]
+      },
+      { onError: clearPending }
+    );
+  }
+
+  // One click: approve the outcome token (if needed) then auto-fire the sell.
+  function approveAndSell() {
+    pendingActionRef.current = onSell;
+    approveOutcomeToFpmm();
   }
 
   function onSell() {
@@ -289,12 +337,22 @@ export function ForecastTradePanel({
   function approveSusdToMarket() {
     if (parsedAmount === null) return;
     resetWrite();
-    writeContract({
-      address: SUSD_ADDRESS,
-      abi: ERC20_ABI,
-      functionName: 'approve',
-      args: [SIBYL_PREDICTION_MARKET_ADDRESS, parsedAmount]
-    });
+    // Infinite (max) approval — one-time only; subsequent mints are a single tx.
+    writeContract(
+      {
+        address: SUSD_ADDRESS,
+        abi: ERC20_ABI,
+        functionName: 'approve',
+        args: [SIBYL_PREDICTION_MARKET_ADDRESS, maxUint256]
+      },
+      { onError: clearPending }
+    );
+  }
+
+  // One click: approve sUSD (if needed) then auto-fire the mintSet.
+  function approveAndMint() {
+    pendingActionRef.current = onMintSet;
+    approveSusdToMarket();
   }
 
   function onMintSet() {
@@ -480,21 +538,25 @@ export function ForecastTradePanel({
               >
                 {tradeMode === 'buy' ? (
                   needsSusdApprovalForBuy ? (
-                    <PrimaryButton disabled={!validAmount || busy} onClick={approveSusdToFpmm}>
-                      {busy ? 'Approving sUSD…' : 'Approve sUSD'}
+                    <PrimaryButton
+                      disabled={!validAmount || busy || insufficientSusdForBuy}
+                      onClick={approveAndBuy}
+                      accent={side === 'YES' ? 'rise' : 'fall'}
+                    >
+                      {insufficientSusdForBuy ? 'Insufficient sUSD' : busy ? 'Working…' : `Approve & Buy ${side}`}
                     </PrimaryButton>
                   ) : (
                     <PrimaryButton
-                      disabled={!validAmount || busy || minOut === undefined}
+                      disabled={!validAmount || busy || minOut === undefined || insufficientSusdForBuy}
                       onClick={onBuy}
                       accent={side === 'YES' ? 'rise' : 'fall'}
                     >
-                      {busy ? 'Buying…' : `Buy ${side}`}
+                      {insufficientSusdForBuy ? 'Insufficient sUSD' : busy ? 'Buying…' : `Buy ${side}`}
                     </PrimaryButton>
                   )
                 ) : needsOutcomeApprovalForSell ? (
-                  <PrimaryButton disabled={!validAmount || busy || !activeToken} onClick={approveOutcomeToFpmm}>
-                    {busy ? `Approving ${side}…` : `Approve ${side} shares`}
+                  <PrimaryButton disabled={!validAmount || busy || !activeToken} onClick={approveAndSell}>
+                    {busy ? 'Working…' : `Approve & Sell ${side}`}
                   </PrimaryButton>
                 ) : (
                   <PrimaryButton
@@ -542,20 +604,20 @@ export function ForecastTradePanel({
               {needsSusdApprovalForMint ? (
                 <button
                   type="button"
-                  disabled={!validAmount || busy}
-                  onClick={approveSusdToMarket}
+                  disabled={!validAmount || busy || insufficientSusdForMint}
+                  onClick={approveAndMint}
                   className="col-span-2 bg-bureau-fg px-4 py-3 font-sansd text-sm font-semibold text-bureau transition-colors enabled:hover:bg-brass disabled:cursor-not-allowed disabled:opacity-40"
                 >
-                  {busy ? 'Approving sUSD…' : 'Approve sUSD for mintSet'}
+                  {insufficientSusdForMint ? 'Insufficient sUSD' : busy ? 'Working…' : 'Approve & Mint set'}
                 </button>
               ) : (
                 <button
                   type="button"
-                  disabled={!validAmount || busy}
+                  disabled={!validAmount || busy || insufficientSusdForMint}
                   onClick={onMintSet}
                   className="border border-rise bg-rise/10 px-4 py-3 font-sansd text-sm font-semibold text-rise transition-colors enabled:hover:bg-rise/20 disabled:cursor-not-allowed disabled:opacity-40"
                 >
-                  {busy ? 'Minting…' : 'Mint set'}
+                  {insufficientSusdForMint ? 'Insufficient sUSD' : busy ? 'Minting…' : 'Mint set'}
                 </button>
               )}
               <button

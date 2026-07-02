@@ -1,7 +1,7 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
-import { formatUnits, parseUnits } from 'viem';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { formatUnits, maxUint256, parseUnits } from 'viem';
 import {
   useAccount,
   useChainId,
@@ -161,6 +161,31 @@ export function VaultForm({ sharePrice }: { sharePrice: number }) {
 
   const [phase, setPhase] = useState<'idle' | 'approving' | 'depositing'>('idle');
 
+  // Set true when the user presses the combined "Approve & Deposit" button, so
+  // the confirmed-approval effect knows to auto-fire the deposit right after.
+  const pendingDepositRef = useRef(false);
+
+  // Guard so a bad amount never produces a reverted tx on camera.
+  const insufficientBalance =
+    mode === 'deposit' &&
+    parsedAmount !== null &&
+    susdBalance !== undefined &&
+    parsedAmount > (susdBalance as bigint);
+
+  const insufficientShares =
+    mode === 'withdraw' &&
+    parsedAmount !== null &&
+    shares !== undefined &&
+    parsedAmount > (shares as bigint);
+
+  function onMax() {
+    const src = mode === 'deposit' ? susdBalance : shares;
+    if (src === undefined) return;
+    setAmount(formatUnits(src as bigint, DEC));
+    resetWrite();
+    setPhase('idle');
+  }
+
   function refreshAll() {
     void refetchBalance();
     void refetchAllowance();
@@ -176,11 +201,24 @@ export function VaultForm({ sharePrice }: { sharePrice: number }) {
         address: SUSD_ADDRESS,
         abi: ERC20_ABI,
         functionName: 'approve',
-        // Approve exact amount requested. (maxUint256 available if infinite is desired.)
-        args: [SIBYL_VAULT_ADDRESS, parsedAmount]
+        // Infinite (max) approval — a one-time cost. After this, every deposit
+        // from this wallet is a single transaction (no repeat approvals).
+        args: [SIBYL_VAULT_ADDRESS, maxUint256]
       },
-      { onError: () => setPhase('idle') }
+      {
+        onError: () => {
+          pendingDepositRef.current = false;
+          setPhase('idle');
+        }
+      }
     );
+  }
+
+  // One click for the user: approve (if needed), then auto-fire the deposit the
+  // moment the approval confirms — see the confirmed-receipt effect below.
+  function onApproveAndDeposit() {
+    pendingDepositRef.current = true;
+    onApprove();
   }
 
   function onDeposit() {
@@ -215,11 +253,18 @@ export function VaultForm({ sharePrice }: { sharePrice: number }) {
   // approval for a deposit, the allowance refetch flips `needsApproval` off so
   // the button advances to the deposit step.
   useEffect(() => {
-    if (isConfirmed && txHash) {
-      refreshAll();
-      setPhase('idle');
+    if (!isConfirmed || !txHash) return;
+    // If this confirmed tx was the approval half of a one-click deposit,
+    // advance straight into the deposit — no lag, no second button to hunt for.
+    if (pendingDepositRef.current) {
+      pendingDepositRef.current = false;
+      void refetchAllowance();
+      onDeposit();
+      return;
     }
-    // refreshAll is stable enough for this effect; keyed on the confirmed hash.
+    refreshAll();
+    setPhase('idle');
+    // refreshAll/onDeposit are stable enough here; keyed on the confirmed hash.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isConfirmed, txHash]);
 
@@ -267,8 +312,18 @@ export function VaultForm({ sharePrice }: { sharePrice: number }) {
 
       {/* Amount */}
       <label className="mt-5 block">
-        <span className="font-monod text-[11px] uppercase tracking-[0.18em] text-bureau-muted">
-          {mode === 'deposit' ? 'sUSD assets to deposit' : 'shares to redeem'}
+        <span className="flex items-center justify-between">
+          <span className="font-monod text-[11px] uppercase tracking-[0.18em] text-bureau-muted">
+            {mode === 'deposit' ? 'sUSD assets to deposit' : 'shares to redeem'}
+          </span>
+          <button
+            type="button"
+            onClick={onMax}
+            disabled={!readEnabled}
+            className="font-monod text-[11px] uppercase tracking-[0.18em] text-brass transition-opacity hover:opacity-80 disabled:opacity-30"
+          >
+            Max
+          </button>
         </span>
         <input
           inputMode="decimal"
@@ -322,29 +377,35 @@ export function VaultForm({ sharePrice }: { sharePrice: number }) {
         ) : mode === 'deposit' && needsApproval ? (
           <button
             type="button"
-            disabled={!validAmount || busy}
-            onClick={onApprove}
+            disabled={!validAmount || busy || insufficientBalance}
+            onClick={onApproveAndDeposit}
             className="w-full bg-bureau-fg px-6 py-3 font-sansd text-sm font-semibold text-bureau transition-colors enabled:hover:bg-brass disabled:cursor-not-allowed disabled:opacity-40"
           >
-            {busy && phase === 'approving' ? 'Approving sUSD…' : 'Approve sUSD'}
+            {insufficientBalance
+              ? 'Insufficient sUSD balance'
+              : busy && phase === 'approving'
+                ? 'Approving sUSD…'
+                : busy && phase === 'depositing'
+                  ? 'Depositing…'
+                  : 'Approve & Deposit'}
           </button>
         ) : mode === 'deposit' ? (
           <button
             type="button"
-            disabled={!validAmount || busy}
+            disabled={!validAmount || busy || insufficientBalance}
             onClick={onDeposit}
             className="w-full bg-bureau-fg px-6 py-3 font-sansd text-sm font-semibold text-bureau transition-colors enabled:hover:bg-brass disabled:cursor-not-allowed disabled:opacity-40"
           >
-            {busy ? 'Depositing…' : 'Deposit'}
+            {insufficientBalance ? 'Insufficient sUSD balance' : busy ? 'Depositing…' : 'Deposit'}
           </button>
         ) : (
           <button
             type="button"
-            disabled={!validAmount || busy}
+            disabled={!validAmount || busy || insufficientShares}
             onClick={onWithdraw}
             className="w-full bg-bureau-fg px-6 py-3 font-sansd text-sm font-semibold text-bureau transition-colors enabled:hover:bg-brass disabled:cursor-not-allowed disabled:opacity-40"
           >
-            {busy ? 'Redeeming…' : 'Redeem shares'}
+            {insufficientShares ? 'Insufficient shares' : busy ? 'Redeeming…' : 'Redeem shares'}
           </button>
         )}
       </div>
@@ -377,8 +438,9 @@ export function VaultForm({ sharePrice }: { sharePrice: number }) {
       {/* Disclaimer */}
       <p className="mt-5 border-t border-bureau-line pt-3 font-monod text-[11px] leading-relaxed text-bureau-muted">
         Transactions are <b className="text-bureau-fg">real and signed by your wallet</b> on Mantle Sepolia.
-        Your first deposit may ask for a one-time approval to spend sUSD, then the deposit confirms; withdrawing
-        returns your assets to your wallet. Testnet assets only.
+        Your first deposit asks for a <b className="text-bureau-fg">one-time approval</b> to spend sUSD, then the
+        deposit fires automatically — every deposit after that is a single transaction. Withdrawing returns your
+        assets to your wallet. Testnet assets only.
       </p>
     </div>
   );
